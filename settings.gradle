@@ -1,0 +1,8 @@
+rootProject.name = 'your-news-v2'
+
+include 'yournews-admin'
+include 'yournews-apis'
+include 'yournews-auth'
+include 'yournews-common'
+include 'yournews-infra'
+include 'yournews-domain'

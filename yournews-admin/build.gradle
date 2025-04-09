@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(':yournews-auth')
+    implementation project(':yournews-common')
+    implementation project(':yournews-domain')
+    implementation project(':yournews-infra')
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
