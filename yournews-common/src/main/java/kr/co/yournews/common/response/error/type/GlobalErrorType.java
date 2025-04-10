@@ -1,6 +1,5 @@
 package kr.co.yournews.common.response.error.type;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
