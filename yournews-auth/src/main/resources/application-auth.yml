@@ -1,0 +1,5 @@
+jwt:
+  secret: ${JWT_KEY:exampleSecretKeyForYourNewsSystemAccessSecretKeyTestForPadding}
+  access-expiration: ${JWT_ACCESS_EXPIRATION:1800000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:86400000}
+  issuer: ${JWT_ISSUER:your-news}
