@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtProviderTest {
-    private final String secretKey = "helloMyNameIsPennywayThisIsSecretKeyItNeedsToBeLongerThan256Bits";
+    private final String secretKey = "S3cr3tK3yForJwt_T0ken_Gen3ration_ThisKeyIsDefinitelyLongEnough_398fhsduh238dhf28";
     private JwtProvider jwtProvider;
     private String username;
     private String nickname;

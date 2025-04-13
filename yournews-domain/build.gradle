@@ -4,6 +4,9 @@ jar { enabled = true }
 dependencies {
     implementation project(':yournews-common')
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    /* JPA */
+    api group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '3.2.3'
+
+    /* Database */
     runtimeOnly 'com.mysql:mysql-connector-j'
 }

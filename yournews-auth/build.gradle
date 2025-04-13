@@ -8,6 +8,9 @@ dependencies {
     /* web */
     compileOnly 'org.springframework.boot:spring-boot-starter-web'
 
+    /* I/O Valid */
+    api 'org.springframework.boot:spring-boot-starter-validation'
+
     /* Spring Security*/
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
