@@ -1,5 +1,6 @@
 package kr.co.yournews.apis.auth.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
@@ -24,14 +25,23 @@ public class AuthCommandService {
      * dto를 통해 비밀번호 인코딩 후, 회원가입 진행 메서드.
      *
      * @param signUpDto : 사용자 회원가입 요청 dto
+     * @return : jwt token
      */
     @Transactional
-    public void signUp(SignUpDto.Auth signUpDto) {
+    public TokenDto signUp(SignUpDto.Auth signUpDto) {
         String encodedPassword = passwordEncodeService.encode(signUpDto.password());
         User user = signUpDto.toEntity(encodedPassword);
         userService.save(user);
+
+        return jwtHelper.createToken(user);
     }
 
+    /**
+     * 서비스 이용을 위한 로그인 메서드
+     *
+     * @param signInDto : 사용자가 입력한 정보
+     * @return : jwt token
+     */
     @Transactional(readOnly = true)
     public TokenDto signIn(SignInDto signInDto) {
         User user = userService.readByUsername(signInDto.username())
@@ -42,5 +52,25 @@ public class AuthCommandService {
         }
 
         return jwtHelper.createToken(user);
+    }
+
+    /**
+     * access token 재발급 메서드
+     *
+     * @param refreshToken : access token 재발급을 위한 refresh token
+     * @return : jwt token
+     */
+    public TokenDto reissueAccessToken(String refreshToken) {
+        return jwtHelper.reissueToken(refreshToken);
+    }
+
+    /**
+     * 서비스 로그아웃 메서드
+     *
+     * @param refreshToken : refresh token
+     * @param response     : 쿠키 제거용 HttpServletResponse
+     */
+    public void signOut(String refreshToken, HttpServletResponse response) {
+        jwtHelper.removeToken(refreshToken, response);
     }
 }
