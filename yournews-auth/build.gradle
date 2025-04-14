@@ -4,6 +4,7 @@ jar { enabled = true }
 dependencies {
     implementation project(':yournews-common')
     implementation project(':yournews-domain')
+    implementation project(':yournews-infra')
 
     /* web */
     compileOnly 'org.springframework.boot:spring-boot-starter-web'
