@@ -2,6 +2,7 @@ package kr.co.yournews.apis.auth.controller;
 
 import jakarta.validation.Valid;
 import kr.co.yournews.apis.auth.service.AuthCommandService;
+import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.common.response.success.SuccessResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,12 @@ public class AuthController {
     public ResponseEntity<?> signUp(@RequestBody @Valid SignUpDto.Auth sighUpDto) {
         authCommandService.signUp(sighUpDto);
         return ResponseEntity.ok(SuccessResponse.ok());
+    }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<?> signIn(@RequestBody @Valid SignInDto signInDto) {
+        return ResponseEntity.ok(
+                SuccessResponse.from(authCommandService.signIn(signInDto))
+        );
     }
 }
