@@ -25,10 +25,6 @@ public class SignUpDto {
             @Email(message = "이메일 형식이 아닙니다.")
             String email
     ) {
-        public String password(PasswordEncoder passwordEncoder) {
-            return passwordEncoder.encode(password);
-        }
-
         public User toEntity(String encodePassword) {
             return User.builder()
                     .username(username)
