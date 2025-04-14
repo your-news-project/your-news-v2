@@ -1,5 +1,6 @@
 package kr.co.yournews.auth.helper;
 
+import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.jwt.provider.JwtProvider;
 import kr.co.yournews.auth.service.RefreshTokenService;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,5 +69,46 @@ public class JwtHelperTest {
         verify(refreshTokenService, times(1)).saveRefreshToken(username, refreshToken);
         assertEquals(tokenDto.accessToken(), returnTokenDto.accessToken());
         assertEquals(tokenDto.refreshToken(), returnTokenDto.refreshToken());
+    }
+
+    @Test
+    @DisplayName("AccessToken, RefreshToken 재발급 테스트")
+    void reissueTokenTest() {
+        // given
+        String oldRefreshToken = "oldRefreshToken";
+        String newAccessToken = "newAccessToken";
+        String newRefreshToken = "newRefreshToken";
+        TokenDto expected = TokenDto.of(newAccessToken, newRefreshToken);
+
+        given(jwtProvider.getUsername(oldRefreshToken)).willReturn(username);
+        given(refreshTokenService.existedRefreshToken(username)).willReturn(true);
+        given(jwtProvider.getNickname(oldRefreshToken)).willReturn(nickname);
+        given(jwtProvider.getUserId(oldRefreshToken)).willReturn(userId);
+        given(jwtProvider.generateAccessToken(username, nickname, userId)).willReturn(newAccessToken);
+        given(jwtProvider.generateRefreshToken(username, nickname, userId)).willReturn(newRefreshToken);
+
+        // when
+        TokenDto result = jwtHelper.reissueToken(oldRefreshToken);
+
+        // then
+        verify(refreshTokenService).saveRefreshToken(username, newRefreshToken);
+        assertEquals(expected.accessToken(), result.accessToken());
+        assertEquals(expected.refreshToken(), result.refreshToken());
+    }
+
+    @Test
+    @DisplayName("토큰 제거 테스트")
+    void removeTokenTest() {
+        // given
+        String refreshToken = "refreshToken";
+        HttpServletResponse response = new MockHttpServletResponse();
+
+        given(jwtProvider.getUsername(refreshToken)).willReturn(username);
+
+        // when
+        jwtHelper.removeToken(refreshToken, response);
+
+        // then
+        verify(refreshTokenService, times(1)).deleteRefreshToken(username);
     }
 }
