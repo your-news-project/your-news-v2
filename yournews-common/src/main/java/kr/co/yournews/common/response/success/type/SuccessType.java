@@ -1,6 +1,6 @@
 package kr.co.yournews.common.response.success.type;
 
-import kr.co.yournews.common.response.exception.StatusCode;
+import kr.co.yournews.common.response.StatusCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
