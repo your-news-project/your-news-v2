@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import kr.co.yournews.domain.user.entity.User;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class SignUpDto {
 
