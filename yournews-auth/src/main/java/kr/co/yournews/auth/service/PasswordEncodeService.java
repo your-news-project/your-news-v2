@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class PasswordEncodeService {
     private final PasswordEncoder passwordEncoder;
 
-    public String encode(String rawPassword) {
-        return passwordEncoder.encode(rawPassword);
+    public String encode(String password) {
+        return passwordEncoder.encode(password);
     }
 }
