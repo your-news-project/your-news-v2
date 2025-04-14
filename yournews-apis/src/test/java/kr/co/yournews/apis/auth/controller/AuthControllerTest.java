@@ -252,7 +252,7 @@ public class AuthControllerTest {
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
 
-        doNothing().when(authCommandService).signOut(eq(refreshToken), any(HttpServletResponse.class));
+        doNothing().when(authCommandService).signOut(eq(accessToken), eq(refreshToken), any(HttpServletResponse.class));
 
         // when
         ResultActions resultActions = mockMvc.perform(
