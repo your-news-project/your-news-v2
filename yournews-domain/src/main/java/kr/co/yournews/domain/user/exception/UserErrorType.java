@@ -1,16 +1,17 @@
-package kr.co.yournews.common.response.error.type;
+package kr.co.yournews.domain.user.exception;
 
+import kr.co.yournews.common.response.error.type.BaseErrorType;
 import kr.co.yournews.common.response.exception.StatusCode;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Common ErrorCode: Gxxx
+ * User ErrorCode: Uxxx
  */
 @RequiredArgsConstructor
-public enum GlobalErrorType implements BaseErrorType {
+public enum UserErrorType implements BaseErrorType {
 
-    INTERNAL_SERVER_ERROR(StatusCode.INTERNAL_SERVER_ERROR, "G001", "서버 내부 에러입니다. 관리자에게 문의하세요."),
-    VALIDATION_ERROR(StatusCode.BAD_REQUEST, "G002", "유효성 검증에 실패하였습니다."),
+    NOT_FOUND(StatusCode.NOT_FOUND, "U001", "존재하지 않는 사용자입니다."),
+    NOT_MATCHED_PASSWORD(StatusCode.BAD_REQUEST, "U002", "비밀번호가 일치하지 않습니다."),
     ;
 
     private final StatusCode status;

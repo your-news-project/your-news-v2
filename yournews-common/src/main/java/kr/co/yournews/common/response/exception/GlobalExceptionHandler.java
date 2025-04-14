@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<?> handleCustomException(final CustomException e) {
         BaseErrorType error = e.getErrorType();
         log.error("[Error Occurred] {}", error.getMessage());
-        return ResponseEntity.status(error.getStatus()).body(ErrorResponse.from(error));
+        return ResponseEntity.status(error.getStatus().getCode()).body(ErrorResponse.from(error));
     }
 
     /* Argument Validation 예외 처리 */
@@ -45,6 +45,6 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<?> handleException(final Exception e) {
         log.error("[Error Occurred] {}", e.getMessage());
         BaseErrorType error = GlobalErrorType.INTERNAL_SERVER_ERROR;
-        return ResponseEntity.status(error.getStatus()).body(ErrorResponse.from(error));
+        return ResponseEntity.status(error.getStatus().getCode()).body(ErrorResponse.from(error));
     }
 }

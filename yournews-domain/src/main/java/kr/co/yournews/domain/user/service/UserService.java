@@ -19,4 +19,8 @@ public class UserService {
     public Optional<User> readById(Long id) {
         return userRepository.findById(id);
     }
+
+    public Optional<User> readByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 }

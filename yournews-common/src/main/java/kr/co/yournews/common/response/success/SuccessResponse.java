@@ -1,6 +1,7 @@
 package kr.co.yournews.common.response.success;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import kr.co.yournews.common.response.exception.StatusCode;
 import kr.co.yournews.common.response.success.type.SuccessType;
 import lombok.Builder;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ public record SuccessResponse<T>(
 ) {
     public static SuccessResponse<?> ok() {
         return SuccessResponse.builder()
-                .code(HttpStatus.OK.value())
+                .code(StatusCode.OK.getCode())
                 .message("요청이 성공하였습니다.")
                 .build();
     }
