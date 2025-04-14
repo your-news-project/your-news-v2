@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum AuthConstants {
     AUTHORIZATION("Authorization"),
     TOKEN_TYPE("Bearer "),
-    REFRESH_TOKEN_KEY("refreshToken");
+    REFRESH_TOKEN_KEY("refreshToken"),
+    BLACKLIST_KEY_PREFIX("BlackListToken::");
 
     private final String value;
 }
