@@ -9,6 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,5 +36,20 @@ public class PasswordEncodeServiceTest {
         // then
         assertThat(encodedPassword).isEqualTo(fakeEncodedPassword);
         assertThat(encodedPassword).isNotEqualTo(password);
+    }
+
+    @Test
+    @DisplayName("비밀번호 일치 여부 테스트")
+    void passwordEqualsTest() {
+        // given
+        String password = "password";
+        String fakeEncodedPassword = "$2a$10$abcdefg12345678";
+        given(passwordEncoder.encode(password)).willReturn(fakeEncodedPassword);
+        given(passwordEncoder.matches(password, fakeEncodedPassword)).willReturn(true);
+
+        // when
+        String encodedPassword = passwordEncodeService.encode(password);
+
+        assertTrue(passwordEncodeService.matches(password, encodedPassword));
     }
 }
