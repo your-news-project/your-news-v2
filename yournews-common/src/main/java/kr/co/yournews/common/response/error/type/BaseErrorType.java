@@ -1,9 +1,9 @@
 package kr.co.yournews.common.response.error.type;
 
-import org.springframework.http.HttpStatus;
+import kr.co.yournews.common.response.exception.StatusCode;
 
 public interface BaseErrorType {
-    HttpStatus getStatus();
+    StatusCode getStatus();
     String getCode();
     String getMessage();
 }
