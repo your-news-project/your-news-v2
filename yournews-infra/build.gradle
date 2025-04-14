@@ -3,4 +3,7 @@ jar { enabled = true }
 
 dependencies {
     implementation project(':yournews-common')
+
+    /* Redis */
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
