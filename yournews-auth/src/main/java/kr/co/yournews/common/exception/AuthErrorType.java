@@ -1,4 +1,4 @@
-package kr.co.yournews.auth.common.exception;
+package kr.co.yournews.common.exception;
 
 import kr.co.yournews.common.response.error.type.BaseErrorType;
 import lombok.RequiredArgsConstructor;

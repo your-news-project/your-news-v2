@@ -9,7 +9,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.co.yournews.auth.common.exception.AuthErrorType;
+import kr.co.yournews.common.exception.AuthErrorType;
 import kr.co.yournews.common.response.error.ErrorResponse;
 import kr.co.yournews.common.response.error.type.BaseErrorType;
 import lombok.RequiredArgsConstructor;
