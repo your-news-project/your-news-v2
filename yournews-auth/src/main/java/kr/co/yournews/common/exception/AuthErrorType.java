@@ -10,7 +10,8 @@ public enum AuthErrorType implements BaseErrorType {
     INVALID_ACCESS_TOKEN(StatusCode.UNAUTHORIZED, "A002", "Access Token이 잘못되었습니다."),
     INVALID_TOKEN_SIGNATURE(StatusCode.UNAUTHORIZED, "A003", "Access Token의 서명이 잘못되었습니다."),
     UNKNOWN_TOKEN_ERROR(StatusCode.UNAUTHORIZED, "A004", "알 수 없는 토큰 에러입니다."),
-    REFRESH_TOKEN_NOT_FOUND(StatusCode.NOT_FOUND, "A005", "Refresh Token이 존재하지 않습니다.")
+    REFRESH_TOKEN_NOT_FOUND(StatusCode.NOT_FOUND, "A005", "Refresh Token이 존재하지 않습니다."),
+    BLACKLIST_ACCESS_TOKEN(StatusCode.UNAUTHORIZED, "A006", "접근 불가한 AccessToken입니다."),
     ;
 
     private final StatusCode status;
