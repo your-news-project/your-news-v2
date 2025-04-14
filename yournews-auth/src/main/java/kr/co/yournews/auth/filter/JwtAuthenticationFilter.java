@@ -5,10 +5,12 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.co.yournews.auth.jwt.provider.JwtProvider;
+import kr.co.yournews.auth.service.TokenBlackListService;
 import kr.co.yournews.common.exception.AuthErrorType;
+import kr.co.yournews.common.response.exception.BlackListException;
 import kr.co.yournews.common.util.AuthConstants;
 import kr.co.yournews.common.util.JwtUtil;
-import kr.co.yournews.auth.jwt.provider.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +26,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final JwtProvider jwtProvider;
+    private final TokenBlackListService tokenBlackListService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -47,10 +50,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     /**
      * 토큰 파싱 및 유효성 검사 메서드
      *
-     * @throws : 토큰이 만료되었다면 예외 발생
+     * @throws : 토큰 만료 및 블랙리스트 토큰이면 예외 발생
      */
     private String resolveAccessToken(String authToken) {
         String accessToken = JwtUtil.resolveToken(authToken);
+
+        if (tokenBlackListService.existsBlackListCheck(accessToken)) {
+            throw new BlackListException(AuthErrorType.BLACKLIST_ACCESS_TOKEN);
+        }
 
         if (jwtProvider.isExpired(accessToken)) {
             throw new ExpiredJwtException(null, null, AuthErrorType.ACCESS_TOKEN_EXPIRED.getMessage());

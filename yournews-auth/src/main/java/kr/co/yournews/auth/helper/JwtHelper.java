@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.jwt.provider.JwtProvider;
 import kr.co.yournews.auth.service.RefreshTokenService;
+import kr.co.yournews.auth.service.TokenBlackListService;
 import kr.co.yournews.common.exception.AuthErrorType;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.common.util.AuthConstants;
@@ -12,11 +13,14 @@ import kr.co.yournews.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class JwtHelper {
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
+    private final TokenBlackListService tokenBlackListService;
 
     /**
      * accessToken, refreshToken 생성
@@ -62,12 +66,28 @@ public class JwtHelper {
 
     /**
      * 로그아웃 시 refreshToken 제거 메서드 (외부에서 호출)
+     * - accessToken은 블랙리스트 등록
+     * - refreshToken은 쿠키 제거 + Redis에서 삭제
      *
+     * @param accessToken  : 헤더에 담긴 JWT access token
      * @param refreshToken : 쿠키에 저장된 refreshToken
      * @param response     : 쿠키 제거용 HttpServletResponse
      */
-    public void removeToken(String refreshToken, HttpServletResponse response) {
+    public void removeToken(String accessToken, String refreshToken, HttpServletResponse response) {
+        deleteAccessToken(accessToken);
         deleteRefreshToken(refreshToken, response);
+    }
+
+    /**
+     * accessToken을 블랙리스트에 등록 (로그아웃 처리용)
+     * - 해당 accessToken은 더 이상 사용할 수 없도록 차단
+     * - Redis에 TTL 기반으로 저장됨 (토큰 만료 시 자동 삭제)
+     *
+     * @param accessToken : 헤더에 담긴 JWT access token
+     */
+    private void deleteAccessToken(String accessToken) {
+        LocalDateTime accessTokenExpireAt = jwtProvider.getExpiryDate(accessToken);
+        tokenBlackListService.saveBlackList(accessToken, accessTokenExpireAt);
     }
 
     /**

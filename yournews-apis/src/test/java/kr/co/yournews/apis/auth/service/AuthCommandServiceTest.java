@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -98,7 +99,7 @@ public class AuthCommandServiceTest {
 
         // then
         assertEquals(tokenDto.accessToken(), result.accessToken());
-        verify(jwtHelper).createToken(user);
+        verify(jwtHelper, times(1)).createToken(user);
     }
 
     @Test
@@ -144,20 +145,22 @@ public class AuthCommandServiceTest {
 
         // then
         assertEquals(tokenDto.refreshToken(), result.refreshToken());
-        verify(jwtHelper).reissueToken(refreshToken);
+        verify(jwtHelper, times(1)).reissueToken(refreshToken);
     }
 
     @Test
     @DisplayName("로그아웃 시 토큰 삭제")
     void signOutTest() {
         // given
+        String accessTokenInHeader = "Bearer accessToken";
+        String accessToken = "accessToken";
         String refreshToken = "refreshToken";
         HttpServletResponse response = new MockHttpServletResponse();
 
         // when
-        authCommandService.signOut(refreshToken, response);
+        authCommandService.signOut(accessTokenInHeader, refreshToken, response);
 
         // then
-        verify(jwtHelper).removeToken(refreshToken, response);
+        verify(jwtHelper, times(1)).removeToken(accessToken, refreshToken, response);
     }
 }

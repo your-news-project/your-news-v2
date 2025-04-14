@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.jwt.provider.JwtProvider;
 import kr.co.yournews.auth.service.RefreshTokenService;
+import kr.co.yournews.auth.service.TokenBlackListService;
 import kr.co.yournews.domain.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,6 +31,9 @@ public class JwtHelperTest {
 
     @Mock
     private RefreshTokenService refreshTokenService;
+
+    @Mock
+    private TokenBlackListService tokenBlackListService;
 
     @InjectMocks
     private JwtHelper jwtHelper;
@@ -100,15 +106,17 @@ public class JwtHelperTest {
     @DisplayName("토큰 제거 테스트")
     void removeTokenTest() {
         // given
+        String accessToken = "accessToken";
         String refreshToken = "refreshToken";
         HttpServletResponse response = new MockHttpServletResponse();
 
         given(jwtProvider.getUsername(refreshToken)).willReturn(username);
 
         // when
-        jwtHelper.removeToken(refreshToken, response);
+        jwtHelper.removeToken(accessToken, refreshToken, response);
 
         // then
+        verify(tokenBlackListService, times(1)).saveBlackList(eq(accessToken), any());
         verify(refreshTokenService, times(1)).deleteRefreshToken(username);
     }
 }

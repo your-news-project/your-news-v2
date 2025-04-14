@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.common.exception.AuthErrorType;
 import kr.co.yournews.common.response.error.ErrorResponse;
 import kr.co.yournews.common.response.error.type.BaseErrorType;
+import kr.co.yournews.common.response.exception.BlackListException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -37,6 +38,8 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
             handleExceptionToken(response, AuthErrorType.INVALID_TOKEN_SIGNATURE);
         } catch (JwtException e) {
             handleExceptionToken(response, AuthErrorType.UNKNOWN_TOKEN_ERROR);
+        } catch (BlackListException e) {
+            handleExceptionToken(response, AuthErrorType.BLACKLIST_ACCESS_TOKEN);
         }
     }
 
