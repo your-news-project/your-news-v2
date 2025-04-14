@@ -7,6 +7,7 @@ import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
 import kr.co.yournews.auth.service.PasswordEncodeService;
 import kr.co.yournews.common.response.exception.CustomException;
+import kr.co.yournews.common.util.AuthConstants;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
@@ -67,10 +68,12 @@ public class AuthCommandService {
     /**
      * 서비스 로그아웃 메서드
      *
-     * @param refreshToken : refresh token
-     * @param response     : 쿠키 제거용 HttpServletResponse
+     * @param accessTokenInHeader : 헤더에 있는 accessToken
+     * @param refreshToken        : refresh token
+     * @param response            : 쿠키 제거용 HttpServletResponse
      */
-    public void signOut(String refreshToken, HttpServletResponse response) {
-        jwtHelper.removeToken(refreshToken, response);
+    public void signOut(String accessTokenInHeader, String refreshToken, HttpServletResponse response) {
+        String accessToken = accessTokenInHeader.substring(AuthConstants.TOKEN_TYPE.getValue().length()).trim();
+        jwtHelper.removeToken(accessToken, refreshToken, response);
     }
 }
