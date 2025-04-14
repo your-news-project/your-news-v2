@@ -1,4 +1,4 @@
-package kr.co.yournews.auth.config;
+package kr.co.yournews.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.yournews.auth.filter.JwtAuthenticationFilter;

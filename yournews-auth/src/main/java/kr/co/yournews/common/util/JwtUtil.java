@@ -1,4 +1,4 @@
-package kr.co.yournews.auth.common.util;
+package kr.co.yournews.common.util;
 
 public class JwtUtil {
 

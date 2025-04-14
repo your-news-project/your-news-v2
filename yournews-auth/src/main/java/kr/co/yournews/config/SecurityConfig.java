@@ -1,4 +1,4 @@
-package kr.co.yournews.auth.config;
+package kr.co.yournews.config;
 
 import kr.co.yournews.auth.filter.JwtAuthenticationFilter;
 import kr.co.yournews.auth.filter.JwtExceptionFilter;

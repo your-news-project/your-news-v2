@@ -1,4 +1,4 @@
-package kr.co.yournews.auth.common.util;
+package kr.co.yournews.common.util;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

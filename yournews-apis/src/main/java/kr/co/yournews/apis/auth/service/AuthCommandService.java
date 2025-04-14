@@ -1,7 +1,9 @@
 package kr.co.yournews.apis.auth.service;
 
 import kr.co.yournews.auth.dto.SignUpDto;
-import kr.co.yournews.auth.service.BasicAuthService;
+import kr.co.yournews.auth.service.PasswordEncodeService;
+import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,10 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AuthCommandService {
-    private final BasicAuthService basicAuthService;
+    private final UserService userService;
+    private final PasswordEncodeService passwordEncodeService;
 
+    /**
+     * dto를 통해 비밀번호 인코딩 후, 회원가입 진행 메서드.
+     *
+     * @param signUpDto : 사용자 회원가입 요청 dto
+     */
     @Transactional
-    public void signUp(SignUpDto.Auth signUpRequest) {
-        basicAuthService.createUser(signUpRequest);
+    public void signUp(SignUpDto.Auth signUpDto) {
+        String encodedPassword = passwordEncodeService.encode(signUpDto.password());
+        User user = signUpDto.toEntity(encodedPassword);
+        userService.save(user);
     }
 }
