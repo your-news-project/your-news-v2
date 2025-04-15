@@ -63,7 +63,6 @@ public class AuthController {
     }
 
     private ResponseEntity<?> createTokenRes(TokenDto tokenDto) {
-
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("accessToken", tokenDto.accessToken());
 
