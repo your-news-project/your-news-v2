@@ -30,6 +30,7 @@ public class SignUpDto {
                     .password(encodePassword)
                     .nickname(nickname)
                     .email(email)
+                    .signedUp(true)
                     .build();
         }
     }
