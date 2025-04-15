@@ -3,9 +3,12 @@ package kr.co.yournews.apis.auth.service;
 import kr.co.yournews.apis.auth.dto.OAuthCode;
 import kr.co.yournews.apis.auth.dto.OAuthTokenDto;
 import kr.co.yournews.apis.auth.dto.UserStatusDto;
+import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
+import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import kr.co.yournews.domain.user.type.OAuthPlatform;
 import kr.co.yournews.infra.oauth.OAuthClient;
@@ -20,6 +23,22 @@ public class OAuthCommandService {
     private final UserService userService;
     private final OAuthClientFactory oAuthClientFactory;
     private final JwtHelper jwtHelper;
+
+    /**
+     * OAuth 추가 정보 입력 회원가입 진행 메서드
+     *
+     * @param id        : 사용자 pk값
+     * @param signUpDto : 사용자 회원가입 요청 dto
+     * @return : jwt token
+     */
+    @Transactional
+    public OAuthTokenDto signUp(Long id, SignUpDto.OAuth signUpDto) {
+        User user = userService.readById(id)
+                .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
+
+        user.updateUserInfo(signUpDto.nickname());
+        return OAuthTokenDto.of(jwtHelper.createToken(user), user.isSignedUp());
+    }
 
     /**
      * 서비스 로그인을 위한 메서드
