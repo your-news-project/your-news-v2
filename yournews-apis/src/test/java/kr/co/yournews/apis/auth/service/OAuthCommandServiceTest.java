@@ -2,6 +2,7 @@ package kr.co.yournews.apis.auth.service;
 
 import kr.co.yournews.apis.auth.dto.OAuthCode;
 import kr.co.yournews.apis.auth.dto.OAuthTokenDto;
+import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
 import kr.co.yournews.domain.user.entity.User;
@@ -19,8 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class OAuthCommandServiceTest {
@@ -51,6 +54,26 @@ public class OAuthCommandServiceTest {
             .build();
 
     private final TokenDto tokenDto = TokenDto.of("access", "refresh");
+
+    @Test
+    @DisplayName("회원가입 시 토큰 반환")
+    void signUpTest() {
+        // given
+        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("test");
+        Long userId = 1L;
+
+        given(userService.readById(userId)).willReturn(Optional.ofNullable(user));
+        given(jwtHelper.createToken(any(User.class))).willReturn(tokenDto);
+
+        // when
+        OAuthTokenDto result = oAuthCommandService.signUp(userId, signUpDto);
+
+        // then
+        verify(jwtHelper).createToken(any(User.class));
+        assertEquals(tokenDto.accessToken(), result.tokenDto().accessToken());
+        assertEquals(tokenDto.refreshToken(), result.tokenDto().refreshToken());
+        assertThat(result.isSignUp()).isTrue();
+    }
 
     @Test
     @DisplayName("기존 회원 - OAuth 로그인 성공")
