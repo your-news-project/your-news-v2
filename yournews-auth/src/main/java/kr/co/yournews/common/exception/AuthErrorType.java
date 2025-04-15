@@ -1,7 +1,7 @@
 package kr.co.yournews.common.exception;
 
+import kr.co.yournews.common.response.StatusCode;
 import kr.co.yournews.common.response.error.type.BaseErrorType;
-import kr.co.yournews.common.response.exception.StatusCode;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import kr.co.yournews.common.BaseTimeEntity;
+import kr.co.yournews.domain.user.type.OAuthPlatform;
 import kr.co.yournews.domain.user.type.Role;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -39,22 +40,31 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    private OAuthPlatform platform;
+
     @ColumnDefault("NULL")
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @ColumnDefault("true")
+    @Column(name = "signed_up", nullable = false)
+    private boolean signedUp;
+
     @Builder
-    public User(String username, String password, String nickname, String email, Role role) {
+    public User(String username, String password, String nickname, String email, Role role, OAuthPlatform platform, boolean signedUp) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
         this.email = email;
         this.role = role;
+        this.platform = platform;
+        this.signedUp = signedUp;
     }
 }

@@ -1,7 +1,7 @@
 package kr.co.yournews.common.response.success;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import kr.co.yournews.common.response.exception.StatusCode;
+import kr.co.yournews.common.response.StatusCode;
 import kr.co.yournews.common.response.success.type.SuccessType;
 import lombok.Builder;
 import org.springframework.http.HttpStatus;

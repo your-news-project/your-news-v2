@@ -1,4 +1,4 @@
-package kr.co.yournews.common.response.exception;
+package kr.co.yournews.common.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
