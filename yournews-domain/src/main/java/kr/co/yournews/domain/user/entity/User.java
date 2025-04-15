@@ -67,4 +67,9 @@ public class User extends BaseTimeEntity {
         this.platform = platform;
         this.signedUp = signedUp;
     }
+
+    public void updateUserInfo(String nickname) {
+        this.nickname = nickname;
+        this.signedUp = true;
+    }
 }
