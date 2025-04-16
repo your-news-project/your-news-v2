@@ -1,34 +1,31 @@
 package kr.co.yournews.apis.post.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.co.yournews.apis.post.dto.PostDto;
+import kr.co.yournews.apis.post.dto.PostInfoDto;
 import kr.co.yournews.apis.post.service.PostCommandService;
-import kr.co.yournews.auth.authentication.CustomUserDetails;
-import kr.co.yournews.common.response.exception.CustomException;
-import kr.co.yournews.domain.post.exception.PostErrorType;
-import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.apis.post.service.PostQueryService;
+import kr.co.yournews.domain.post.type.Category;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,50 +36,32 @@ public class PostControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockBean
     private PostCommandService postCommandService;
 
-    private User user;
-    private UserDetails userDetails;
-    private final Long userId = 1L;
-    private final Long postId = 1L;
+    @MockBean
+    private PostQueryService postQueryService;
 
     @BeforeEach
-    void setup(WebApplicationContext webApplicationContext) {
+    void setUp(WebApplicationContext webApplicationContext) {
         this.mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
-                .apply(springSecurity())
-                .defaultRequest(post("/**").with(csrf()))
-                .defaultRequest(put("/**").with(csrf()))
-                .defaultRequest(delete("/**").with(csrf()))
                 .build();
-
-
-        user = User.builder()
-                .username("test")
-                .build();
-        ReflectionTestUtils.setField(user, "id", userId);
-
-        userDetails = CustomUserDetails.from(user);
     }
 
     @Test
-    @DisplayName("게시글 생성 성공")
-    void createPostTest() throws Exception {
+    @DisplayName("특정 게시글 조회 메서드")
+    void getPostById() throws Exception {
         // given
-        PostDto.Request postDto = new PostDto.Request("게시글 제목", "게시글 내용");
-        PostDto.Response response = PostDto.Response.of(1L);
-        given(postCommandService.createPost(userId, postDto)).willReturn(response);
+        Long postId = 1L;
+        PostInfoDto.Details postInfoDto =
+                new PostInfoDto.Details(postId, "title", "content", "nickname", LocalDateTime.now());
+
+        given(postQueryService.getPostById(postId)).willReturn(postInfoDto);
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/posts")
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(postDto))
-                        .contentType(MediaType.APPLICATION_JSON)
+                get("/api/v1/posts/{postId}", postId)
         );
 
         // then
@@ -90,111 +69,42 @@ public class PostControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
-                .andExpect(jsonPath("$.data.id").value(1L));
+                .andExpect(jsonPath("$.data.id").value(postInfoDto.id()))
+                .andExpect(jsonPath("$.data.title").value(postInfoDto.title()))
+                .andExpect(jsonPath("$.data.content").value(postInfoDto.content()))
+                .andExpect(jsonPath("$.data.nickname").value(postInfoDto.nickname()));
     }
 
     @Test
-    @DisplayName("게시글 생성 실패 - 조건 불충족")
-    void createPostInsufficientTestTest() throws Exception {
+    @DisplayName("카테고리별 게시글 조회 메서드")
+    void getPostsByCategory() throws Exception {
         // given
-        PostDto.Request postDto = new PostDto.Request(null, null);
+        Category category = Category.NEWS_REQUEST;
+
+        Page<PostInfoDto.Summary> postInfoDtos = new PageImpl<>(List.of(
+                new PostInfoDto.Summary(1L, "title1", "nickname1", LocalDateTime.now()),
+                new PostInfoDto.Summary(2L, "title2", "nickname2", LocalDateTime.now()),
+                new PostInfoDto.Summary(3L, "title3", "nickname3", LocalDateTime.now())
+        ));
+
+        given(postQueryService.getPostsByCategory(eq(category), any(Pageable.class))).willReturn(postInfoDtos);
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/posts")
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(postDto))
-                        .contentType(MediaType.APPLICATION_JSON)
+                get("/api/v1/posts")
+                        .param("category", String.valueOf(category))
+                        .param("page", "0")
+                        .param("size", "10")
         );
 
         // then
         resultActions
                 .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.title").value("제목은 필수 입력입니다."))
-                .andExpect(jsonPath("$.errors.content").value("내용은 필수 입력입니다."));
-    }
-
-    @Test
-    @DisplayName("게시글 수정 성공")
-    void updatePostTest() throws Exception {
-        // given
-        PostDto.Request updateDto = new PostDto.Request("수정된 제목", "수정된 내용");
-
-        // when
-        ResultActions result = mockMvc.perform(
-                put("/api/v1/posts/{postId}", postId)
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(updateDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        result.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
-    }
-
-    @Test
-    @DisplayName("게시글 수정 실패 - 권한 없음")
-    void updatePostForbiddenTest() throws Exception {
-        // given
-        PostDto.Request updateDto = new PostDto.Request("수정된 제목", "수정된 내용");
-
-        doThrow(new CustomException(PostErrorType.FORBIDDEN))
-                .when(postCommandService)
-                .updatePost(userId, postId, updateDto);
-
-        // when
-        ResultActions result = mockMvc.perform(
-                put("/api/v1/posts/{postId}", postId)
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(updateDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        result.andDo(print())
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value(PostErrorType.FORBIDDEN.getCode()))
-                .andExpect(jsonPath("$.message").value(PostErrorType.FORBIDDEN.getMessage()));
-    }
-
-    @Test
-    @DisplayName("게시글 삭제 성공")
-    void deletePostTest() throws Exception {
-        // given
-
-        // when
-        ResultActions result = mockMvc.perform(
-                delete("/api/v1/posts/{postId}", postId)
-                        .with(user(userDetails))
-        );
-
-        // then
-        result.andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
-    }
-
-    @Test
-    @DisplayName("게시글 삭제 실패 - 권한 없음")
-    void deletePostForbiddenTest() throws Exception {
-        // given
-        doThrow(new CustomException(PostErrorType.FORBIDDEN))
-                .when(postCommandService)
-                .deletePost(userId, postId);
-
-        // when
-        ResultActions result = mockMvc.perform(
-                delete("/api/v1/posts/{postId}", postId)
-                        .with(user(userDetails))
-        );
-
-        // then
-        result.andDo(print())
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value(PostErrorType.FORBIDDEN.getCode()))
-                .andExpect(jsonPath("$.message").value(PostErrorType.FORBIDDEN.getMessage()));
+                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
+                .andExpect(jsonPath("$.data.content", hasSize(3)))
+                .andExpect(jsonPath("$.data.content[0].title").value(postInfoDtos.getContent().get(0).title()))
+                .andExpect(jsonPath("$.data.content[1].title").value(postInfoDtos.getContent().get(1).title()))
+                .andExpect(jsonPath("$.data.content[2].title").value(postInfoDtos.getContent().get(2).title()));
     }
 }
