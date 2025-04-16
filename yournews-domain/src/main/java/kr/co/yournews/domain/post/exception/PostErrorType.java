@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PostErrorType implements BaseErrorType {
 
-    NOT_FOUND(StatusCode.NOT_FOUND, "P001", "존재하지 않는 사용자입니다."),
+    NOT_FOUND(StatusCode.NOT_FOUND, "P001", "존재하지 않는 게시글입니다."),
     FORBIDDEN(StatusCode.FORBIDDEN, "P002", "접근 권한이 없습니다."),
     ;
 
