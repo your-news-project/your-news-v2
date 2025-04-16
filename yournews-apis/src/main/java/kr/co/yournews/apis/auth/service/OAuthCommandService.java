@@ -36,7 +36,7 @@ public class OAuthCommandService {
         User user = userService.readById(id)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
-        user.updateUserInfo(signUpDto.nickname());
+        user.updateInfo(signUpDto.nickname());
         return OAuthTokenDto.of(jwtHelper.createToken(user), user.isSignedUp());
     }
 

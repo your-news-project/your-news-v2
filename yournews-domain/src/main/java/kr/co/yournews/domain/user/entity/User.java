@@ -68,7 +68,7 @@ public class User extends BaseTimeEntity {
         this.signedUp = signedUp;
     }
 
-    public void updateUserInfo(String nickname) {
+    public void updateInfo(String nickname) {
         this.nickname = nickname;
         this.signedUp = true;
     }
