@@ -1,8 +1,12 @@
 package kr.co.yournews.domain.post.service;
 
+import kr.co.yournews.domain.post.dto.PostQueryDto;
 import kr.co.yournews.domain.post.entity.Post;
 import kr.co.yournews.domain.post.repository.PostRepository;
+import kr.co.yournews.domain.post.type.Category;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -18,6 +22,14 @@ public class PostService {
 
     public Optional<Post> readById(Long id) {
         return postRepository.findById(id);
+    }
+
+    public Optional<PostQueryDto.Details> readDetailsById(Long id) {
+        return postRepository.findDetailsById(id);
+    }
+
+    public Page<PostQueryDto.Summary> readByCategory(Category category, Pageable pageable) {
+        return postRepository.findAllByCategory(category, pageable);
     }
 
     public void deleteById(Long id) {
