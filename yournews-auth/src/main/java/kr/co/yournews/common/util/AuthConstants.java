@@ -1,15 +1,10 @@
 package kr.co.yournews.common.util;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public final class AuthConstants {
 
-@Getter
-@RequiredArgsConstructor
-public enum AuthConstants {
-    AUTHORIZATION("Authorization"),
-    TOKEN_TYPE("Bearer "),
-    REFRESH_TOKEN_KEY("refreshToken"),
-    BLACKLIST_KEY_PREFIX("BlackListToken::");
+    private AuthConstants() { }
 
-    private final String value;
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String TOKEN_TYPE = "Bearer ";
+    public static final String REFRESH_TOKEN_KEY = "refreshToken";
 }

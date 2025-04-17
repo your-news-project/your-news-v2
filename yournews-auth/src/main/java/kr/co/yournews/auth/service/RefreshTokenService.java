@@ -1,12 +1,13 @@
 package kr.co.yournews.auth.service;
 
-import kr.co.yournews.common.util.AuthConstants;
 import kr.co.yournews.infra.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+
+import static kr.co.yournews.infra.redis.util.RedisConstants.REFRESH_TOKEN_PREFIX;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +24,12 @@ public class RefreshTokenService {
      * @param refreshToken : 사용자의 refreshToken
      */
     public void saveRefreshToken(String username, String refreshToken) {
-        String key = AuthConstants.REFRESH_TOKEN_KEY.getValue() + ":" + username;
-        redisRepository.set(key, refreshToken, Duration.ofSeconds(REDIS_REFRESH_EXPIRATION));
+        String key = REFRESH_TOKEN_PREFIX + username;
+        redisRepository.set(
+                key,
+                refreshToken,
+                Duration.ofSeconds(REDIS_REFRESH_EXPIRATION)
+        );
     }
 
     /**
@@ -34,7 +39,7 @@ public class RefreshTokenService {
      * @return : 존재여부
      */
     public boolean existedRefreshToken(String username) {
-        String key = AuthConstants.REFRESH_TOKEN_KEY.getValue() + ":" + username;
+        String key = REFRESH_TOKEN_PREFIX + username;
 
         return redisRepository.existed(key);
     }
@@ -45,7 +50,7 @@ public class RefreshTokenService {
      * @param username : 사용자 아이디
      */
     public void deleteRefreshToken(String username) {
-        String key = AuthConstants.REFRESH_TOKEN_KEY.getValue() + ":" + username;
+        String key = REFRESH_TOKEN_PREFIX + username;
         redisRepository.del(key);
     }
 }

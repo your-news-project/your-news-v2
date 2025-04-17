@@ -7,13 +7,14 @@ import kr.co.yournews.auth.service.RefreshTokenService;
 import kr.co.yournews.auth.service.TokenBlackListService;
 import kr.co.yournews.common.exception.AuthErrorType;
 import kr.co.yournews.common.response.exception.CustomException;
-import kr.co.yournews.common.util.AuthConstants;
 import kr.co.yournews.common.util.CookieUtil;
 import kr.co.yournews.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+
+import static kr.co.yournews.common.util.AuthConstants.REFRESH_TOKEN_KEY;
 
 @Component
 @RequiredArgsConstructor
@@ -99,7 +100,7 @@ public class JwtHelper {
      */
     private void deleteRefreshToken(String refreshToken, HttpServletResponse response) {
         String username = jwtProvider.getUsername(refreshToken);
-        CookieUtil.deleteCookie(AuthConstants.REFRESH_TOKEN_KEY.getValue(), response);
+        CookieUtil.deleteCookie(REFRESH_TOKEN_KEY, response);
         refreshTokenService.deleteRefreshToken(username);
     }
 }

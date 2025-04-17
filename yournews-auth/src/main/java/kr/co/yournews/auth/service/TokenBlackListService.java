@@ -1,12 +1,13 @@
 package kr.co.yournews.auth.service;
 
-import kr.co.yournews.common.util.AuthConstants;
 import kr.co.yournews.infra.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+
+import static kr.co.yournews.infra.redis.util.RedisConstants.BLACKLIST_KEY_PREFIX;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class TokenBlackListService {
      * @param expireAt    : 해당 토큰의 만료 시간 (access token의 exp 기준)
      */
     public void saveBlackList(String accessToken, LocalDateTime expireAt) {
-        String key = AuthConstants.BLACKLIST_KEY_PREFIX.getValue() + accessToken;
+        String key = BLACKLIST_KEY_PREFIX + accessToken;
         LocalDateTime now = LocalDateTime.now();
         long timeToLive = Duration.between(now, expireAt).toSeconds();
 
@@ -36,7 +37,7 @@ public class TokenBlackListService {
      * @return true: 블랙리스트에 있음 (사용 불가), false: 없음 (사용 가능)
      */
     public boolean existsBlackListCheck(String accessToken) {
-        return redisRepository.existed(AuthConstants.BLACKLIST_KEY_PREFIX.getValue() + accessToken);
+        return redisRepository.existed(BLACKLIST_KEY_PREFIX + accessToken);
     }
 
 }
