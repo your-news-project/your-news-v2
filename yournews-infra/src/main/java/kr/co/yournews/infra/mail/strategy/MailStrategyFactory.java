@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MailStrategyFactory {
     private final CodeMailStrategy codeMailStrategy;
+    private final PassMailStrategy passMailStrategy;
 
     public MailStrategy getStrategy(MailType mailType) {
         return switch (mailType) {
             case CODE -> codeMailStrategy;
-            case PASS -> null;
+            case PASS -> passMailStrategy;
         };
     }
 }

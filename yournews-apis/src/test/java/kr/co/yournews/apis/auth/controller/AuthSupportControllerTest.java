@@ -2,7 +2,9 @@ package kr.co.yournews.apis.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.yournews.apis.auth.dto.AuthCodeDto;
+import kr.co.yournews.apis.auth.dto.PassResetDto;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeManager;
+import kr.co.yournews.apis.auth.service.mail.PassCodeManager;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +37,9 @@ public class AuthSupportControllerTest {
 
     @MockBean
     private AuthCodeManager authCodeManager;
+
+    @MockBean
+    private PassCodeManager passCodeManager;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -179,5 +184,114 @@ public class AuthSupportControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(UserErrorType.INVALID_CODE.getCode()))
                 .andExpect(jsonPath("$.message").value(UserErrorType.INVALID_CODE.getMessage()));
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 링크 요청 - 성공")
+    void requestResetLinkSuccess() throws Exception {
+        // given
+        PassResetDto.VerifyUser dto = new PassResetDto.VerifyUser("user1", "user1@email.com");
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                post("/api/v1/auth/password/request")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 링크 요청 - 사용자 정보 불일치")
+    void requestResetLinkInvalidUser() throws Exception {
+        // given
+        PassResetDto.VerifyUser dto = new PassResetDto.VerifyUser("invalidUser", "invalid@email.com");
+
+        doThrow(new CustomException(UserErrorType.INVALID_USER_INFO))
+                .when(passCodeManager).initiatePasswordReset(dto);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                post("/api/v1/auth/password/request")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(UserErrorType.INVALID_USER_INFO.getCode()))
+                .andExpect(jsonPath("$.message").value(UserErrorType.INVALID_USER_INFO.getMessage()));
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 적용 - 성공")
+    void applyNewPasswordSuccess() throws Exception {
+        // given
+        PassResetDto.ResetPassword dto = new PassResetDto.ResetPassword(
+                "user1", "uuid-1234", "Abcdefg123!"
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                post("/api/v1/auth/password/reset")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 적용 - 유효성 실패 (비밀번호 형식)")
+    void applyNewPasswordValidationFail() throws Exception {
+        // given
+        PassResetDto.ResetPassword dto = new PassResetDto.ResetPassword(
+                "user1", "uuid-1234", "123"
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                post("/api/v1/auth/password/reset")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.password").value("비밀번호는 8~16자 영문, 숫자, 특수문자를 사용하세요."));
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 적용 - 인증 실패 (uuid 불일치)")
+    void applyNewPasswordInvalidUuid() throws Exception {
+        // given
+        PassResetDto.ResetPassword dto = new PassResetDto.ResetPassword(
+                "user1", "wrong-uuid", "Abcdefg123!"
+        );
+
+        doThrow(new CustomException(UserErrorType.UNAUTHORIZED_ACTION))
+                .when(passCodeManager).applyNewPassword(dto);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                post("/api/v1/auth/password/reset")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(UserErrorType.UNAUTHORIZED_ACTION.getCode()))
+                .andExpect(jsonPath("$.message").value(UserErrorType.UNAUTHORIZED_ACTION.getMessage()));
     }
 }

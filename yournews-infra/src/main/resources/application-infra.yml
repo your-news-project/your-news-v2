@@ -24,7 +24,8 @@ spring:
             trust: smtp.naver.com
 
 mail:
-  sender: ${MAIL_SENDER}
+  reset-password:
+    link: ${RESET_PASSWORD_LINK}
 
 oauth2:
   kakao:
