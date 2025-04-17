@@ -1,5 +1,6 @@
 package kr.co.yournews.domain.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -52,6 +53,7 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private OAuthPlatform platform;
 
+    @JsonIgnore
     @ColumnDefault("NULL")
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
