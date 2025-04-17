@@ -8,8 +8,10 @@ import kr.co.yournews.auth.authentication.CustomUserDetails;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.post.exception.PostErrorType;
 import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.domain.user.type.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -67,138 +69,152 @@ public class SecuredPostControllerTest {
 
         user = User.builder()
                 .username("test")
+                .role(Role.USER)
                 .build();
         ReflectionTestUtils.setField(user, "id", userId);
 
         userDetails = CustomUserDetails.from(user);
     }
 
-    @Test
-    @DisplayName("게시글 생성 성공")
-    void createPostTest() throws Exception {
-        // given
-        PostDto.Request postDto = new PostDto.Request("게시글 제목", "게시글 내용");
-        PostDto.Response response = PostDto.Response.of(1L);
-        given(postCommandService.createPost(userId, postDto)).willReturn(response);
+    @Nested
+    @DisplayName("게시글 생성")
+    class CreatePostTest {
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/posts")
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(postDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+        @Test
+        @DisplayName("성공")
+        void createPostSuccess() throws Exception {
+            // given
+            PostDto.Request postDto = new PostDto.Request("게시글 제목", "게시글 내용");
+            PostDto.Response response = PostDto.Response.of(1L);
+            given(postCommandService.createPost(userId, postDto)).willReturn(response);
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
-                .andExpect(jsonPath("$.data.id").value(1L));
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/posts")
+                            .with(user(userDetails))
+                            .content(objectMapper.writeValueAsBytes(postDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
+                    .andExpect(jsonPath("$.data.id").value(1L));
+        }
+
+        @Test
+        @DisplayName("실패 - 조건 불충족")
+        void createPostInsufficient() throws Exception {
+            // given
+            PostDto.Request postDto = new PostDto.Request(null, null);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/posts")
+                            .with(user(userDetails))
+                            .content(objectMapper.writeValueAsBytes(postDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.title").value("제목은 필수 입력입니다."))
+                    .andExpect(jsonPath("$.errors.content").value("내용은 필수 입력입니다."));
+        }
     }
 
-    @Test
-    @DisplayName("게시글 생성 실패 - 조건 불충족")
-    void createPostInsufficientTestTest() throws Exception {
-        // given
-        PostDto.Request postDto = new PostDto.Request(null, null);
+    @Nested
+    @DisplayName("게시글 수정")
+    class UpdatePostTest {
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/posts")
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(postDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+        @Test
+        @DisplayName("성공")
+        void updatePostSuccess() throws Exception {
+            // given
+            PostDto.Request updateDto = new PostDto.Request("수정된 제목", "수정된 내용");
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.title").value("제목은 필수 입력입니다."))
-                .andExpect(jsonPath("$.errors.content").value("내용은 필수 입력입니다."));
+            // when
+            ResultActions result = mockMvc.perform(
+                    put("/api/v1/posts/{postId}", postId)
+                            .with(user(userDetails))
+                            .content(objectMapper.writeValueAsBytes(updateDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            result.andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+        }
+
+        @Test
+        @DisplayName("실패 - 권한 없음")
+        void updatePostForbidden() throws Exception {
+            // given
+            PostDto.Request updateDto = new PostDto.Request("수정된 제목", "수정된 내용");
+
+            doThrow(new CustomException(PostErrorType.FORBIDDEN))
+                    .when(postCommandService)
+                    .updatePost(userId, postId, updateDto);
+
+            // when
+            ResultActions result = mockMvc.perform(
+                    put("/api/v1/posts/{postId}", postId)
+                            .with(user(userDetails))
+                            .content(objectMapper.writeValueAsBytes(updateDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            result.andDo(print())
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value(PostErrorType.FORBIDDEN.getCode()))
+                    .andExpect(jsonPath("$.message").value(PostErrorType.FORBIDDEN.getMessage()));
+        }
     }
 
-    @Test
-    @DisplayName("게시글 수정 성공")
-    void updatePostTest() throws Exception {
-        // given
-        PostDto.Request updateDto = new PostDto.Request("수정된 제목", "수정된 내용");
+    @Nested
+    @DisplayName("게시글 삭제")
+    class DeletePostTest {
 
-        // when
-        ResultActions result = mockMvc.perform(
-                put("/api/v1/posts/{postId}", postId)
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(updateDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+        @Test
+        @DisplayName("성공")
+        void deletePostSuccess() throws Exception {
+            // when
+            ResultActions result = mockMvc.perform(
+                    delete("/api/v1/posts/{postId}", postId)
+                            .with(user(userDetails))
+            );
 
-        // then
-        result.andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
-    }
+            // then
+            result.andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+        }
 
-    @Test
-    @DisplayName("게시글 수정 실패 - 권한 없음")
-    void updatePostForbiddenTest() throws Exception {
-        // given
-        PostDto.Request updateDto = new PostDto.Request("수정된 제목", "수정된 내용");
+        @Test
+        @DisplayName("실패 - 권한 없음")
+        void deletePostForbidden() throws Exception {
+            // given
+            doThrow(new CustomException(PostErrorType.FORBIDDEN))
+                    .when(postCommandService)
+                    .deletePost(userId, postId);
 
-        doThrow(new CustomException(PostErrorType.FORBIDDEN))
-                .when(postCommandService)
-                .updatePost(userId, postId, updateDto);
+            // when
+            ResultActions result = mockMvc.perform(
+                    delete("/api/v1/posts/{postId}", postId)
+                            .with(user(userDetails))
+            );
 
-        // when
-        ResultActions result = mockMvc.perform(
-                put("/api/v1/posts/{postId}", postId)
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(updateDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        result.andDo(print())
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value(PostErrorType.FORBIDDEN.getCode()))
-                .andExpect(jsonPath("$.message").value(PostErrorType.FORBIDDEN.getMessage()));
-    }
-
-    @Test
-    @DisplayName("게시글 삭제 성공")
-    void deletePostTest() throws Exception {
-        // given
-
-        // when
-        ResultActions result = mockMvc.perform(
-                delete("/api/v1/posts/{postId}", postId)
-                        .with(user(userDetails))
-        );
-
-        // then
-        result.andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
-    }
-
-    @Test
-    @DisplayName("게시글 삭제 실패 - 권한 없음")
-    void deletePostForbiddenTest() throws Exception {
-        // given
-        doThrow(new CustomException(PostErrorType.FORBIDDEN))
-                .when(postCommandService)
-                .deletePost(userId, postId);
-
-        // when
-        ResultActions result = mockMvc.perform(
-                delete("/api/v1/posts/{postId}", postId)
-                        .with(user(userDetails))
-        );
-
-        // then
-        result.andDo(print())
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value(PostErrorType.FORBIDDEN.getCode()))
-                .andExpect(jsonPath("$.message").value(PostErrorType.FORBIDDEN.getMessage()));
+            // then
+            result.andDo(print())
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value(PostErrorType.FORBIDDEN.getCode()))
+                    .andExpect(jsonPath("$.message").value(PostErrorType.FORBIDDEN.getMessage()));
+        }
     }
 }

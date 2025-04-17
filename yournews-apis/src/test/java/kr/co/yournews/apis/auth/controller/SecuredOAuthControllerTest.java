@@ -7,6 +7,7 @@ import kr.co.yournews.auth.authentication.CustomUserDetails;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.domain.user.type.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,7 @@ public class SecuredOAuthControllerTest {
 
         user = User.builder()
                 .username("test")
+                .role(Role.USER)
                 .build();
         ReflectionTestUtils.setField(user, "id", userId);
 

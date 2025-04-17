@@ -5,8 +5,10 @@ import kr.co.yournews.apis.user.dto.UserReq;
 import kr.co.yournews.apis.user.service.UserCommandService;
 import kr.co.yournews.auth.authentication.CustomUserDetails;
 import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.domain.user.type.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -58,77 +60,83 @@ public class SecuredUserControllerTest {
 
         user = User.builder()
                 .username("test")
+                .role(Role.USER)
                 .build();
         ReflectionTestUtils.setField(user, "id", userId);
 
         userDetails = CustomUserDetails.from(user);
     }
 
-    @Test
-    @DisplayName("사용자 비밀번호 변경 테스트")
-    void updatePasswordTest() throws Exception {
-        // given
-        UserReq.UpdatePassword dto =
-                new UserReq.UpdatePassword("oldPass123!", "newPass456!");
+    @Nested
+    @DisplayName("비밀번호 변경")
+    class UpdatePasswordTest {
 
-        doNothing().when(userCommandService).updatePassword(userId, dto);
+        @Test
+        @DisplayName("성공")
+        void updatePasswordSuccess() throws Exception {
+            // given
+            UserReq.UpdatePassword dto =
+                    new UserReq.UpdatePassword("oldPass123!", "newPass456!");
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                patch("/api/v1/users/password")
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(dto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+            doNothing().when(userCommandService).updatePassword(userId, dto);
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
-    }
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    patch("/api/v1/users/password")
+                            .with(user(userDetails))
+                            .content(objectMapper.writeValueAsBytes(dto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
 
-    @Test
-    @DisplayName("사용자 비밀번호 변경 실패 테스트 - 유효성 검사 실패")
-    void updatePasswordInvalidFailedTest() throws Exception {
-        // given
-        UserReq.UpdatePassword dto = new UserReq.UpdatePassword(null, null);
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+        }
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                patch("/api/v1/users/password")
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(dto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+        @Test
+        @DisplayName("실패 - 유효성 검사 실패")
+        void updatePasswordInvalidFailed() throws Exception {
+            // given
+            UserReq.UpdatePassword dto = new UserReq.UpdatePassword(null, null);
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.currentPassword").value("현재 비밀번호를 입력해주세요."))
-                .andExpect(jsonPath("$.errors.newPassword").value("새로운 비밀번호를 입력해주세요."));
-    }
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    patch("/api/v1/users/password")
+                            .with(user(userDetails))
+                            .content(objectMapper.writeValueAsBytes(dto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
 
-    @Test
-    @DisplayName("사용자 비밀번호 변경 실패 테스트 - 조건 불충족")
-    void updatePasswordInsufficientTest() throws Exception {
-        // given
-        UserReq.UpdatePassword dto = new UserReq.UpdatePassword("oldPass123!", "pass");
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.currentPassword").value("현재 비밀번호를 입력해주세요."))
+                    .andExpect(jsonPath("$.errors.newPassword").value("새로운 비밀번호를 입력해주세요."));
+        }
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                patch("/api/v1/users/password")
-                        .with(user(userDetails))
-                        .content(objectMapper.writeValueAsBytes(dto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+        @Test
+        @DisplayName("실패 - 조건 불충족")
+        void updatePasswordInsufficient() throws Exception {
+            // given
+            UserReq.UpdatePassword dto = new UserReq.UpdatePassword("oldPass123!", "pass");
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.newPassword").value("비밀번호는 8~16자 영문, 숫자, 특수문자를 사용하세요."));
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    patch("/api/v1/users/password")
+                            .with(user(userDetails))
+                            .content(objectMapper.writeValueAsBytes(dto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.newPassword").value("비밀번호는 8~16자 영문, 숫자, 특수문자를 사용하세요."));
+        }
     }
 
     @Test

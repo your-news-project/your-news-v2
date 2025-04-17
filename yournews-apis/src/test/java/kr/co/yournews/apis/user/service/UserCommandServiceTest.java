@@ -7,6 +7,7 @@ import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,63 +37,68 @@ public class UserCommandServiceTest {
 
     private final Long userId = 1L;
 
-    @Test
-    @DisplayName("비밀번호 변경 성공")
-    void updatePasswordTest() {
-        // given
-        String currentPassword = "oldPass123!";
-        String newPassword = "newPass456!";
-        String encodedNewPassword = "encodedNewPass";
+    @Nested
+    @DisplayName("비밀번호 변경")
+    class UpdatePasswordTest {
 
-        User user = User.builder()
-                .username("test")
-                .password(currentPassword)
-                .nickname("테스터")
-                .build();
+        @Test
+        @DisplayName("성공")
+        void updatePasswordSuccess() {
+            // given
+            String currentPassword = "oldPass123!";
+            String newPassword = "newPass456!";
+            String encodedNewPassword = "encodedNewPass";
 
-        UserReq.UpdatePassword dto = new UserReq.UpdatePassword(currentPassword, newPassword);
+            User user = User.builder()
+                    .username("test")
+                    .password(currentPassword)
+                    .nickname("테스터")
+                    .build();
 
-        given(userService.readById(userId)).willReturn(Optional.of(user));
-        given(passwordEncodeService.matches(currentPassword, user.getPassword())).willReturn(true);
-        given(passwordEncodeService.encode(newPassword)).willReturn(encodedNewPassword);
+            UserReq.UpdatePassword dto = new UserReq.UpdatePassword(currentPassword, newPassword);
 
-        // when
-        userCommandService.updatePassword(userId, dto);
+            given(userService.readById(userId)).willReturn(Optional.of(user));
+            given(passwordEncodeService.matches(currentPassword, user.getPassword())).willReturn(true);
+            given(passwordEncodeService.encode(newPassword)).willReturn(encodedNewPassword);
 
-        // then
-        assertEquals(encodedNewPassword, user.getPassword());
-    }
+            // when
+            userCommandService.updatePassword(userId, dto);
 
-    @Test
-    @DisplayName("비밀번호 변경 실패 - 비밀번호 불일치")
-    void updatePasswordFailDueToMismatchTest() {
-        // given
-        UserReq.UpdatePassword dto = new UserReq.UpdatePassword("wrongCurrentPass", "newPass");
-        User mockUser = mock(User.class);
-        given(userService.readById(userId)).willReturn(Optional.of(mockUser));
-        given(passwordEncodeService.matches("wrongCurrentPass", mockUser.getPassword())).willReturn(false);
+            // then
+            assertEquals(encodedNewPassword, user.getPassword());
+        }
 
-        // when
-        CustomException exception = assertThrows(CustomException.class,
-                () -> userCommandService.updatePassword(userId, dto));
+        @Test
+        @DisplayName("실패 - 비밀번호 불일치")
+        void updatePasswordFailDueToMismatch() {
+            // given
+            UserReq.UpdatePassword dto = new UserReq.UpdatePassword("wrongCurrentPass", "newPass");
+            User mockUser = mock(User.class);
+            given(userService.readById(userId)).willReturn(Optional.of(mockUser));
+            given(passwordEncodeService.matches("wrongCurrentPass", mockUser.getPassword())).willReturn(false);
 
-        // then
-        assertEquals(UserErrorType.NOT_MATCHED_PASSWORD, exception.getErrorType());
-    }
+            // when
+            CustomException exception = assertThrows(CustomException.class,
+                    () -> userCommandService.updatePassword(userId, dto));
 
-    @Test
-    @DisplayName("비밀번호 변경 실패 - 사용자 없음")
-    void updatePasswordFailUserNotFoundTest() {
-        // given
-        UserReq.UpdatePassword dto = new UserReq.UpdatePassword("old", "new");
-        given(userService.readById(userId)).willReturn(Optional.empty());
+            // then
+            assertEquals(UserErrorType.NOT_MATCHED_PASSWORD, exception.getErrorType());
+        }
 
-        // when
-        CustomException exception = assertThrows(CustomException.class,
-                () -> userCommandService.updatePassword(userId, dto));
+        @Test
+        @DisplayName("실패 - 사용자 없음")
+        void updatePasswordFailUserNotFound() {
+            // given
+            UserReq.UpdatePassword dto = new UserReq.UpdatePassword("old", "new");
+            given(userService.readById(userId)).willReturn(Optional.empty());
 
-        // then
-        assertEquals(UserErrorType.NOT_FOUND, exception.getErrorType());
+            // when
+            CustomException exception = assertThrows(CustomException.class,
+                    () -> userCommandService.updatePassword(userId, dto));
+
+            // then
+            assertEquals(UserErrorType.NOT_FOUND, exception.getErrorType());
+        }
     }
 
     @Test

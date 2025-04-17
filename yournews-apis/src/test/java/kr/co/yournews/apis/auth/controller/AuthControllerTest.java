@@ -12,6 +12,7 @@ import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -63,187 +64,201 @@ public class AuthControllerTest {
         tokenDto = TokenDto.of(accessToken, refreshToken);
     }
 
-    @Test
-    @DisplayName("회원가입 테스트")
-    void signUpTest() throws Exception {
-        // given
-        SignUpDto.Auth signUpDto = new SignUpDto.Auth("test123", "password1234@",
-                "테스터", "test@naver.com");
+    @Nested
+    @DisplayName("회원가입")
+    class SignUpTest {
 
-        given(authCommandService.signUp(signUpDto)).willReturn(tokenDto);
+        @Test
+        @DisplayName("성공")
+        void signUpSuccess() throws Exception {
+            // given
+            SignUpDto.Auth signUpDto = new SignUpDto.Auth("test123", "password1234@",
+                    "테스터", "test@naver.com");
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/auth/sign-up")
-                        .content(objectMapper.writeValueAsBytes(signUpDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+            given(authCommandService.signUp(signUpDto)).willReturn(tokenDto);
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
-                .andExpect(jsonPath("$.data.accessToken").value(tokenDto.accessToken()));
-    }
-    @Test
-    @DisplayName("회원가입 테스트 - 유효성 검사 실패")
-    void signUpInvalidFailedTest() throws Exception {
-        // given
-        SignUpDto.Auth signUpDto = new SignUpDto.Auth(null, null, null, null);
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/sign-up")
+                            .content(objectMapper.writeValueAsBytes(signUpDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/auth/sign-up")
-                        .content(objectMapper.writeValueAsBytes(signUpDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
+                    .andExpect(jsonPath("$.data.accessToken").value(tokenDto.accessToken()));
+        }
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.username").value("아이디는 필수 입력입니다."))
-                .andExpect(jsonPath("$.errors.password").value("비밀번호는 필수 입력 값입니다."))
-                .andExpect(jsonPath("$.errors.nickname").value("닉네임은 필수 입력 값입니다."))
-                .andExpect(jsonPath("$.errors.email").value("이메일은 필수 입력 값입니다."));
-    }
+        @Test
+        @DisplayName("실패 - 유효성 검사 실패")
+        void signUpInvalidFailed() throws Exception {
+            // given
+            SignUpDto.Auth signUpDto = new SignUpDto.Auth(null, null, null, null);
 
-    @Test
-    @DisplayName("회원가입 테스트 - 조건 불충족")
-    void signUpInsufficientTest() throws Exception {
-        // given
-        SignUpDto.Auth signUpDto = new SignUpDto.Auth("te", "password", "x",
-                "testgmail.com");
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/sign-up")
+                            .content(objectMapper.writeValueAsBytes(signUpDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/auth/sign-up")
-                        .content(objectMapper.writeValueAsBytes(signUpDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.username").value("아이디는 필수 입력입니다."))
+                    .andExpect(jsonPath("$.errors.password").value("비밀번호는 필수 입력 값입니다."))
+                    .andExpect(jsonPath("$.errors.nickname").value("닉네임은 필수 입력 값입니다."))
+                    .andExpect(jsonPath("$.errors.email").value("이메일은 필수 입력 값입니다."));
+        }
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.username").value("아이디는 특수문자를 제외한 4~20자리여야 합니다."))
-                .andExpect(jsonPath("$.errors.password").value("비밀번호는 8~16자 영문, 숫자, 특수문자를 사용하세요."))
-                .andExpect(jsonPath("$.errors.nickname").value("닉네임은 특수문자를 제외한 2~10자리여야 합니다."))
-                .andExpect(jsonPath("$.errors.email").value("이메일 형식이 아닙니다."));
-    }
+        @Test
+        @DisplayName("실패 - 조건 불충족")
+        void signUpInsufficient() throws Exception {
+            // given
+            SignUpDto.Auth signUpDto = new SignUpDto.Auth("te", "password", "x",
+                    "testgmail.com");
 
-    @Test
-    @DisplayName("로그인 테스트")
-    void signInTest() throws Exception {
-        // given
-        SignInDto signInDto = new SignInDto("test", "pass1234@");
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/sign-up")
+                            .content(objectMapper.writeValueAsBytes(signUpDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
 
-        given(authCommandService.signIn(signInDto)).willReturn(tokenDto);
-
-        // then
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/auth/sign-in")
-                        .content(objectMapper.writeValueAsBytes(signInDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
-                .andExpect(jsonPath("$.data.accessToken").value(tokenDto.accessToken()));
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.username").value("아이디는 특수문자를 제외한 4~20자리여야 합니다."))
+                    .andExpect(jsonPath("$.errors.password").value("비밀번호는 8~16자 영문, 숫자, 특수문자를 사용하세요."))
+                    .andExpect(jsonPath("$.errors.nickname").value("닉네임은 특수문자를 제외한 2~10자리여야 합니다."))
+                    .andExpect(jsonPath("$.errors.email").value("이메일 형식이 아닙니다."));
+        }
     }
 
-    @Test
-    @DisplayName("로그인 실패 테스트 - 없는 사용자")
-    void signInFailedByUserNotFoundTest() throws Exception {
-        // given
-        SignInDto signInDto = new SignInDto("test", "pass1234@");
+    @Nested
+    @DisplayName("로그인")
+    class SignInTest {
 
-        given(authCommandService.signIn(signInDto))
-                .willThrow(new CustomException(UserErrorType.NOT_FOUND));
+        @Test
+        @DisplayName("성공")
+        void signInSuccess() throws Exception {
+            // given
+            SignInDto signInDto = new SignInDto("test", "pass1234@");
 
-        // then
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/auth/sign-in")
-                        .content(objectMapper.writeValueAsBytes(signInDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+            given(authCommandService.signIn(signInDto)).willReturn(tokenDto);
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(UserErrorType.NOT_FOUND.getMessage()))
-                .andExpect(jsonPath("$.code").value(UserErrorType.NOT_FOUND.getCode()));
+            // then
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/sign-in")
+                            .content(objectMapper.writeValueAsBytes(signInDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
+                    .andExpect(jsonPath("$.data.accessToken").value(tokenDto.accessToken()));
+        }
+
+        @Test
+        @DisplayName("실패 - 없는 사용자")
+        void signInFailedByUserNotFound() throws Exception {
+            // given
+            SignInDto signInDto = new SignInDto("test", "pass1234@");
+
+            given(authCommandService.signIn(signInDto))
+                    .willThrow(new CustomException(UserErrorType.NOT_FOUND));
+
+            // then
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/sign-in")
+                            .content(objectMapper.writeValueAsBytes(signInDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").value(UserErrorType.NOT_FOUND.getMessage()))
+                    .andExpect(jsonPath("$.code").value(UserErrorType.NOT_FOUND.getCode()));
+        }
+
+        @Test
+        @DisplayName("실패 - 비밀번호 불일치")
+        void signInFailedByMisMatchPass() throws Exception {
+            // given
+            SignInDto signInDto = new SignInDto("test", "pass1234@");
+
+            given(authCommandService.signIn(signInDto))
+                    .willThrow(new CustomException(UserErrorType.NOT_MATCHED_PASSWORD));
+
+            // then
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/sign-in")
+                            .content(objectMapper.writeValueAsBytes(signInDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value(UserErrorType.NOT_MATCHED_PASSWORD.getMessage()))
+                    .andExpect(jsonPath("$.code").value(UserErrorType.NOT_MATCHED_PASSWORD.getCode()));
+        }
     }
 
-    @Test
-    @DisplayName("로그인 실패 테스트 - 비밀번호 불일치")
-    void signInFailedByMisMatchPassTest() throws Exception {
-        // given
-        SignInDto signInDto = new SignInDto("test", "pass1234@");
+    @Nested
+    @DisplayName("토큰 재발급")
+    class ReIssueTest {
 
-        given(authCommandService.signIn(signInDto))
-                .willThrow(new CustomException(UserErrorType.NOT_MATCHED_PASSWORD));
+        @Test
+        @DisplayName("성공")
+        void reIssueTokenSuccess() throws Exception {
+            // given
+            String reIssueRefreshToken = "reIssueRefreshToken";
+            String reIssueAccessToken = "reIssueAccessToken";
+            TokenDto newTokenDto = TokenDto.of(reIssueAccessToken, reIssueRefreshToken);
 
-        // then
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/auth/sign-in")
-                        .content(objectMapper.writeValueAsBytes(signInDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+            given(authCommandService.reissueAccessToken(tokenDto.refreshToken())).willReturn(newTokenDto);
 
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(UserErrorType.NOT_MATCHED_PASSWORD.getMessage()))
-                .andExpect(jsonPath("$.code").value(UserErrorType.NOT_MATCHED_PASSWORD.getCode()));
-    }
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/reissue")
+                            .cookie(new Cookie(REFRESH_TOKEN_KEY, tokenDto.refreshToken()))
+            );
 
-    @Test
-    @DisplayName("AccessToken 재발급 테스트")
-    void reIssueTokenTest() throws Exception {
-        // given
-        String reIssueRefreshToken = "reIssueRefreshToken";
-        String reIssueAccessToken = "reIssueAccessToken";
-        TokenDto newTokenDto = TokenDto.of(reIssueAccessToken, reIssueRefreshToken);
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.accessToken").value(newTokenDto.accessToken()))
+                    .andExpect(cookie().exists(REFRESH_TOKEN_KEY));
+        }
 
-        given(authCommandService.reissueAccessToken(tokenDto.refreshToken())).willReturn(newTokenDto);
+        @Test
+        @DisplayName("실패 - Refresh Token 없음")
+        void reIssueTokenException() throws Exception {
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/reissue")
+            );
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/auth/reissue")
-                        .cookie(new Cookie(REFRESH_TOKEN_KEY, tokenDto.refreshToken()))
-        );
-
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.accessToken").value(newTokenDto.accessToken()))
-                .andExpect(cookie().exists(REFRESH_TOKEN_KEY));
-    }
-
-    @Test
-    @DisplayName("AccessToken 재발급 테스트 - Refresh Token 없음")
-    void reIssueTokenExceptionTest() throws Exception {
-        // given
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/auth/reissue")
-        );
-
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(AuthErrorType.REFRESH_TOKEN_NOT_FOUND.getMessage()))
-                .andExpect(jsonPath("$.code").value(AuthErrorType.REFRESH_TOKEN_NOT_FOUND.getCode()));
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").value(AuthErrorType.REFRESH_TOKEN_NOT_FOUND.getMessage()))
+                    .andExpect(jsonPath("$.code").value(AuthErrorType.REFRESH_TOKEN_NOT_FOUND.getCode()));
+        }
     }
 
     @Test
