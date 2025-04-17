@@ -5,6 +5,27 @@ spring:
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASS:}
 
+  mail:
+    host: smtp.naver.com
+    port: 465
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enable: true
+            trust: smtp.naver.com
+
+mail:
+  sender: ${MAIL_SENDER}
+
 oauth2:
   kakao:
     tokenUri: https://kauth.kakao.com/oauth/token

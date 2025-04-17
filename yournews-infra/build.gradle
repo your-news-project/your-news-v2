@@ -12,4 +12,7 @@ dependencies {
 
     /* HTTP */
     implementation 'org.springframework:spring-web'
+
+    /* SMTP */
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
