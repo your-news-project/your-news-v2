@@ -1,30 +1,38 @@
 package kr.co.yournews.auth.authentication;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.domain.user.type.Role;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomUserDetails implements UserDetails {
-    private final Long userId;
-    private final String username;
+    private Long userId;
+    private String username;
+    private Collection<? extends GrantedAuthority> authorities;
 
-    private CustomUserDetails(Long userId, String username) {
+    private CustomUserDetails(Long userId, String username, Role role) {
         this.userId = userId;
         this.username = username;
+        this.authorities = List.of(new CustomGrantedAuthority(role.getValue()));
     }
 
     public static CustomUserDetails from(User user) {
-        return new CustomUserDetails(user.getId(), user.getUsername());
+        return new CustomUserDetails(user.getId(), user.getUsername(), user.getRole());
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList(); // 추후 수정 필요
+        return authorities;
     }
 
     @Override
