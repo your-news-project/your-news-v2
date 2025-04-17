@@ -5,6 +5,7 @@ import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import kr.co.yournews.infra.redis.RedisRepository;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,90 +40,100 @@ public class AuthCodeServiceTest {
 
     private final String email = "test@example.com";
 
-    @Test
-    @DisplayName("인증 코드 생성 및 저장 성공")
-    void generateAndSaveTest() {
-        // given
-        given(userService.existsByEmail(email)).willReturn(false);
-        given(redisRepository.getExpire(anyString(), eq(TimeUnit.SECONDS))).willReturn(null);
+    @Nested
+    @DisplayName("인증 코드 생성")
+    class GenerateCodeTest {
 
-        // when
-        String code = authCodeService.generateAndSave(email);
+        @Test
+        @DisplayName("성공")
+        void generateAndSaveSuccess() {
+            // given
+            given(userService.existsByEmail(email)).willReturn(false);
+            given(redisRepository.getExpire(anyString(), eq(TimeUnit.SECONDS))).willReturn(null);
 
-        // then
-        assertNotNull(code);
-        assertEquals(6, code.length());
-        verify(redisRepository).set(startsWith(CODE_PREFIX), eq(code), eq(Duration.ofMinutes(3)));
+            // when
+            String code = authCodeService.generateAndSave(email);
+
+            // then
+            assertNotNull(code);
+            assertEquals(6, code.length());
+            verify(redisRepository).set(startsWith(CODE_PREFIX), eq(code), eq(Duration.ofMinutes(3)));
+        }
+
+        @Test
+        @DisplayName("실패 - 이미 존재하는 이메일")
+        void generateAndSaveFailExistEmail() {
+            // given
+            given(userService.existsByEmail(email)).willReturn(true);
+
+            // when
+            CustomException e = assertThrows(CustomException.class,
+                    () -> authCodeService.generateAndSave(email));
+
+            // then
+            assertEquals(UserErrorType.EXIST_EMAIL, e.getErrorType());
+        }
+
+        @Test
+        @DisplayName("실패 - 너무 빠른 재요청")
+        void generateAndSaveFailResendTooFast() {
+            // given
+            given(userService.existsByEmail(email)).willReturn(false);
+            given(redisRepository.getExpire(anyString(), eq(TimeUnit.SECONDS))).willReturn(150L);
+
+            // when
+            CustomException e = assertThrows(CustomException.class,
+                    () -> authCodeService.generateAndSave(email));
+
+            // then
+            assertEquals(UserErrorType.ALREADY_MAIL_REQUEST, e.getErrorType());
+        }
     }
 
-    @Test
-    @DisplayName("인증 코드 생성 실패 - 이미 존재하는 이메일")
-    void generateAndSaveFailExistEmailTest() {
-        // given
-        given(userService.existsByEmail(email)).willReturn(true);
+    @Nested
+    @DisplayName("인증 코드 검증")
+    class VerifyCodeTest {
 
-        // when
-        CustomException e = assertThrows(CustomException.class,
-                () -> authCodeService.generateAndSave(email));
+        @Test
+        @DisplayName("성공")
+        void verifyCodeSuccess() {
+            // given
+            String code = "123456";
+            given(redisRepository.get(CODE_PREFIX + email)).willReturn(code);
 
-        // then
-        assertEquals(UserErrorType.EXIST_EMAIL, e.getErrorType());
-    }
+            // when
+            boolean result = authCodeService.verifiedCode(email, code);
 
-    @Test
-    @DisplayName("인증 코드 생성 실패 - 너무 빠른 재요청")
-    void generateAndSaveFailResendTooFast() {
-        // given
-        given(userService.existsByEmail(email)).willReturn(false);
-        given(redisRepository.getExpire(anyString(), eq(TimeUnit.SECONDS))).willReturn(150L);
+            // then
+            assertTrue(result);
+        }
 
-        // when
-        CustomException e = assertThrows(CustomException.class,
-                () -> authCodeService.generateAndSave(email));
+        @Test
+        @DisplayName("실패 - 저장된 코드 없음")
+        void verifyCodeFailCodeExpired() {
+            // given
+            given(redisRepository.get(CODE_PREFIX + email)).willReturn(null);
 
-        // then
-        assertEquals(UserErrorType.ALREADY_MAIL_REQUEST, e.getErrorType());
-    }
+            // when
+            CustomException e = assertThrows(CustomException.class,
+                    () -> authCodeService.verifiedCode(email, "any"));
 
-    @Test
-    @DisplayName("인증 코드 검증 성공")
-    void verifyCodeSuccess() {
-        // given
-        String code = "123456";
-        given(redisRepository.get(CODE_PREFIX + email)).willReturn(code);
+            // then
+            assertEquals(UserErrorType.CODE_EXPIRED, e.getErrorType());
+        }
 
-        // when
-        boolean result = authCodeService.verifiedCode(email, code);
+        @Test
+        @DisplayName("실패 - 코드 불일치")
+        void verifyCodeFailInvalidCode() {
+            // given
+            given(redisRepository.get(CODE_PREFIX + email)).willReturn("654321");
 
-        // then
-        assertTrue(result);
-    }
+            // when
+            CustomException e = assertThrows(CustomException.class,
+                    () -> authCodeService.verifiedCode(email, "123456"));
 
-    @Test
-    @DisplayName("인증 코드 검증 실패 - 저장된 코드 없음")
-    void verifyCodeFailCodeExpired() {
-        // given
-        given(redisRepository.get(CODE_PREFIX + email)).willReturn(null);
-
-        // when
-        CustomException e = assertThrows(CustomException.class,
-                () -> authCodeService.verifiedCode(email, "any"));
-
-        // then
-        assertEquals(UserErrorType.CODE_EXPIRED, e.getErrorType());
-    }
-
-    @Test
-    @DisplayName("인증 코드 검증 실패 - 코드 불일치")
-    void verifyCodeFailInvalidCode() {
-        // given
-        given(redisRepository.get(CODE_PREFIX + email)).willReturn("654321");
-
-        // when
-        CustomException e = assertThrows(CustomException.class,
-                () -> authCodeService.verifiedCode(email, "123456"));
-
-        // then
-        assertEquals(UserErrorType.INVALID_CODE, e.getErrorType());
+            // then
+            assertEquals(UserErrorType.INVALID_CODE, e.getErrorType());
+        }
     }
 }

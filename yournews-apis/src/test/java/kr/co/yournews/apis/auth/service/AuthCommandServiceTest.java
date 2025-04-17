@@ -12,6 +12,7 @@ import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -84,53 +85,58 @@ public class AuthCommandServiceTest {
         assertEquals(tokenDto.refreshToken(), result.refreshToken());
     }
 
-    @Test
-    @DisplayName("로그인 성공 시 토큰 반환")
-    void signInTest() {
-        // given
-        SignInDto signInDto = new SignInDto(username, password);
+    @Nested
+    @DisplayName("로그인")
+    class SignInTest {
 
-        given(userService.readByUsername(username)).willReturn(Optional.of(user));
-        given(passwordEncodeService.matches(password, encodedPassword)).willReturn(true);
-        given(jwtHelper.createToken(user)).willReturn(tokenDto);
+        @Test
+        @DisplayName("로그인 성공 시 토큰 반환")
+        void signInSuccess() {
+            // given
+            SignInDto signInDto = new SignInDto(username, password);
 
-        // when
-        TokenDto result = authCommandService.signIn(signInDto);
+            given(userService.readByUsername(username)).willReturn(Optional.of(user));
+            given(passwordEncodeService.matches(password, encodedPassword)).willReturn(true);
+            given(jwtHelper.createToken(user)).willReturn(tokenDto);
 
-        // then
-        assertEquals(tokenDto.accessToken(), result.accessToken());
-        verify(jwtHelper, times(1)).createToken(user);
-    }
+            // when
+            TokenDto result = authCommandService.signIn(signInDto);
 
-    @Test
-    @DisplayName("로그인 실패 - 존재하지 않는 사용자")
-    void signInFail_UserNotFound() {
-        // given
-        SignInDto signInDto = new SignInDto(username, password);
-        given(userService.readByUsername(username)).willReturn(Optional.empty());
+            // then
+            assertEquals(tokenDto.accessToken(), result.accessToken());
+            verify(jwtHelper, times(1)).createToken(user);
+        }
 
-        // when
-        CustomException exception = assertThrows(CustomException.class,
-                () -> authCommandService.signIn(signInDto));
+        @Test
+        @DisplayName("실패 - 존재하지 않는 사용자")
+        void signInFailUserNotFound() {
+            // given
+            SignInDto signInDto = new SignInDto(username, password);
+            given(userService.readByUsername(username)).willReturn(Optional.empty());
 
-        // then
-        assertEquals(UserErrorType.NOT_FOUND, exception.getErrorType());
-    }
+            // when
+            CustomException exception = assertThrows(CustomException.class,
+                    () -> authCommandService.signIn(signInDto));
 
-    @Test
-    @DisplayName("로그인 실패 - 비밀번호 불일치")
-    void signInFail_InvalidPassword() {
-        // given
-        SignInDto signInDto = new SignInDto(username, password);
-        given(userService.readByUsername(username)).willReturn(Optional.of(user));
-        given(passwordEncodeService.matches(password, encodedPassword)).willReturn(false);
+            // then
+            assertEquals(UserErrorType.NOT_FOUND, exception.getErrorType());
+        }
 
-        // when
-        CustomException exception = assertThrows(CustomException.class,
-                () -> authCommandService.signIn(signInDto));
+        @Test
+        @DisplayName("실패 - 비밀번호 불일치")
+        void signInFailInvalidPassword() {
+            // given
+            SignInDto signInDto = new SignInDto(username, password);
+            given(userService.readByUsername(username)).willReturn(Optional.of(user));
+            given(passwordEncodeService.matches(password, encodedPassword)).willReturn(false);
 
-        // then
-        assertEquals(UserErrorType.NOT_MATCHED_PASSWORD, exception.getErrorType());
+            // when
+            CustomException exception = assertThrows(CustomException.class,
+                    () -> authCommandService.signIn(signInDto));
+
+            // then
+            assertEquals(UserErrorType.NOT_MATCHED_PASSWORD, exception.getErrorType());
+        }
     }
 
     @Test

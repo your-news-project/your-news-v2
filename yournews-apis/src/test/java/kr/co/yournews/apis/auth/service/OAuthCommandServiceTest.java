@@ -95,7 +95,7 @@ public class OAuthCommandServiceTest {
 
     @Test
     @DisplayName("신규 회원 - OAuth 로그인 시 등록 후 토큰 발급")
-    void signIn_newUser_registerAndLogin() {
+    void signInNewUserRegisterAndLogin() {
         // given
         given(oAuthClientFactory.getPlatformService(platform)).willReturn(oAuthClient);
         given(oAuthClient.fetchUserInfoFromPlatform("authCode123")).willReturn(userInfoRes);
