@@ -28,6 +28,9 @@ import java.time.LocalDateTime;
 @SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE id = ?")
 @Entity(name = "user")
 public class User extends BaseTimeEntity {
+
+    public static final String UNKNOWN_NICKNAME = "알 수 없음";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -71,5 +74,9 @@ public class User extends BaseTimeEntity {
     public void updateInfo(String nickname) {
         this.nickname = nickname;
         this.signedUp = true;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
     }
 }
