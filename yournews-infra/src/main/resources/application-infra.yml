@@ -19,3 +19,7 @@ oauth2:
     clientSecret: ${NAVER_CLIENT_SECRET}
     redirectUri: ${NAVER_REDIRECT_URL}
     userInfoUri: https://openapi.naver.com/v1/nid/me
+
+cache:
+  ttl:
+    default: ${CACHE_TTL:30}

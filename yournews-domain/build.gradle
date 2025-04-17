@@ -10,6 +10,9 @@ dependencies {
     /* Database */
     runtimeOnly 'com.mysql:mysql-connector-j'
 
+    /* Jackson DataType */
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
     /* QueryDSL */
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
