@@ -6,6 +6,7 @@ import kr.co.yournews.domain.post.dto.PostQueryDto;
 import kr.co.yournews.domain.post.entity.QPost;
 import kr.co.yournews.domain.post.type.Category;
 import kr.co.yournews.domain.user.entity.QUser;
+import kr.co.yournews.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,11 +29,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         PostQueryDto.Summary.class,
                         post.id,
                         post.title,
-                        user.nickname,
+                        user.nickname.coalesce(User.UNKNOWN_NICKNAME),
                         post.createdAt
                 ))
                 .from(post)
-                .join(post.user, user)
+                .leftJoin(post.user, user)
                 .where(post.category.eq(category))
                 .orderBy(post.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -56,11 +57,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.id,
                         post.title,
                         post.content,
-                        user.nickname,
+                        user.nickname.coalesce(User.UNKNOWN_NICKNAME),
                         post.createdAt
                 ))
                 .from(post)
-                .join(post.user, user)
+                .leftJoin(post.user, user)
                 .where(post.id.eq(id))
                 .fetchOne();
 
