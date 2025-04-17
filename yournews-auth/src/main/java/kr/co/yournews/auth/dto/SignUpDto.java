@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.domain.user.type.Role;
 
 public class SignUpDto {
 
@@ -31,6 +32,7 @@ public class SignUpDto {
                     .nickname(nickname)
                     .email(email)
                     .signedUp(true)
+                    .role(Role.USER)
                     .build();
         }
     }
