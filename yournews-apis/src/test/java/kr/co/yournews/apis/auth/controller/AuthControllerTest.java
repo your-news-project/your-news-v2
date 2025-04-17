@@ -9,7 +9,6 @@ import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.common.exception.AuthErrorType;
 import kr.co.yournews.common.response.exception.CustomException;
-import kr.co.yournews.common.util.AuthConstants;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +22,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static kr.co.yournews.common.util.AuthConstants.AUTHORIZATION;
+import static kr.co.yournews.common.util.AuthConstants.REFRESH_TOKEN_KEY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -216,7 +217,7 @@ public class AuthControllerTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/api/v1/auth/reissue")
-                        .cookie(new Cookie(AuthConstants.REFRESH_TOKEN_KEY.getValue(), tokenDto.refreshToken()))
+                        .cookie(new Cookie(REFRESH_TOKEN_KEY, tokenDto.refreshToken()))
         );
 
         // then
@@ -224,7 +225,7 @@ public class AuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.accessToken").value(newTokenDto.accessToken()))
-                .andExpect(cookie().exists(AuthConstants.REFRESH_TOKEN_KEY.getValue()));
+                .andExpect(cookie().exists(REFRESH_TOKEN_KEY));
     }
 
     @Test
@@ -257,8 +258,8 @@ public class AuthControllerTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/api/v1/auth/sign-out")
-                        .cookie(new Cookie(AuthConstants.REFRESH_TOKEN_KEY.getValue(), tokenDto.refreshToken()))
-                        .header(AuthConstants.AUTHORIZATION.getValue(), accessToken)
+                        .cookie(new Cookie(REFRESH_TOKEN_KEY, tokenDto.refreshToken()))
+                        .header(AUTHORIZATION, accessToken)
         );
 
         // then

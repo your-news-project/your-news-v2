@@ -1,5 +1,7 @@
 package kr.co.yournews.common.util;
 
+import static kr.co.yournews.common.util.AuthConstants.TOKEN_TYPE;
+
 public class JwtUtil {
 
     /**
@@ -8,6 +10,6 @@ public class JwtUtil {
      * @return : TYPE 파싱 토큰
      */
     public static String resolveToken(String token) {
-        return token.substring(AuthConstants.TOKEN_TYPE.getValue().length()).trim();
+        return token.substring(TOKEN_TYPE.length()).trim();
     }
 }

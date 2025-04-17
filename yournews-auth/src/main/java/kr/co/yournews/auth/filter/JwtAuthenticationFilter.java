@@ -9,7 +9,6 @@ import kr.co.yournews.auth.jwt.provider.JwtProvider;
 import kr.co.yournews.auth.service.TokenBlackListService;
 import kr.co.yournews.common.exception.AuthErrorType;
 import kr.co.yournews.common.response.exception.BlackListException;
-import kr.co.yournews.common.util.AuthConstants;
 import kr.co.yournews.common.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
+import static kr.co.yournews.common.util.AuthConstants.TOKEN_TYPE;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -34,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authToken = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (authToken == null || !authToken.startsWith(AuthConstants.TOKEN_TYPE.getValue())) {
+        if (authToken == null || !authToken.startsWith(TOKEN_TYPE)) {
             filterChain.doFilter(request, response);
             return;
         }

@@ -8,7 +8,6 @@ import kr.co.yournews.auth.authentication.CustomUserDetails;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.common.response.success.SuccessResponse;
-import kr.co.yournews.common.util.AuthConstants;
 import kr.co.yournews.common.util.CookieUtil;
 import kr.co.yournews.domain.user.type.OAuthPlatform;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+
+import static kr.co.yournews.common.util.AuthConstants.REFRESH_TOKEN_KEY;
 
 @RestController
 @RequestMapping("/api/v1/oauth")
@@ -55,7 +56,7 @@ public class OAuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE,
                         CookieUtil.createCookie(
-                                AuthConstants.REFRESH_TOKEN_KEY.getValue(),
+                                REFRESH_TOKEN_KEY,
                                 tokenDto.refreshToken(),
                                 Duration.ofDays(7).toSeconds()
                         ).toString())
