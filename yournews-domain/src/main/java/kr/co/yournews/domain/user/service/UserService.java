@@ -23,4 +23,8 @@ public class UserService {
     public Optional<User> readByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+    public void deleteById(Long id) {
+        userRepository.deleteById(id);
+    }
 }
