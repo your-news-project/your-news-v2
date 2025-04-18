@@ -1,4 +1,4 @@
-package kr.co.yournews.domain.post.entity;
+package kr.co.yournews.domain.news.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "post_like")
-public class PostLike {
+@Entity(name = "sub_news")
+public class SubNews {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,12 +26,12 @@ public class PostLike {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private Post post;
+    @JoinColumn(name = "news_id")
+    private News news;
 
     @Builder
-    public PostLike(User user, Post post) {
+    public SubNews(User user, News news) {
         this.user = user;
-        this.post = post;
+        this.news = news;
     }
 }

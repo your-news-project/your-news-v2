@@ -18,6 +18,14 @@ public class PostCommandService {
     private final UserService userService;
     private final PostService postService;
 
+    /**
+     * 게시글 생성 메서드
+     *
+     * @param userId  : 게시글을 작성하는 사용자 ID
+     * @param postDto : 생성할 게시글의 제목 및 내용 정보를 담은 DTO
+     * @return : 생성된 게시글의 ID를 담은 응답 DTO
+     * @throws CustomException NOT_FOUND: 사용자가 존재하지 않을 경우
+     */
     @Transactional
     public PostDto.Response createPost(Long userId, PostDto.Request postDto) {
         User user = userService.readById(userId)
@@ -28,6 +36,14 @@ public class PostCommandService {
         return PostDto.Response.of(postId);
     }
 
+    /**
+     * 게시글 삭제 메서드
+     *
+     * @param userId : 요청한 사용자 ID
+     * @param postId : 삭제할 게시글 ID
+     * @throws CustomException NOT_FOUND: 게시글이 존재하지 않을 경우
+     *                         FORBIDDEN: 작성자가 아닐 경우
+     */
     @Transactional
     public void updatePost(Long userId, Long postId, PostDto.Request postDto) {
         Post post = postService.readById(postId)
@@ -40,6 +56,14 @@ public class PostCommandService {
         post.updateInfo(postDto.title(), postDto.content());
     }
 
+    /**
+     * 게시글 삭제 메서드
+     *
+     * @param userId : 요청한 사용자 ID
+     * @param postId : 삭제할 게시글 ID
+     * @throws CustomException NOT_FOUND: 게시글이 존재하지 않을 경우
+     *                         FORBIDDEN: 작성자가 아닐 경우
+     */
     @Transactional
     public void deletePost(Long userId, Long postId) {
         Post post = postService.readById(postId)

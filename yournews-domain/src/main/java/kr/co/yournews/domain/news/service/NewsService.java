@@ -21,6 +21,10 @@ public class NewsService {
         return newsRepository.findById(id);
     }
 
+    public List<News> readAllByIds(List<Long> ids) {
+        return newsRepository.findAllById(ids);
+    }
+
     public List<News> readAll() {
         return newsRepository.findAll();
     }

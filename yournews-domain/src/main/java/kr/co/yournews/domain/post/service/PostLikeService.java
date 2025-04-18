@@ -15,10 +15,10 @@ public class PostLikeService {
     }
 
     public void deleteByUserIdAndPostId(Long userId, Long postId) {
-        postLikeRepository.deleteByUserIdAndPostId(userId, postId);
+        postLikeRepository.deleteByUser_IdAndPost_Id(userId, postId);
     }
 
     public boolean existsByUserIdAndPostId(Long userId, Long poseId) {
-        return postLikeRepository.existsByUserIdAndPostId(userId, poseId);
+        return postLikeRepository.existsByUser_IdAndPost_Id(userId, poseId);
     }
 }
