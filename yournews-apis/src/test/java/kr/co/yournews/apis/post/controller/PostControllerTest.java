@@ -55,7 +55,7 @@ public class PostControllerTest {
         // given
         Long postId = 1L;
         PostInfoDto.Details postInfoDto =
-                new PostInfoDto.Details(postId, "title", "content", "nickname", LocalDateTime.now());
+                new PostInfoDto.Details(postId, "title", "content", "nickname", LocalDateTime.now(), 1L);
 
         given(postQueryService.getPostById(postId)).willReturn(postInfoDto);
 
@@ -72,7 +72,8 @@ public class PostControllerTest {
                 .andExpect(jsonPath("$.data.id").value(postInfoDto.id()))
                 .andExpect(jsonPath("$.data.title").value(postInfoDto.title()))
                 .andExpect(jsonPath("$.data.content").value(postInfoDto.content()))
-                .andExpect(jsonPath("$.data.nickname").value(postInfoDto.nickname()));
+                .andExpect(jsonPath("$.data.nickname").value(postInfoDto.nickname()))
+                .andExpect(jsonPath("$.data.userId").value(postInfoDto.userId()));
     }
 
     @Test

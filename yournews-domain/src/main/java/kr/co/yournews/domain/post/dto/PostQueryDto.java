@@ -16,6 +16,7 @@ public class PostQueryDto {
             String title,
             String content,
             String nickname,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            Long userId
     ) { }
 }

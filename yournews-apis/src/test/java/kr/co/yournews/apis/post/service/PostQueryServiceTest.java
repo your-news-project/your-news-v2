@@ -39,7 +39,7 @@ public class PostQueryServiceTest {
         // given
         Long postId = 1L;
         PostQueryDto.Details postQueryDto =
-                new PostQueryDto.Details(postId, "title", "content", "nickname", LocalDateTime.now());
+                new PostQueryDto.Details(postId, "title", "content", "nickname", LocalDateTime.now(), 1L);
         PostInfoDto.Details postInfoDto = PostInfoDto.Details.from(postQueryDto);
 
         given(postService.readDetailsById(postId)).willReturn(Optional.of(postQueryDto));
@@ -54,6 +54,7 @@ public class PostQueryServiceTest {
         assertEquals(postInfoDto.content(), result.content());
         assertEquals(postInfoDto.nickname(), result.nickname());
         assertEquals(postInfoDto.createdAt(), result.createdAt());
+        assertEquals(postInfoDto.userId(), result.userId());
     }
 
     @Test

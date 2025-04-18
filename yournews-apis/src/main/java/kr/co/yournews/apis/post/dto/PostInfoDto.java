@@ -22,10 +22,11 @@ public class PostInfoDto {
             String title,
             String content,
             String nickname,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            Long userId
     ) {
         public static Details from(PostQueryDto.Details dto) {
-            return new Details(dto.id(), dto.title(), dto.content(), dto.nickname(), dto.createdAt());
+            return new Details(dto.id(), dto.title(), dto.content(), dto.nickname(), dto.createdAt(), dto.userId());
         }
     }
 }

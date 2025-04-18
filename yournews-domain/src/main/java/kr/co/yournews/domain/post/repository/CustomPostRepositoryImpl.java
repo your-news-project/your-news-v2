@@ -58,7 +58,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.title,
                         post.content,
                         user.nickname.coalesce(User.UNKNOWN_NICKNAME),
-                        post.createdAt
+                        post.createdAt,
+                        post.userId
                 ))
                 .from(post)
                 .leftJoin(post.user, user)
