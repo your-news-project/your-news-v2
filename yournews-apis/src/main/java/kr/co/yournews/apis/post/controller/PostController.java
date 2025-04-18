@@ -41,10 +41,11 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPostById(@PathVariable Long postId) {
+    public ResponseEntity<?> getPostById(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                         @PathVariable Long postId) {
         return ResponseEntity.ok(
                 SuccessResponse.from(
-                        postQueryService.getPostById(postId)
+                        postQueryService.getPostById(postId, userDetails.getUserId())
                 )
         );
     }

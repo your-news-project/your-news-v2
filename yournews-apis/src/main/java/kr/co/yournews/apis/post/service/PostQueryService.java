@@ -21,11 +21,12 @@ public class PostQueryService {
      * 게시글 조회 메서드
      *
      * @param postId : 조회할 게시글 pk값
+     * @param userId : 사용자 pk값
      * @return : 게시글 정보
      */
     @Transactional(readOnly = true)
-    public PostInfoDto.Details getPostById(Long postId) {
-        PostQueryDto.Details details = postService.readDetailsById(postId)
+    public PostInfoDto.Details getPostById(Long postId, Long userId) {
+        PostQueryDto.Details details = postService.readDetailsById(postId, userId)
                 .orElseThrow(() -> new CustomException(PostErrorType.NOT_FOUND));
 
         return PostInfoDto.Details.from(details);
