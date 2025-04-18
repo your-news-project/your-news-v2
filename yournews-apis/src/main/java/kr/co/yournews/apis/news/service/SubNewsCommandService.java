@@ -35,6 +35,7 @@ public class SubNewsCommandService {
                 .map(news -> SubNews.builder()
                         .user(user)
                         .news(news)
+                        .newsName(news.getName())
                         .build())
                 .toList();
 

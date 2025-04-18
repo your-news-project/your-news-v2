@@ -1,5 +1,6 @@
 package kr.co.yournews.domain.news.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +22,9 @@ public class SubNews {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "news_name")
+    private String newsName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -30,8 +34,9 @@ public class SubNews {
     private News news;
 
     @Builder
-    public SubNews(User user, News news) {
+    public SubNews(User user, News news, String newsName) {
         this.user = user;
         this.news = news;
+        this.newsName = newsName;
     }
 }

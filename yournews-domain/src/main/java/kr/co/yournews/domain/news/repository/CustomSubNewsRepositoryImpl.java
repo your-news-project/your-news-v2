@@ -15,8 +15,8 @@ public class CustomSubNewsRepositoryImpl implements CustomSubNewsRepository {
 
     @Override
     public void saveAllInBatch(List<SubNews> subNewsList) {
-        String sql = "INSERT INTO sub_news (user_id, news_id) " +
-                "VALUES (?, ?)";
+        String sql = "INSERT INTO sub_news (user_id, news_id, news_name) " +
+                "VALUES (?, ?, ?)";
 
         jdbcTemplate.batchUpdate(
                 sql,
@@ -25,6 +25,7 @@ public class CustomSubNewsRepositoryImpl implements CustomSubNewsRepository {
                 (PreparedStatement ps, SubNews subNews) -> {
                     ps.setLong(1, subNews.getUser().getId());
                     ps.setLong(2, subNews.getNews().getId());
+                    ps.setString(3, subNews.getNewsName());
                 });
     }
 }
