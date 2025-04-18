@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -137,6 +138,31 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.errors.password").value("비밀번호는 8~16자 영문, 숫자, 특수문자를 사용하세요."))
                     .andExpect(jsonPath("$.errors.nickname").value("닉네임은 특수문자를 제외한 2~10자리여야 합니다."))
                     .andExpect(jsonPath("$.errors.email").value("이메일 형식이 아닙니다."));
+        }
+
+        @Test
+        @DisplayName("실패 - 인증 코드 검증되지 않음")
+        void signUpCodeNotVerified() throws Exception {
+            // given
+            SignUpDto.Auth signUpDto = new SignUpDto.Auth("test123", "password1234@",
+                    "테스터", "test@naver.com");
+
+            doThrow(new CustomException(UserErrorType.CODE_NOT_VERIFIED))
+                    .when(authCommandService).signUp(signUpDto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/sign-up")
+                            .content(objectMapper.writeValueAsBytes(signUpDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.message").value(UserErrorType.CODE_NOT_VERIFIED.getMessage()))
+                    .andExpect(jsonPath("$.code").value(UserErrorType.CODE_NOT_VERIFIED.getCode()));
         }
     }
 

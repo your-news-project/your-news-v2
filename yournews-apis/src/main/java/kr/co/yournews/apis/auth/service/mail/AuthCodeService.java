@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static kr.co.yournews.infra.redis.util.RedisConstants.CODE_PREFIX;
+import static kr.co.yournews.infra.redis.util.RedisConstants.VERIFIED_PREFIX;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +73,7 @@ public class AuthCodeService {
 
     /**
      * 사용자가 입력한 인증 코드가 Redis에 저장된 값과 일치하는지 검증
+     * - 인증 성공하면, 인증된 이메일 Redis 저장 (최종 회원가입 때, 확인을 위해)
      *
      * @param email : 사용자 이메일
      * @param code  : 입력한 인증 코드
@@ -91,6 +93,29 @@ public class AuthCodeService {
             throw new CustomException(UserErrorType.INVALID_CODE);
         }
 
+        redisRepository.set(VERIFIED_PREFIX + email, true, Duration.ofMinutes(10));
+        redisRepository.del(key);
+
         return true;
+    }
+
+    /**
+     * 이메일 인증 여부를 검증하고 인증 상태를 삭제
+     * - 인증 여부는 Redis에 저장된 VERIFIED_PREFIX + email 값을 통해 확인
+     * - 인증 여부가 확인되지 않거나 false인 경우 예외를 발생
+     * - 인증 여부가 true이면 Redis에서 해당 키를 삭제하여 재사용을 방지
+     *
+     * @param email : 인증 상태를 확인할 사용자 이메일
+     * @throws CustomException CODE_NOT_VERIFIED: 인증되지 않은 경우
+     */
+    public void ensureVerifiedAndConsume(String email) {
+        String key = VERIFIED_PREFIX + email;
+        Boolean isVerified = (Boolean) redisRepository.get(key);
+
+        if (isVerified == null || !isVerified) {
+            throw new CustomException(UserErrorType.CODE_NOT_VERIFIED);
+        }
+
+        redisRepository.del(key);
     }
 }

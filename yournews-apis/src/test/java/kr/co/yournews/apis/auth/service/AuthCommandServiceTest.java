@@ -1,6 +1,7 @@
 package kr.co.yournews.apis.auth.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import kr.co.yournews.apis.auth.service.mail.AuthCodeService;
 import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
@@ -27,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -41,6 +44,9 @@ public class AuthCommandServiceTest {
 
     @Mock
     private JwtHelper jwtHelper;
+
+    @Mock
+    private AuthCodeService authCodeService;
 
     @InjectMocks
     private AuthCommandService authCommandService;
@@ -66,23 +72,50 @@ public class AuthCommandServiceTest {
         tokenDto = TokenDto.of("accessToken", "refreshToken");
     }
 
-    @Test
-    @DisplayName("회원가입 시 토큰 반환")
-    void signUpTest() {
-        // given
-        SignUpDto.Auth signUpDto = new SignUpDto.Auth(username, password, nickname, "test@gmail.com");
+    @Nested
+    @DisplayName("회원가입")
+    class SignUpTest {
+        private final String email = "test@gmail.com";
 
-        given(passwordEncodeService.encode(password)).willReturn(encodedPassword);
-        given(jwtHelper.createToken(any(User.class))).willReturn(tokenDto);
+        @Test
+        @DisplayName("회원가입 성공 시 토큰 반환")
+        void signUpSuccess() {
+            // given
+            SignUpDto.Auth signUpDto = new SignUpDto.Auth(username, password, nickname, email);
 
-        // when
-        TokenDto result = authCommandService.signUp(signUpDto);
+            given(passwordEncodeService.encode(password)).willReturn(encodedPassword);
+            given(jwtHelper.createToken(any(User.class))).willReturn(tokenDto);
 
-        // then
-        verify(userService).save(any(User.class));
-        verify(jwtHelper).createToken(any(User.class));
-        assertEquals(tokenDto.accessToken(), result.accessToken());
-        assertEquals(tokenDto.refreshToken(), result.refreshToken());
+            // when
+            TokenDto result = authCommandService.signUp(signUpDto);
+
+            // then
+            verify(authCodeService).ensureVerifiedAndConsume(email);
+            verify(userService).save(any(User.class));
+            verify(jwtHelper).createToken(any(User.class));
+
+            assertEquals(tokenDto.accessToken(), result.accessToken());
+            assertEquals(tokenDto.refreshToken(), result.refreshToken());
+        }
+
+        @Test
+        @DisplayName("회원가입 실패 - 인증되지 않은 이메일")
+        void signUpFailIfCodeNotVerified() {
+            // given
+            SignUpDto.Auth signUpDto = new SignUpDto.Auth(username, password, nickname, email);
+
+            doThrow(new CustomException(UserErrorType.CODE_NOT_VERIFIED))
+                    .when(authCodeService).ensureVerifiedAndConsume(email);
+
+            // when & then
+            CustomException exception = assertThrows(CustomException.class,
+                    () -> authCommandService.signUp(signUpDto));
+
+            assertEquals(UserErrorType.CODE_NOT_VERIFIED, exception.getErrorType());
+            verify(authCodeService).ensureVerifiedAndConsume(email);
+            verify(userService, never()).save(any());
+            verify(jwtHelper, never()).createToken(any());
+        }
     }
 
     @Nested

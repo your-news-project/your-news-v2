@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static kr.co.yournews.infra.redis.util.RedisConstants.CODE_PREFIX;
+import static kr.co.yournews.infra.redis.util.RedisConstants.VERIFIED_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,6 +25,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -106,6 +109,9 @@ public class AuthCodeServiceTest {
 
             // then
             assertTrue(result);
+            verify(redisRepository, times(1)).get(startsWith(CODE_PREFIX));
+            verify(redisRepository, times(1)).set(startsWith(VERIFIED_PREFIX), eq(true), eq(Duration.ofMinutes(10)));
+            verify(redisRepository, times(1)).del(anyString());
         }
 
         @Test
@@ -134,6 +140,60 @@ public class AuthCodeServiceTest {
 
             // then
             assertEquals(UserErrorType.INVALID_CODE, e.getErrorType());
+        }
+    }
+
+    @Nested
+    @DisplayName("인증 상태 테스트")
+    class ensureVerifiedTest {
+
+        private final String email = "test@email.com";
+        private final String key = VERIFIED_PREFIX + email;
+
+        @Test
+        @DisplayName("성공")
+        void ensureVerifiedAndConsumeSuccess() {
+            // given
+            given(redisRepository.get(key)).willReturn(true);
+
+            // when
+            authCodeService.ensureVerifiedAndConsume(email);
+
+            // then
+            verify(redisRepository).get(key);
+            verify(redisRepository).del(key);
+        }
+
+        @Test
+        @DisplayName("실패 - 인증 상태 없음")
+        void ensureVerifiedAndConsumeNullFail() {
+            // given
+            given(redisRepository.get(key)).willReturn(null);
+
+            // when
+            CustomException exception = assertThrows(CustomException.class,
+                    () -> authCodeService.ensureVerifiedAndConsume(email));
+
+            // then
+            assertEquals(UserErrorType.CODE_NOT_VERIFIED, exception.getErrorType());
+            verify(redisRepository).get(key);
+            verify(redisRepository, never()).del(key);
+        }
+
+        @Test
+        @DisplayName("실패 - 인증 상태 false")
+        void ensureVerifiedAndConsumeFalseFail() {
+            // given
+            given(redisRepository.get(key)).willReturn(false);
+
+            // when
+            CustomException exception = assertThrows(CustomException.class,
+                    () -> authCodeService.ensureVerifiedAndConsume(email));
+
+            // then
+            assertEquals(UserErrorType.CODE_NOT_VERIFIED, exception.getErrorType());
+            verify(redisRepository).get(key);
+            verify(redisRepository, never()).del(key);
         }
     }
 }
