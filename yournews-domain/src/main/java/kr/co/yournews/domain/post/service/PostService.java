@@ -24,8 +24,8 @@ public class PostService {
         return postRepository.findById(id);
     }
 
-    public Optional<PostQueryDto.Details> readDetailsById(Long id) {
-        return postRepository.findDetailsById(id);
+    public Optional<PostQueryDto.Details> readDetailsById(Long postId, Long userId) {
+        return postRepository.findDetailsById(postId, userId);
     }
 
     public Page<PostQueryDto.Summary> readByCategory(Category category, Pageable pageable) {

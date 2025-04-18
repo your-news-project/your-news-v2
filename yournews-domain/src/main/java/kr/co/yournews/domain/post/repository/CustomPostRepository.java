@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface CustomPostRepository {
     Page<PostQueryDto.Summary> findAllByCategory(Category category, Pageable pageable);
-    Optional<PostQueryDto.Details> findDetailsById(Long id);
+    Optional<PostQueryDto.Details> findDetailsById(Long postId, Long userId);
 }

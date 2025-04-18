@@ -1,9 +1,11 @@
 package kr.co.yournews.domain.post.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.co.yournews.domain.post.dto.PostQueryDto;
 import kr.co.yournews.domain.post.entity.QPost;
+import kr.co.yournews.domain.post.entity.QPostLike;
 import kr.co.yournews.domain.post.type.Category;
 import kr.co.yournews.domain.user.entity.QUser;
 import kr.co.yournews.domain.user.entity.User;
@@ -21,6 +23,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
     private final QUser user = QUser.user;
     private final QPost post = QPost.post;
+    private final QPostLike postLike = QPostLike.postLike;
 
     @Override
     public Page<PostQueryDto.Summary> findAllByCategory(Category category, Pageable pageable) {
@@ -30,7 +33,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.id,
                         post.title,
                         user.nickname.coalesce(User.UNKNOWN_NICKNAME),
-                        post.createdAt
+                        post.createdAt,
+                        JPAExpressions
+                                .select(postLike.count())
+                                .from(postLike)
+                                .where(postLike.post.id.eq(post.id))
                 ))
                 .from(post)
                 .leftJoin(post.user, user)
@@ -50,7 +57,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     }
 
     @Override
-    public Optional<PostQueryDto.Details> findDetailsById(Long id) {
+    public Optional<PostQueryDto.Details> findDetailsById(Long postId, Long userId) {
         PostQueryDto.Details details = jpaQueryFactory
                 .select(Projections.constructor(
                         PostQueryDto.Details.class,
@@ -59,11 +66,22 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.content,
                         user.nickname.coalesce(User.UNKNOWN_NICKNAME),
                         post.createdAt,
-                        post.userId
+                        post.userId,
+                        JPAExpressions
+                                .select(postLike.count())
+                                .from(postLike)
+                                .where(postLike.post.id.eq(post.id)),
+                        JPAExpressions
+                                .selectOne()
+                                .from(postLike)
+                                .where(
+                                        postLike.post.id.eq(post.id)
+                                                .and(postLike.user.id.eq(userId))
+                                ).exists()
                 ))
                 .from(post)
                 .leftJoin(post.user, user)
-                .where(post.id.eq(id))
+                .where(post.id.eq(postId))
                 .fetchOne();
 
         return Optional.ofNullable(details);
