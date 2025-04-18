@@ -2,6 +2,7 @@ package kr.co.yournews.apis.auth.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeService;
+import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
@@ -26,6 +27,7 @@ public class AuthCommandService {
     private final PasswordEncodeService passwordEncodeService;
     private final JwtHelper jwtHelper;
     private final AuthCodeService authCodeService;
+    private final SubNewsCommandService subNewsCommandService;
 
     /**
      * dto를 통해 비밀번호 인코딩 후, 회원가입 진행 메서드.
@@ -42,6 +44,7 @@ public class AuthCommandService {
         User user = signUpDto.toEntity(encodedPassword);
         userService.save(user);
 
+        subNewsCommandService.subscribeToNews(user, signUpDto.newsIds());
         return jwtHelper.createToken(user);
     }
 
