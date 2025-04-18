@@ -2,9 +2,13 @@ package kr.co.yournews.apis.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.yournews.apis.user.dto.UserReq;
+import kr.co.yournews.apis.user.dto.UserRes;
 import kr.co.yournews.apis.user.service.UserCommandService;
+import kr.co.yournews.apis.user.service.UserQueryService;
 import kr.co.yournews.auth.authentication.CustomUserDetails;
+import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.type.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,11 +25,13 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -44,6 +50,9 @@ public class SecuredUserControllerTest {
     @MockBean
     private UserCommandService userCommandService;
 
+    @MockBean
+    private UserQueryService userQueryService;
+
     private User user;
     private UserDetails userDetails;
     private final Long userId = 1L;
@@ -53,6 +62,7 @@ public class SecuredUserControllerTest {
         this.mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
+                .defaultRequest(get("/**").with(csrf()))
                 .defaultRequest(put("/**").with(csrf()))
                 .defaultRequest(delete("/**").with(csrf()))
                 .build();
@@ -65,6 +75,55 @@ public class SecuredUserControllerTest {
         ReflectionTestUtils.setField(user, "id", userId);
 
         userDetails = CustomUserDetails.from(user);
+    }
+
+    @Nested
+    @DisplayName("사용자 조회")
+    class UserInfoTest {
+
+        @Test
+        @DisplayName("사용자 정보 조회 성공")
+        void getUserInfoSuccess() throws Exception {
+            // given
+            UserRes userRes = new UserRes(userId, "test", "테스터", "test@gmail.com");
+
+            given(userQueryService.getUserInfoById(userId)).willReturn(userRes);
+
+            // when
+            ResultActions result = mockMvc.perform(
+                    get("/api/v1/users")
+                            .with(user(userDetails))
+            );
+
+            // then
+            result.andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
+                    .andExpect(jsonPath("$.data.id").value(userRes.id()))
+                    .andExpect(jsonPath("$.data.username").value(userRes.username()))
+                    .andExpect(jsonPath("$.data.nickname").value(userRes.nickname()))
+                    .andExpect(jsonPath("$.data.email").value(userRes.email()));
+        }
+
+        @Test
+        @DisplayName("사용자 정보 조회 실패 - 존재하지 않는 사용자")
+        void getUserInfoFail_NotFound() throws Exception {
+            // given
+            given(userQueryService.getUserInfoById(userId))
+                    .willThrow(new CustomException(UserErrorType.NOT_FOUND));
+
+            // when
+            ResultActions result = mockMvc.perform(
+                    get("/api/v1/users")
+                            .with(user(userDetails))
+            );
+
+            // then
+            result.andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value(UserErrorType.NOT_FOUND.getCode()))
+                    .andExpect(jsonPath("$.message").value(UserErrorType.NOT_FOUND.getMessage()));
+        }
     }
 
     @Nested
