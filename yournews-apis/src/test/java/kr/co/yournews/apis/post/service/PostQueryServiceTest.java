@@ -38,17 +38,19 @@ public class PostQueryServiceTest {
     void getPostByIdTest() {
         // given
         Long postId = 1L;
+        Long userId = 1L;
         PostQueryDto.Details postQueryDto =
-                new PostQueryDto.Details(postId, "title", "content", "nickname", LocalDateTime.now(), 1L);
+                new PostQueryDto.Details(postId, "title", "content",
+                        "nickname", LocalDateTime.now(), userId, 10L, true);
         PostInfoDto.Details postInfoDto = PostInfoDto.Details.from(postQueryDto);
 
-        given(postService.readDetailsById(postId)).willReturn(Optional.of(postQueryDto));
+        given(postService.readDetailsById(postId, userId)).willReturn(Optional.of(postQueryDto));
 
         // when
-        PostInfoDto.Details result = postQueryService.getPostById(postId);
+        PostInfoDto.Details result = postQueryService.getPostById(postId, userId);
 
         // then
-        verify(postService, times(1)).readDetailsById(postId);
+        verify(postService, times(1)).readDetailsById(postId, userId);
         assertEquals(postInfoDto.id(), result.id());
         assertEquals(postInfoDto.title(), result.title());
         assertEquals(postInfoDto.content(), result.content());
@@ -65,9 +67,9 @@ public class PostQueryServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         Page<PostQueryDto.Summary> postQueries = new PageImpl<>(List.of(
-                new PostQueryDto.Summary(1L, "title1", "nickname1", LocalDateTime.now()),
-                new PostQueryDto.Summary(2L, "title2", "nickname2", LocalDateTime.now()),
-                new PostQueryDto.Summary(3L, "title3", "nickname3", LocalDateTime.now())
+                new PostQueryDto.Summary(1L, "title1", "nickname1", LocalDateTime.now(), 10L),
+                new PostQueryDto.Summary(2L, "title2", "nickname2", LocalDateTime.now(), 15L),
+                new PostQueryDto.Summary(3L, "title3", "nickname3", LocalDateTime.now(), 20L)
         ));
         Page<PostInfoDto.Summary> postDtos = postQueries.map(PostInfoDto.Summary::from);
 

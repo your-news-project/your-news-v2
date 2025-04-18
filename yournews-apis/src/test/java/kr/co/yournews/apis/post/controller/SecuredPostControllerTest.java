@@ -2,6 +2,7 @@ package kr.co.yournews.apis.post.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.yournews.apis.post.dto.PostDto;
+import kr.co.yournews.apis.post.dto.PostInfoDto;
 import kr.co.yournews.apis.post.service.PostCommandService;
 import kr.co.yournews.apis.post.service.PostQueryService;
 import kr.co.yournews.auth.authentication.CustomUserDetails;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.LocalDateTime;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -216,5 +220,34 @@ public class SecuredPostControllerTest {
                     .andExpect(jsonPath("$.code").value(PostErrorType.FORBIDDEN.getCode()))
                     .andExpect(jsonPath("$.message").value(PostErrorType.FORBIDDEN.getMessage()));
         }
+    }
+
+    @Test
+    @DisplayName("특정 게시글 조회 메서드")
+    void getPostById() throws Exception {
+        // given
+        Long postId = 1L;
+        PostInfoDto.Details postInfoDto =
+                new PostInfoDto.Details(postId, "title", "content", "nickname",
+                        LocalDateTime.now(), userId, 10L, true);
+
+        given(postQueryService.getPostById(postId, userId)).willReturn(postInfoDto);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                get("/api/v1/posts/{postId}", postId)
+                        .with(user(userDetails))
+        );
+
+        // then
+        resultActions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
+                .andExpect(jsonPath("$.data.id").value(postInfoDto.id()))
+                .andExpect(jsonPath("$.data.title").value(postInfoDto.title()))
+                .andExpect(jsonPath("$.data.content").value(postInfoDto.content()))
+                .andExpect(jsonPath("$.data.nickname").value(postInfoDto.nickname()))
+                .andExpect(jsonPath("$.data.userId").value(postInfoDto.userId()));
     }
 }
