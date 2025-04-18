@@ -10,10 +10,11 @@ public class PostInfoDto {
             Long id,
             String title,
             String nickname,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            Long likeCount
     ) {
         public static Summary from(PostQueryDto.Summary dto) {
-            return new Summary(dto.id(), dto.title(), dto.nickname(), dto.createdAt());
+            return new Summary(dto.id(), dto.title(), dto.nickname(), dto.createdAt(), dto.likeCount());
         }
     }
 
@@ -23,10 +24,13 @@ public class PostInfoDto {
             String content,
             String nickname,
             LocalDateTime createdAt,
-            Long userId
+            Long userId,
+            Long likeCount,
+            boolean liked
     ) {
         public static Details from(PostQueryDto.Details dto) {
-            return new Details(dto.id(), dto.title(), dto.content(), dto.nickname(), dto.createdAt(), dto.userId());
+            return new Details(dto.id(), dto.title(), dto.content(), dto.nickname(),
+                    dto.createdAt(), dto.userId(), dto.likeCount(), dto.liked());
         }
     }
 }

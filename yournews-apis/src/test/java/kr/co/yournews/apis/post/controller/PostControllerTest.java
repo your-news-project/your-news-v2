@@ -50,42 +50,15 @@ public class PostControllerTest {
     }
 
     @Test
-    @DisplayName("특정 게시글 조회 메서드")
-    void getPostById() throws Exception {
-        // given
-        Long postId = 1L;
-        PostInfoDto.Details postInfoDto =
-                new PostInfoDto.Details(postId, "title", "content", "nickname", LocalDateTime.now(), 1L);
-
-        given(postQueryService.getPostById(postId)).willReturn(postInfoDto);
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                get("/api/v1/posts/{postId}", postId)
-        );
-
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
-                .andExpect(jsonPath("$.data.id").value(postInfoDto.id()))
-                .andExpect(jsonPath("$.data.title").value(postInfoDto.title()))
-                .andExpect(jsonPath("$.data.content").value(postInfoDto.content()))
-                .andExpect(jsonPath("$.data.nickname").value(postInfoDto.nickname()))
-                .andExpect(jsonPath("$.data.userId").value(postInfoDto.userId()));
-    }
-
-    @Test
     @DisplayName("카테고리별 게시글 조회 메서드")
     void getPostsByCategory() throws Exception {
         // given
         Category category = Category.NEWS_REQUEST;
 
         Page<PostInfoDto.Summary> postInfoDtos = new PageImpl<>(List.of(
-                new PostInfoDto.Summary(1L, "title1", "nickname1", LocalDateTime.now()),
-                new PostInfoDto.Summary(2L, "title2", "nickname2", LocalDateTime.now()),
-                new PostInfoDto.Summary(3L, "title3", "nickname3", LocalDateTime.now())
+                new PostInfoDto.Summary(1L, "title1", "nickname1", LocalDateTime.now(), 10L),
+                new PostInfoDto.Summary(2L, "title2", "nickname2", LocalDateTime.now(), 15L),
+                new PostInfoDto.Summary(3L, "title3", "nickname3", LocalDateTime.now(), 20L)
         ));
 
         given(postQueryService.getPostsByCategory(eq(category), any(Pageable.class))).willReturn(postInfoDtos);

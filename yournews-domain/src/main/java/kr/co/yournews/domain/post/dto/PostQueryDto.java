@@ -8,7 +8,8 @@ public class PostQueryDto {
             Long id,
             String title,
             String nickname,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            Long likeCount
     ) { }
 
     public record Details(
@@ -17,6 +18,8 @@ public class PostQueryDto {
             String content,
             String nickname,
             LocalDateTime createdAt,
-            Long userId
+            Long userId,
+            Long likeCount,
+            Boolean liked
     ) { }
 }
