@@ -3,6 +3,8 @@ package kr.co.yournews.apis.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.yournews.apis.auth.dto.AuthCodeDto;
 import kr.co.yournews.apis.auth.dto.PassResetDto;
+import kr.co.yournews.apis.auth.dto.UsernameDto;
+import kr.co.yournews.apis.auth.service.UsernameFindService;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeManager;
 import kr.co.yournews.apis.auth.service.mail.PassCodeManager;
 import kr.co.yournews.common.response.exception.CustomException;
@@ -41,6 +43,9 @@ public class AuthSupportControllerTest {
 
     @MockBean
     private PassCodeManager passCodeManager;
+
+    @MockBean
+    private UsernameFindService usernameFindService;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -308,6 +313,57 @@ public class AuthSupportControllerTest {
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value(UserErrorType.UNAUTHORIZED_ACTION.getCode()))
                     .andExpect(jsonPath("$.message").value(UserErrorType.UNAUTHORIZED_ACTION.getMessage()));
+        }
+    }
+
+    @Nested
+    @DisplayName("아이디 찾기")
+    class UsernameFindTest {
+
+        @Test
+        @DisplayName("성공")
+        void getUsernameSuccess() throws Exception {
+            // given
+            UsernameDto.Request request = new UsernameDto.Request("test@email.com");
+            UsernameDto.Response response = new UsernameDto.Response("testUser");
+
+            when(usernameFindService.getUsernameByEmail(request)).thenReturn(response);
+
+            // when
+            ResultActions result = mockMvc.perform(
+                    post("/api/v1/auth/username/retrieve")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            // then
+            result.andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
+                    .andExpect(jsonPath("$.data.username").value("testUser"));
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 사용자")
+        void getUsernameNotFound() throws Exception {
+            // given
+            UsernameDto.Request request = new UsernameDto.Request("notfound@email.com");
+
+            when(usernameFindService.getUsernameByEmail(request))
+                    .thenThrow(new CustomException(UserErrorType.NOT_FOUND));
+
+            // when
+            ResultActions result = mockMvc.perform(
+                    post("/api/v1/auth/username/retrieve")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            // then
+            result.andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value(UserErrorType.NOT_FOUND.getCode()))
+                    .andExpect(jsonPath("$.message").value(UserErrorType.NOT_FOUND.getMessage()));
         }
     }
 }
