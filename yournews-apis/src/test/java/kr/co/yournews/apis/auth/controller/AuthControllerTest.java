@@ -23,6 +23,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.List;
+
 import static kr.co.yournews.common.util.AuthConstants.AUTHORIZATION;
 import static kr.co.yournews.common.util.AuthConstants.REFRESH_TOKEN_KEY;
 import static org.mockito.ArgumentMatchers.any;
@@ -74,7 +76,7 @@ public class AuthControllerTest {
         void signUpSuccess() throws Exception {
             // given
             SignUpDto.Auth signUpDto = new SignUpDto.Auth("test123", "password1234@",
-                    "테스터", "test@naver.com");
+                    "테스터", "test@naver.com", List.of(1L, 2L, 3L));
 
             given(authCommandService.signUp(signUpDto)).willReturn(tokenDto);
 
@@ -97,7 +99,7 @@ public class AuthControllerTest {
         @DisplayName("실패 - 유효성 검사 실패")
         void signUpInvalidFailed() throws Exception {
             // given
-            SignUpDto.Auth signUpDto = new SignUpDto.Auth(null, null, null, null);
+            SignUpDto.Auth signUpDto = new SignUpDto.Auth(null, null, null, null, List.of(1L, 2L, 3L));
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -121,7 +123,7 @@ public class AuthControllerTest {
         void signUpInsufficient() throws Exception {
             // given
             SignUpDto.Auth signUpDto = new SignUpDto.Auth("te", "password", "x",
-                    "testgmail.com");
+                    "testgmail.com", List.of(1L, 2L, 3L));
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -145,7 +147,7 @@ public class AuthControllerTest {
         void signUpCodeNotVerified() throws Exception {
             // given
             SignUpDto.Auth signUpDto = new SignUpDto.Auth("test123", "password1234@",
-                    "테스터", "test@naver.com");
+                    "테스터", "test@naver.com", List.of(1L, 2L, 3L));
 
             doThrow(new CustomException(UserErrorType.CODE_NOT_VERIFIED))
                     .when(authCommandService).signUp(signUpDto);

@@ -3,6 +3,7 @@ package kr.co.yournews.apis.auth.service;
 import kr.co.yournews.apis.auth.dto.OAuthCode;
 import kr.co.yournews.apis.auth.dto.OAuthTokenDto;
 import kr.co.yournews.apis.auth.dto.UserStatusDto;
+import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
@@ -23,6 +24,7 @@ public class OAuthCommandService {
     private final UserService userService;
     private final OAuthClientFactory oAuthClientFactory;
     private final JwtHelper jwtHelper;
+    private final SubNewsCommandService subNewsCommandService;
 
     /**
      * OAuth 추가 정보 입력 회원가입 진행 메서드
@@ -37,6 +39,8 @@ public class OAuthCommandService {
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
         user.updateInfo(signUpDto.nickname());
+        subNewsCommandService.subscribeToNews(user, signUpDto.newsIds());
+
         return OAuthTokenDto.of(jwtHelper.createToken(user), user.isSignedUp());
     }
 

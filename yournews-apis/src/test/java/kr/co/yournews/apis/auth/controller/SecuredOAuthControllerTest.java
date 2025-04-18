@@ -22,6 +22,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.List;
+
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -79,7 +81,7 @@ public class SecuredOAuthControllerTest {
     @DisplayName("회원가입 테스트")
     void signUpTest() throws Exception {
         // given
-        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("test");
+        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("test", List.of(1L, 2L, 3L));
 
         given(oAuthCommandService.signUp(userId, signUpDto)).willReturn(oAuthTokenDto);
 
@@ -103,7 +105,7 @@ public class SecuredOAuthControllerTest {
     @DisplayName("회원가입 테스트 - 유효성 검사 실패")
     void signUpInvalidFailedTest() throws Exception {
         // given
-        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth(null);
+        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth(null, List.of(1L, 2L, 3L));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -124,7 +126,7 @@ public class SecuredOAuthControllerTest {
     @DisplayName("회원가입 테스트 - 조건 불충족")
     void signUpInsufficientTest() throws Exception {
         // given
-        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("x");
+        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("x", List.of(1L, 2L, 3L));
 
         // when
         ResultActions resultActions = mockMvc.perform(

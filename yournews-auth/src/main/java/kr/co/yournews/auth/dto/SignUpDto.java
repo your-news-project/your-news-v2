@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Pattern;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.type.Role;
 
+import java.util.List;
+
 public class SignUpDto {
 
     public record Auth(
@@ -23,7 +25,9 @@ public class SignUpDto {
 
             @NotBlank(message = "이메일은 필수 입력 값입니다.")
             @Email(message = "이메일 형식이 아닙니다.")
-            String email
+            String email,
+
+            List<Long> newsIds
     ) {
         public User toEntity(String encodePassword) {
             return User.builder()
@@ -40,6 +44,8 @@ public class SignUpDto {
     public record OAuth(
             @NotBlank(message = "닉네임은 필수 입력 값입니다.")
             @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-zA-Z0-9-_]{2,10}$", message = "닉네임은 특수문자를 제외한 2~10자리여야 합니다.")
-            String nickname
+            String nickname,
+
+            List<Long> newsIds
     ) { }
 }
