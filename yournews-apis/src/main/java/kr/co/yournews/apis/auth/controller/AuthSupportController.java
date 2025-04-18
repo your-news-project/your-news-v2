@@ -3,6 +3,8 @@ package kr.co.yournews.apis.auth.controller;
 import jakarta.validation.Valid;
 import kr.co.yournews.apis.auth.dto.AuthCodeDto;
 import kr.co.yournews.apis.auth.dto.PassResetDto;
+import kr.co.yournews.apis.auth.dto.UsernameDto;
+import kr.co.yournews.apis.auth.service.UsernameFindService;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeManager;
 import kr.co.yournews.apis.auth.service.mail.PassCodeManager;
 import kr.co.yournews.common.response.success.SuccessResponse;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthSupportController {
     private final AuthCodeManager authCodeManager;
     private final PassCodeManager passCodeManager;
+    private final UsernameFindService usernameFindService;
 
     @PostMapping("/code/request")
     public ResponseEntity<?> requestCode(@RequestBody AuthCodeDto.Request dto) {
@@ -43,4 +46,14 @@ public class AuthSupportController {
         passCodeManager.applyNewPassword(resetPasswordDto);
         return ResponseEntity.ok(SuccessResponse.ok());
     }
+
+    @PostMapping("/username/retrieve")
+    public ResponseEntity<?> findUsername(@RequestBody @Valid UsernameDto.Request dto) {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        usernameFindService.getUsernameByEmail(dto)
+                )
+        );
+    }
+
 }
