@@ -2,6 +2,7 @@ package kr.co.yournews.apis.auth.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeService;
+import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,6 +49,9 @@ public class AuthCommandServiceTest {
 
     @Mock
     private AuthCodeService authCodeService;
+
+    @Mock
+    private SubNewsCommandService subNewsCommandService;
 
     @InjectMocks
     private AuthCommandService authCommandService;
@@ -81,7 +86,7 @@ public class AuthCommandServiceTest {
         @DisplayName("회원가입 성공 시 토큰 반환")
         void signUpSuccess() {
             // given
-            SignUpDto.Auth signUpDto = new SignUpDto.Auth(username, password, nickname, email);
+            SignUpDto.Auth signUpDto = new SignUpDto.Auth(username, password, nickname, email, List.of(1L, 2L, 3L));
 
             given(passwordEncodeService.encode(password)).willReturn(encodedPassword);
             given(jwtHelper.createToken(any(User.class))).willReturn(tokenDto);
@@ -102,7 +107,7 @@ public class AuthCommandServiceTest {
         @DisplayName("회원가입 실패 - 인증되지 않은 이메일")
         void signUpFailIfCodeNotVerified() {
             // given
-            SignUpDto.Auth signUpDto = new SignUpDto.Auth(username, password, nickname, email);
+            SignUpDto.Auth signUpDto = new SignUpDto.Auth(username, password, nickname, email, List.of(1L, 2L, 3L));
 
             doThrow(new CustomException(UserErrorType.CODE_NOT_VERIFIED))
                     .when(authCodeService).ensureVerifiedAndConsume(email);

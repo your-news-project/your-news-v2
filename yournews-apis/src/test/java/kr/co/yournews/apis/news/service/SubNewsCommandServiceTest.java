@@ -60,14 +60,14 @@ public class SubNewsCommandServiceTest {
 
     @Test
     @DisplayName("뉴스 구독 성공")
-    void subscribeToNews_success() {
+    void subscribeToNewsSuccess() {
         // given
         SubNewsDto.Request dto = new SubNewsDto.Request(newsIds);
 
         given(newsService.readAllByIds(newsIds)).willReturn(newsList);
 
         // when
-        subNewsCommandService.subscribeToNews(user, dto);
+        subNewsCommandService.subscribeToNews(user, dto.ids());
 
         // then
         verify(newsService).readAllByIds(newsIds);

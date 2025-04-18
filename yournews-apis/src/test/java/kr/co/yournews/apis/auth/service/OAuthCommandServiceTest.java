@@ -2,6 +2,7 @@ package kr.co.yournews.apis.auth.service;
 
 import kr.co.yournews.apis.auth.dto.OAuthCode;
 import kr.co.yournews.apis.auth.dto.OAuthTokenDto;
+import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -30,12 +32,18 @@ public class OAuthCommandServiceTest {
 
     @Mock
     private UserService userService;
+
     @Mock
     private OAuthClientFactory oAuthClientFactory;
+
     @Mock
     private JwtHelper jwtHelper;
+
     @Mock
     private OAuthClient oAuthClient;
+
+    @Mock
+    private SubNewsCommandService subNewsCommandService;
 
     @InjectMocks
     private OAuthCommandService oAuthCommandService;
@@ -59,7 +67,7 @@ public class OAuthCommandServiceTest {
     @DisplayName("회원가입 시 토큰 반환")
     void signUpTest() {
         // given
-        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("test");
+        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("test", List.of(1L, 2L, 3L));
         Long userId = 1L;
 
         given(userService.readById(userId)).willReturn(Optional.ofNullable(user));
