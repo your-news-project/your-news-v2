@@ -44,7 +44,7 @@ public class AuthCommandService {
         User user = signUpDto.toEntity(encodedPassword);
         userService.save(user);
 
-        subNewsCommandService.subscribeToNews(user, signUpDto.newsIds());
+        subNewsCommandService.subscribeToNews(user, signUpDto.newsIds(), signUpDto.keywords());
         return jwtHelper.createToken(user);
     }
 
