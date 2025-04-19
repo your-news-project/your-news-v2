@@ -76,7 +76,7 @@ public class AuthControllerTest {
         void signUpSuccess() throws Exception {
             // given
             SignUpDto.Auth signUpDto = new SignUpDto.Auth("test123", "password1234@",
-                    "테스터", "test@naver.com", List.of(1L, 2L, 3L));
+                    "테스터", "test@naver.com", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
 
             given(authCommandService.signUp(signUpDto)).willReturn(tokenDto);
 
@@ -99,7 +99,9 @@ public class AuthControllerTest {
         @DisplayName("실패 - 유효성 검사 실패")
         void signUpInvalidFailed() throws Exception {
             // given
-            SignUpDto.Auth signUpDto = new SignUpDto.Auth(null, null, null, null, List.of(1L, 2L, 3L));
+            SignUpDto.Auth signUpDto =
+                    new SignUpDto.Auth(null, null, null,
+                            null, List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -123,7 +125,7 @@ public class AuthControllerTest {
         void signUpInsufficient() throws Exception {
             // given
             SignUpDto.Auth signUpDto = new SignUpDto.Auth("te", "password", "x",
-                    "testgmail.com", List.of(1L, 2L, 3L));
+                    "testgmail.com", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -147,7 +149,7 @@ public class AuthControllerTest {
         void signUpCodeNotVerified() throws Exception {
             // given
             SignUpDto.Auth signUpDto = new SignUpDto.Auth("test123", "password1234@",
-                    "테스터", "test@naver.com", List.of(1L, 2L, 3L));
+                    "테스터", "test@naver.com", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
 
             doThrow(new CustomException(UserErrorType.CODE_NOT_VERIFIED))
                     .when(authCommandService).signUp(signUpDto);
