@@ -27,7 +27,9 @@ public class SignUpDto {
             @Email(message = "이메일 형식이 아닙니다.")
             String email,
 
-            List<Long> newsIds
+            List<Long> newsIds,
+
+            List<String> keywords
     ) {
         public User toEntity(String encodePassword) {
             return User.builder()
@@ -46,6 +48,8 @@ public class SignUpDto {
             @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-zA-Z0-9-_]{2,10}$", message = "닉네임은 특수문자를 제외한 2~10자리여야 합니다.")
             String nickname,
 
-            List<Long> newsIds
+            List<Long> newsIds,
+
+            List<String> keywords
     ) { }
 }

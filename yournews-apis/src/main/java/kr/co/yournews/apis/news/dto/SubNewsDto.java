@@ -7,7 +7,8 @@ import java.util.List;
 public class SubNewsDto {
 
     public record Request(
-            List<Long> ids
+            List<Long> ids,
+            List<String> keywords
     ) { }
 
     public record Response(
