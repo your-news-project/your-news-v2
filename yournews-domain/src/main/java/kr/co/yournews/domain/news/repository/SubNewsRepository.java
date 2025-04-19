@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface SubNewsRepository extends JpaRepository<SubNews, Long>, CustomSubNewsRepository {
+public interface SubNewsRepository extends JpaRepository<SubNews, Long> {
     List<SubNews> findByUser_Id(Long userId);
 
     @Modifying
