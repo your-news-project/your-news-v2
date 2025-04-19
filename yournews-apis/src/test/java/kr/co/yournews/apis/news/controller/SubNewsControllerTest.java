@@ -113,7 +113,7 @@ public class SubNewsControllerTest {
 
         @BeforeEach
         void setUp() {
-            requestDto = new SubNewsDto.Request(List.of(1L, 2L, 3L));
+            requestDto = new SubNewsDto.Request(List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
         }
 
         @Test

@@ -39,7 +39,7 @@ public class OAuthCommandService {
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
         user.updateInfo(signUpDto.nickname());
-        subNewsCommandService.subscribeToNews(user, signUpDto.newsIds());
+        subNewsCommandService.subscribeToNews(user, signUpDto.newsIds(), signUpDto.keywords());
 
         return OAuthTokenDto.of(jwtHelper.createToken(user), user.isSignedUp());
     }

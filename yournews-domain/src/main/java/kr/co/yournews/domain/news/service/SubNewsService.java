@@ -17,7 +17,7 @@ public class SubNewsService {
     }
 
     public void saveAll(List<SubNews> subNewsList) {
-        subNewsRepository.saveAllInBatch(subNewsList);
+        subNewsRepository.saveAll(subNewsList);
     }
 
     public List<SubNews> readByUserId(Long userId) {

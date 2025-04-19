@@ -86,7 +86,8 @@ public class AuthCommandServiceTest {
         @DisplayName("회원가입 성공 시 토큰 반환")
         void signUpSuccess() {
             // given
-            SignUpDto.Auth signUpDto = new SignUpDto.Auth(username, password, nickname, email, List.of(1L, 2L, 3L));
+            SignUpDto.Auth signUpDto =
+                    new SignUpDto.Auth(username, password, nickname, email, List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
 
             given(passwordEncodeService.encode(password)).willReturn(encodedPassword);
             given(jwtHelper.createToken(any(User.class))).willReturn(tokenDto);
@@ -107,7 +108,8 @@ public class AuthCommandServiceTest {
         @DisplayName("회원가입 실패 - 인증되지 않은 이메일")
         void signUpFailIfCodeNotVerified() {
             // given
-            SignUpDto.Auth signUpDto = new SignUpDto.Auth(username, password, nickname, email, List.of(1L, 2L, 3L));
+            SignUpDto.Auth signUpDto =
+                    new SignUpDto.Auth(username, password, nickname, email, List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
 
             doThrow(new CustomException(UserErrorType.CODE_NOT_VERIFIED))
                     .when(authCodeService).ensureVerifiedAndConsume(email);

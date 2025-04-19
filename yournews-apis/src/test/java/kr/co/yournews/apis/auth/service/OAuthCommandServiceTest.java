@@ -67,7 +67,8 @@ public class OAuthCommandServiceTest {
     @DisplayName("회원가입 시 토큰 반환")
     void signUpTest() {
         // given
-        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("test", List.of(1L, 2L, 3L));
+        SignUpDto.OAuth signUpDto =
+                new SignUpDto.OAuth("test", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
         Long userId = 1L;
 
         given(userService.readById(userId)).willReturn(Optional.ofNullable(user));

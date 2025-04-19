@@ -3,6 +3,7 @@ package kr.co.yournews.apis.news.service;
 import kr.co.yournews.apis.news.dto.SubNewsDto;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.news.entity.News;
+import kr.co.yournews.domain.news.service.KeywordService;
 import kr.co.yournews.domain.news.service.NewsService;
 import kr.co.yournews.domain.news.service.SubNewsService;
 import kr.co.yournews.domain.user.entity.User;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,12 +41,17 @@ public class SubNewsCommandServiceTest {
     @Mock
     private NewsService newsService;
 
+    @Mock
+    private KeywordService keywordService;
+
     @InjectMocks
     private SubNewsCommandService subNewsCommandService;
 
     private User user;
     private List<Long> newsIds;
     private List<News> newsList;
+    private List<String> keywords;
+    private News yuNews;
 
     @BeforeEach
     void setUp() {
@@ -56,22 +63,32 @@ public class SubNewsCommandServiceTest {
         newsList = newsIds.stream()
                 .map(id -> News.builder().name("이름" + id).build())
                 .toList();
+        keywords = List.of("취업", "학생복지");
+
+        yuNews = News.builder()
+                .name("영대소식")
+                .build();
+        ReflectionTestUtils.setField(yuNews, "id", 1L);
     }
 
     @Test
     @DisplayName("뉴스 구독 성공")
     void subscribeToNewsSuccess() {
         // given
-        SubNewsDto.Request dto = new SubNewsDto.Request(newsIds);
+        SubNewsDto.Request dto = new SubNewsDto.Request(newsIds, keywords);
 
         given(newsService.readAllByIds(newsIds)).willReturn(newsList);
 
+        List<News> newsList = List.of(yuNews);
+        given(newsService.readAllByIds(newsIds)).willReturn(newsList);
+
         // when
-        subNewsCommandService.subscribeToNews(user, dto.ids());
+        subNewsCommandService.subscribeToNews(user, dto.ids(), dto.keywords());
 
         // then
-        verify(newsService).readAllByIds(newsIds);
-        verify(subNewsService).saveAll(anyList());
+        verify(newsService, times(1)).readAllByIds(newsIds);
+        verify(subNewsService, times(1)).saveAll(anyList());
+        verify(keywordService, times(1)).saveAll(anyList());
     }
 
     @Test
@@ -79,19 +96,24 @@ public class SubNewsCommandServiceTest {
     void updateSubscribeNewsSuccess() {
         // given
         Long userId = 1L;
-        SubNewsDto.Request dto = new SubNewsDto.Request(newsIds);
+        SubNewsDto.Request dto = new SubNewsDto.Request(newsIds, keywords);
 
         given(userService.readById(userId)).willReturn(Optional.of(user));
+        given(newsService.readAllByIds(newsIds)).willReturn(newsList);
+
+        List<News> newsList = List.of(yuNews);
         given(newsService.readAllByIds(newsIds)).willReturn(newsList);
 
         // when
         subNewsCommandService.updateSubscribeNews(userId, dto);
 
         // then
+        verify(keywordService, times(1)).deleteAllByUserId(userId);
         verify(subNewsService, times(1)).deleteAllByUserId(userId);
         verify(userService, times(1)).readById(userId);
         verify(newsService, times(1)).readAllByIds(newsIds);
         verify(subNewsService, times(1)).saveAll(anyList());
+        verify(keywordService, times(1)).saveAll(anyList());
     }
 
     @Test
@@ -99,7 +121,7 @@ public class SubNewsCommandServiceTest {
     void updateSubscribeNewsUserNotFound() {
         // given
         Long userId = 1L;
-        SubNewsDto.Request dto = new SubNewsDto.Request(newsIds);
+        SubNewsDto.Request dto = new SubNewsDto.Request(newsIds, keywords);
 
         given(userService.readById(userId)).willReturn(Optional.empty());
 
