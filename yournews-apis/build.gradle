@@ -16,4 +16,7 @@ dependencies {
 
 	/* Test */
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	/* Jsoup */
+	implementation group: 'org.jsoup', name: 'jsoup', version: '1.17.2'
 }
