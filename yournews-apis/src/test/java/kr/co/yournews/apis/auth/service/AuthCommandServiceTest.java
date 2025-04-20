@@ -114,10 +114,11 @@ public class AuthCommandServiceTest {
             doThrow(new CustomException(UserErrorType.CODE_NOT_VERIFIED))
                     .when(authCodeService).ensureVerifiedAndConsume(email);
 
-            // when & then
+            // when
             CustomException exception = assertThrows(CustomException.class,
                     () -> authCommandService.signUp(signUpDto));
 
+            // then
             assertEquals(UserErrorType.CODE_NOT_VERIFIED, exception.getErrorType());
             verify(authCodeService).ensureVerifiedAndConsume(email);
             verify(userService, never()).save(any());
