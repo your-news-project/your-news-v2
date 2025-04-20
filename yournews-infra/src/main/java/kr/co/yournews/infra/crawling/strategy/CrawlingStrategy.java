@@ -16,4 +16,5 @@ public interface CrawlingStrategy {
     List<String> getSubscribedMembers(String newsName);
     void saveUrl(String postUrl);
     boolean isExisted(String postUrl);
+    long getTTL();
 }
