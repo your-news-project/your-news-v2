@@ -1,7 +1,7 @@
 package kr.co.yournews.apis.crawling.service;
 
 import jakarta.annotation.PostConstruct;
-import kr.co.yournews.infra.crawling.strategy.CrawlingStrategy;
+import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -17,6 +17,10 @@ public class CrawlingScheduler {
     private final ThreadPoolTaskScheduler taskScheduler;
     private final CrawlingExecutor crawlingExecutor;
 
+    /**
+     * 각 CrawlingStrategy의 주기에 따라 크롤링 작업을 스케줄링하는 메서드
+     * 애플리케이션 시작 시 자동 실행되며, Cron 표현식은 각 전략 내부에 정의
+     */
     @PostConstruct
     public void scheduleCrawlingTasks() {
         strategies.forEach(strategy -> taskScheduler.schedule(
