@@ -54,6 +54,9 @@ public class Notification {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "user_id", insertable = false, updatable = false)
+    private Long userId;
+
     @Builder
     public Notification(String newsName, List<String> postTitle, List<String> postUrl,
                         boolean isRead, NotificationType type, User user) {
@@ -67,5 +70,9 @@ public class Notification {
 
     public void markAsRead() {
         this.isRead = true;
+    }
+
+    public boolean isReceiver(Long userId) {
+        return this.userId != null && this.userId.equals(userId);
     }
 }
