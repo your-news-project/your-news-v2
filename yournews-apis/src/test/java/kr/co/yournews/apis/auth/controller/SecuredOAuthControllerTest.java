@@ -81,7 +81,8 @@ public class SecuredOAuthControllerTest {
     @DisplayName("회원가입 테스트")
     void signUpTest() throws Exception {
         // given
-        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("test", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
+        SignUpDto.OAuth signUpDto =
+                new SignUpDto.OAuth("test", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
 
         given(oAuthCommandService.signUp(userId, signUpDto)).willReturn(oAuthTokenDto);
 
@@ -105,7 +106,8 @@ public class SecuredOAuthControllerTest {
     @DisplayName("회원가입 테스트 - 유효성 검사 실패")
     void signUpInvalidFailedTest() throws Exception {
         // given
-        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth(null, List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
+        SignUpDto.OAuth signUpDto =
+                new SignUpDto.OAuth(null, List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -126,7 +128,8 @@ public class SecuredOAuthControllerTest {
     @DisplayName("회원가입 테스트 - 조건 불충족")
     void signUpInsufficientTest() throws Exception {
         // given
-        SignUpDto.OAuth signUpDto = new SignUpDto.OAuth("x", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"));
+        SignUpDto.OAuth signUpDto =
+                new SignUpDto.OAuth("x", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
 
         // when
         ResultActions resultActions = mockMvc.perform(
