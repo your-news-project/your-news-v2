@@ -45,3 +45,9 @@ oauth2:
 cache:
   ttl:
     default: ${CACHE_TTL:30}
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    url: ${OPENAI_API_URL}
+    model: ${OPENAI_API_MODEL}

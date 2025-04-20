@@ -1,6 +1,7 @@
 package kr.co.yournews.apis.crawling.strategy.crawling;
 
 import kr.co.yournews.domain.processedurl.service.ProcessedUrlService;
+import kr.co.yournews.infra.openai.KeywordClassificationClient;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,8 +16,11 @@ import static kr.co.yournews.infra.redis.util.RedisConstants.DEFAULT_URL_TTL_SEC
 @RequiredArgsConstructor
 public class YUNewsCrawlingStrategy implements CrawlingStrategy {
     private final ProcessedUrlService processedUrlService;
+    private final KeywordClassificationClient keywordClassificationClient;
 
     private static final String NEWS_NAME = "영대소식";
+
+    private String postTitle;
 
     @Override
     public String getScheduledTime() {
@@ -53,8 +57,13 @@ public class YUNewsCrawlingStrategy implements CrawlingStrategy {
         return titleElement.absUrl("href");
     }
 
+    public void setCurrentPostElement(String postTitle) {
+        this.postTitle = postTitle;
+    }
+
     @Override
     public List<String> getSubscribedUsers(String newsName) {
+        String keyword = keywordClassificationClient.requestKeyword(postTitle);
         return List.of(); // TODO : User에 구독 상황 넣고 추가
     }
 
