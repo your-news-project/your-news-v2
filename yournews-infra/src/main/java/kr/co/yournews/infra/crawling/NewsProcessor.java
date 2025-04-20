@@ -1,13 +1,9 @@
 package kr.co.yournews.infra.crawling;
 
-import kr.co.yournews.infra.crawling.dto.ParsedPost;
-import kr.co.yournews.infra.crawling.strategy.CrawlingStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Slf4j
 @Component
@@ -16,26 +12,17 @@ public class NewsProcessor {
     private static final int MAX_RETRIES = 2;
 
     /**
-     * 주어진 url을 Jsoup으로 크롤링하고, 전략에 따라 게시글 정보를 파싱하여 반환
-     * 실패 시 최대 MAX_RETRIES만큼 재시도하며, 성공하면 즉시 파싱된 결과를 반환
+     * 주어진 url에서 Jsoup을 이용해 HTML 문서를 가져오는 메서드
+     * 최대 MAX_RETRIES까지 재시도하며, 실패 시 null을 반환
      *
-     * @param url      :    크롤링 대상 URL
-     * @param strategy : HTML 파싱 전략
-     * @return : 파싱된 게시글 목록 (ParsedPost 리스트), 실패 시 빈 리스트 반환
+     * @param url : HTML 문서를 크롤링할 대상 URL
+     * @return : Jsoup Document (HTML 파싱 결과), 실패 시 null
      */
-    public List<ParsedPost> process(String url, CrawlingStrategy strategy) {
+    public Document fetch(String url) {
         int retryCount = 0;
         while (retryCount <= MAX_RETRIES) {
             try {
-                Document doc = Jsoup.connect(url).get();
-
-                return strategy.getPostElements(doc).stream()
-                        .filter(strategy::shouldProcessElement)
-                        .map(element -> new ParsedPost(
-                                strategy.extractPostTitle(element),
-                                strategy.extractPostURL(element)
-                        ))
-                        .toList();
+                return Jsoup.connect(url).get();
 
             } catch (Exception e) {
                 log.error("Error crawling {}: retry {}/{}", url, retryCount++, MAX_RETRIES);
@@ -52,7 +39,6 @@ public class NewsProcessor {
             }
         }
 
-        return List.of();
+        return null;
     }
-
 }
