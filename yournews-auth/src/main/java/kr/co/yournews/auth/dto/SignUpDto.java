@@ -29,7 +29,9 @@ public class SignUpDto {
 
             List<Long> newsIds,
 
-            List<String> keywords
+            List<String> keywords,
+
+            boolean subStatus
     ) {
         public User toEntity(String encodePassword) {
             return User.builder()
@@ -38,6 +40,7 @@ public class SignUpDto {
                     .nickname(nickname)
                     .email(email)
                     .signedUp(true)
+                    .subStatus(subStatus)
                     .role(Role.USER)
                     .build();
         }
@@ -50,6 +53,8 @@ public class SignUpDto {
 
             List<Long> newsIds,
 
-            List<String> keywords
+            List<String> keywords,
+
+            boolean subStatus
     ) { }
 }
