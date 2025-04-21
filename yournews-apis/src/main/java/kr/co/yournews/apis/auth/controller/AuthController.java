@@ -64,16 +64,6 @@ public class AuthController {
     }
 
     private ResponseEntity<?> createTokenRes(TokenDto tokenDto) {
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("accessToken", tokenDto.accessToken());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE,
-                        CookieUtil.createCookie(
-                                REFRESH_TOKEN_KEY,
-                                tokenDto.refreshToken(),
-                                Duration.ofDays(7).toSeconds()
-                        ).toString())
-                .body(SuccessResponse.from(responseData));
+        return ResponseEntity.ok(SuccessResponse.from(tokenDto));
     }
 }
