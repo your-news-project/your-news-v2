@@ -1,6 +1,5 @@
 package kr.co.yournews.apis.auth.service;
 
-import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeService;
 import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
@@ -20,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
@@ -194,6 +192,7 @@ public class AuthCommandServiceTest {
 
         // then
         assertEquals(tokenDto.refreshToken(), result.refreshToken());
+        assertEquals(tokenDto.accessToken(), result.accessToken());
         verify(jwtHelper, times(1)).reissueToken(refreshToken);
     }
 
@@ -204,12 +203,11 @@ public class AuthCommandServiceTest {
         String accessTokenInHeader = "Bearer accessToken";
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
-        HttpServletResponse response = new MockHttpServletResponse();
 
         // when
-        authCommandService.signOut(accessTokenInHeader, refreshToken, response);
+        authCommandService.signOut(accessTokenInHeader, refreshToken);
 
         // then
-        verify(jwtHelper, times(1)).removeToken(accessToken, refreshToken, response);
+        verify(jwtHelper, times(1)).removeToken(accessToken, refreshToken);
     }
 }

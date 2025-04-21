@@ -74,7 +74,8 @@ public class OAuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
-                .andExpect(jsonPath("$.data.accessToken").value(oAuthTokenDto.tokenDto().accessToken()))
+                .andExpect(jsonPath("$.data.tokenDto.accessToken").value(oAuthTokenDto.tokenDto().accessToken()))
+                .andExpect(jsonPath("$.data.tokenDto.refreshToken").value(oAuthTokenDto.tokenDto().refreshToken()))
                 .andExpect(jsonPath("$.data.isSignUp").value(oAuthTokenDto.isSignUp()));
     }
 }

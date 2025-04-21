@@ -1,8 +1,6 @@
 package kr.co.yournews.apis.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.apis.auth.service.AuthCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
@@ -26,15 +24,12 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 
 import static kr.co.yournews.common.util.AuthConstants.AUTHORIZATION;
-import static kr.co.yournews.common.util.AuthConstants.REFRESH_TOKEN_KEY;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -93,7 +88,8 @@ public class AuthControllerTest {
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
-                    .andExpect(jsonPath("$.data.accessToken").value(tokenDto.accessToken()));
+                    .andExpect(jsonPath("$.data.accessToken").value(tokenDto.accessToken()))
+                    .andExpect(jsonPath("$.data.refreshToken").value(tokenDto.refreshToken()));
         }
 
         @Test
@@ -197,7 +193,8 @@ public class AuthControllerTest {
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
-                    .andExpect(jsonPath("$.data.accessToken").value(tokenDto.accessToken()));
+                    .andExpect(jsonPath("$.data.accessToken").value(tokenDto.accessToken()))
+                    .andExpect(jsonPath("$.data.refreshToken").value(tokenDto.refreshToken()));
         }
 
         @Test
@@ -266,7 +263,7 @@ public class AuthControllerTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     post("/api/v1/auth/reissue")
-                            .cookie(new Cookie(REFRESH_TOKEN_KEY, tokenDto.refreshToken()))
+                            .header("X-Refresh-Token", tokenDto.refreshToken())
             );
 
             // then
@@ -274,7 +271,7 @@ public class AuthControllerTest {
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data.accessToken").value(newTokenDto.accessToken()))
-                    .andExpect(cookie().exists(REFRESH_TOKEN_KEY));
+                    .andExpect(jsonPath("$.data.refreshToken").value(newTokenDto.refreshToken()));
         }
 
         @Test
@@ -301,12 +298,12 @@ public class AuthControllerTest {
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
 
-        doNothing().when(authCommandService).signOut(eq(accessToken), eq(refreshToken), any(HttpServletResponse.class));
+        doNothing().when(authCommandService).signOut(eq(accessToken), eq(refreshToken));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/api/v1/auth/sign-out")
-                        .cookie(new Cookie(REFRESH_TOKEN_KEY, tokenDto.refreshToken()))
+                        .header("X-Refresh-Token", tokenDto.refreshToken())
                         .header(AUTHORIZATION, accessToken)
         );
 
