@@ -12,9 +12,11 @@ import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import kr.co.yournews.domain.user.type.OAuthPlatform;
+import kr.co.yournews.domain.user.type.Role;
 import kr.co.yournews.infra.oauth.OAuthClient;
 import kr.co.yournews.infra.oauth.dto.OAuthUserInfoRes;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,13 +31,14 @@ public class OAuthCommandService {
     /**
      * OAuth 추가 정보 입력 회원가입 진행 메서드
      *
-     * @param id        : 사용자 pk값
+     * @param userId    : 사용자 pk값
      * @param signUpDto : 사용자 회원가입 요청 dto
      * @return : jwt token
      */
     @Transactional
-    public OAuthTokenDto signUp(Long id, SignUpDto.OAuth signUpDto) {
-        User user = userService.readById(id)
+    @CacheEvict(value = "users", key = "#userId")
+    public OAuthTokenDto signUp(Long userId, SignUpDto.OAuth signUpDto) {
+        User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
         user.updateInfo(signUpDto.nickname(), signUpDto.subStatus());
@@ -93,6 +96,7 @@ public class OAuthCommandService {
                         .email(email)
                         .platform(platform)
                         .signedUp(false)
+                        .role(Role.GUEST)
                         .build()
         );
 
