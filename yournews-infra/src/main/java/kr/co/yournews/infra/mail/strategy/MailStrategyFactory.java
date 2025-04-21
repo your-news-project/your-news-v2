@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 public class MailStrategyFactory {
     private final CodeMailStrategy codeMailStrategy;
     private final PassMailStrategy passMailStrategy;
+    private final InquiryMailStrategy inquiryMailStrategy;
 
     public MailStrategy getStrategy(MailType mailType) {
         return switch (mailType) {
             case CODE -> codeMailStrategy;
             case PASS -> passMailStrategy;
+            case INQUIRY -> inquiryMailStrategy;
         };
     }
 }
