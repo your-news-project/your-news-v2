@@ -26,6 +26,8 @@ spring:
 mail:
   reset-password:
     link: ${RESET_PASSWORD_LINK}
+  admin:
+    email: ${ADMIN_EMAIL}
 
 oauth2:
   kakao:
