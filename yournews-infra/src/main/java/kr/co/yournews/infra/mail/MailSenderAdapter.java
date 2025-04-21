@@ -3,10 +3,9 @@ package kr.co.yournews.infra.mail;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import kr.co.yournews.common.response.error.type.GlobalErrorType;
-import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.infra.mail.strategy.MailStrategy;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -17,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 
 import static kr.co.yournews.infra.mail.util.MailConstants.SENDER;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MailSenderAdapter {
@@ -39,7 +39,8 @@ public class MailSenderAdapter {
 
             javaMailSender.send(message);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new CustomException(GlobalErrorType.INTERNAL_SERVER_ERROR);
+            log.error("Failed to send email to {} with subject '{}' | Reason: {}",
+                    email, strategy.getSubject(), e.getMessage());
         }
     }
 }
