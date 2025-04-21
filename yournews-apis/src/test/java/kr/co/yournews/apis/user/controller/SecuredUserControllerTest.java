@@ -27,6 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -215,5 +216,151 @@ public class SecuredUserControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+    }
+
+    @Nested
+    @DisplayName("회원 정보 수정")
+    class UpdateUserProfileTest {
+
+        @Test
+        @DisplayName("성공")
+        void updateUserProfileSuccess() throws Exception {
+            // given
+            UserReq.UpdateProfile dto = new UserReq.UpdateProfile("테스터");
+
+            doNothing().when(userCommandService).updateUserProfile(userId, dto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    patch("/api/v1/users")
+                            .with(user(userDetails))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(dto))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+        }
+
+        @Test
+        @DisplayName("실패 - 사용자 존재하지 않음")
+        void updateUserProfileFailUserNotFound() throws Exception {
+            // given
+            UserReq.UpdateProfile dto = new UserReq.UpdateProfile("테스터");
+
+            doThrow(new CustomException(UserErrorType.NOT_FOUND))
+                    .when(userCommandService).updateUserProfile(userId, dto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    patch("/api/v1/users")
+                            .with(user(userDetails))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(dto))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().is4xxClientError())
+                    .andExpect(jsonPath("$.message").value(UserErrorType.NOT_FOUND.getMessage()));
+        }
+
+        @Test
+        @DisplayName("실패 - 유효성 검사 실패")
+        void updateUserProfileValidationFail() throws Exception {
+            // given
+            UserReq.UpdateProfile dto = new UserReq.UpdateProfile(null);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    patch("/api/v1/users")
+                            .with(user(userDetails))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(dto))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.nickname").value("닉네임은 필수 입력 값입니다."));
+        }
+
+        @Test
+        @DisplayName("실패 - 조건 불일치")
+        void updateUserProfileInvalidPattern() throws Exception {
+            // given
+            UserReq.UpdateProfile dto = new UserReq.UpdateProfile("x");
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    patch("/api/v1/users")
+                            .with(user(userDetails))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(dto))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.nickname").value("닉네임은 특수문자를 제외한 2~10자리여야 합니다."));
+        }
+    }
+
+    @Nested
+    @DisplayName("구독 상태 변경")
+    class UpdateSubStatusTest {
+
+        @Test
+        @DisplayName("성공")
+        void updateSubStatusSuccess() throws Exception {
+            // given
+            UserReq.UpdateStatus dto = new UserReq.UpdateStatus(true, false);
+
+            doNothing().when(userCommandService).updateSubStatus(userId, dto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    patch("/api/v1/users/subscribe")
+                            .with(user(userDetails))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(dto))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+        }
+
+        @Test
+        @DisplayName("실패 - 사용자 존재하지 않음")
+        void updateSubStatusFailUserNotFound() throws Exception {
+            // given
+            UserReq.UpdateStatus dto = new UserReq.UpdateStatus(true, true);
+
+            doThrow(new CustomException(UserErrorType.NOT_FOUND))
+                    .when(userCommandService).updateSubStatus(userId, dto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    patch("/api/v1/users/subscribe")
+                            .with(user(userDetails))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(dto))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").value(UserErrorType.NOT_FOUND.getMessage()));
+        }
     }
 }
