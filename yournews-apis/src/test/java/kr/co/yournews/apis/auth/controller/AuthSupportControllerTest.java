@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.yournews.apis.auth.dto.AuthCodeDto;
 import kr.co.yournews.apis.auth.dto.PassResetDto;
 import kr.co.yournews.apis.auth.dto.UsernameDto;
+import kr.co.yournews.apis.auth.service.UserValidationService;
 import kr.co.yournews.apis.auth.service.UsernameFindService;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeManager;
 import kr.co.yournews.apis.auth.service.mail.PassCodeManager;
@@ -22,8 +23,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -46,6 +49,9 @@ public class AuthSupportControllerTest {
 
     @MockBean
     private UsernameFindService usernameFindService;
+
+    @MockBean
+    private UserValidationService userValidationService;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -364,6 +370,51 @@ public class AuthSupportControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value(UserErrorType.NOT_FOUND.getCode()))
                     .andExpect(jsonPath("$.message").value(UserErrorType.NOT_FOUND.getMessage()));
+        }
+    }
+
+    @Nested
+    @DisplayName("아이디 및 닉네임 중복 확인")
+    class CheckUserDuplicationTest {
+
+        @Test
+        @DisplayName("아이디 중복 확인 - 존재함")
+        void checkUsernameExists() throws Exception {
+            // given
+            String username = "testUser";
+            given(userValidationService.isUsernameExists(username)).willReturn(true);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/auth/check-username")
+                            .param("value", username)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").value(true));
+        }
+
+        @Test
+        @DisplayName("닉네임 중복 확인 - 존재하지 않음")
+        void checkNicknameNotExists() throws Exception {
+            // given
+            String nickname = "newNick";
+            given(userValidationService.isNicknameExists(nickname)).willReturn(false);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/auth/check-nickname")
+                            .param("value", nickname)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").value(false));
         }
     }
 }
