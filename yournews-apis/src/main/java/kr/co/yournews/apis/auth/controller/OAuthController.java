@@ -46,20 +46,6 @@ public class OAuthController {
     }
 
     private ResponseEntity<?> createTokenRes(OAuthTokenDto oAuthTokenDto) {
-        Map<String, Object> responseData = new HashMap<>();
-
-        TokenDto tokenDto = oAuthTokenDto.tokenDto();
-
-        responseData.put("accessToken", tokenDto.accessToken());
-        responseData.put("isSignUp", oAuthTokenDto.isSignUp());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE,
-                        CookieUtil.createCookie(
-                                REFRESH_TOKEN_KEY,
-                                tokenDto.refreshToken(),
-                                Duration.ofDays(7).toSeconds()
-                        ).toString())
-                .body(SuccessResponse.from(responseData));
+        return ResponseEntity.ok(SuccessResponse.from(oAuthTokenDto));
     }
 }
