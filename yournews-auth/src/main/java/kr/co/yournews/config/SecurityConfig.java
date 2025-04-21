@@ -2,9 +2,11 @@ package kr.co.yournews.config;
 
 import kr.co.yournews.auth.filter.JwtAuthenticationFilter;
 import kr.co.yournews.auth.filter.JwtExceptionFilter;
+import kr.co.yournews.domain.user.type.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,6 +23,13 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
 
+    private static final String[] AUTH_ENDPOINTS = {
+            "/api/v1/auth/**",
+            "/api/v1/oauth/sign-in/**"
+    };
+    private static final String[] ADMIN_ENDPOINTS = { "/api/v1/admin/**" };
+    private static final String[] GUEST_ENDPOINTS = { "/api/v1/oauth/sign-up" };
+
     @Bean
     public PasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -34,6 +43,12 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(AUTH_ENDPOINTS).permitAll()
+                        .requestMatchers(ADMIN_ENDPOINTS).hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, GUEST_ENDPOINTS).hasRole(Role.GUEST.name())
+                        .anyRequest().hasAnyRole(Role.USER.name(), Role.ADMIN.name())
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter .class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 

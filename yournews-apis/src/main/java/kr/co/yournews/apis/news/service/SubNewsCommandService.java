@@ -36,6 +36,8 @@ public class SubNewsCommandService {
      * @param keywords : '영대소식' 키워드 리스트
      */
     public void subscribeToNews(User user, List<Long> newsIds, List<String> keywords) {
+        if (newsIds == null || newsIds.isEmpty()) return;
+
         List<News> newsList = newsService.readAllByIds(newsIds);
 
         List<SubNews> subNewsList = createSubNewsList(user, newsList);

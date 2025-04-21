@@ -83,6 +83,7 @@ public class User extends BaseTimeEntity {
         this.nickname = nickname;
         this.signedUp = true;
         this.subStatus = subStatus;
+        this.role = Role.USER;
     }
 
     public void updatePassword(String password) {
