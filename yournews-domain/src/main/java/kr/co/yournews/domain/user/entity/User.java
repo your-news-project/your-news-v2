@@ -84,14 +84,24 @@ public class User extends BaseTimeEntity {
         this.dailySubStatus = dailySubStatus;
     }
 
-    public void updateInfo(String nickname, boolean subStatus) {
+    public void updateInfo(String nickname, boolean subStatus, boolean dailySubStatus) {
         this.nickname = nickname;
         this.signedUp = true;
         this.subStatus = subStatus;
+        this.dailySubStatus = dailySubStatus;
         this.role = Role.USER;
     }
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void updateInfo(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateSubStatus(boolean subStatus, boolean dailySubStatus) {
+        this.subStatus = subStatus;
+        this.dailySubStatus = dailySubStatus;
     }
 }
