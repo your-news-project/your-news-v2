@@ -113,7 +113,7 @@ public class JwtHelperTest {
         given(jwtProvider.getUsername(refreshToken)).willReturn(username);
 
         // when
-        jwtHelper.removeToken(accessToken, refreshToken, response);
+        jwtHelper.removeToken(accessToken, refreshToken);
 
         // then
         verify(tokenBlackListService, times(1)).saveBlackList(eq(accessToken), any());

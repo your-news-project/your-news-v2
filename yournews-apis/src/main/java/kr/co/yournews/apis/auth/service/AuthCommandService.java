@@ -1,6 +1,5 @@
 package kr.co.yournews.apis.auth.service;
 
-import jakarta.servlet.http.HttpServletResponse;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeService;
 import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
@@ -12,13 +11,11 @@ import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
-import kr.co.yournews.infra.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static kr.co.yournews.common.util.AuthConstants.TOKEN_TYPE;
-import static kr.co.yournews.infra.redis.util.RedisConstants.CODE_PREFIX;
 
 @Service
 @RequiredArgsConstructor
@@ -81,10 +78,9 @@ public class AuthCommandService {
      *
      * @param accessTokenInHeader : 헤더에 있는 accessToken
      * @param refreshToken        : refresh token
-     * @param response            : 쿠키 제거용 HttpServletResponse
      */
-    public void signOut(String accessTokenInHeader, String refreshToken, HttpServletResponse response) {
+    public void signOut(String accessTokenInHeader, String refreshToken) {
         String accessToken = accessTokenInHeader.substring(TOKEN_TYPE.length()).trim();
-        jwtHelper.removeToken(accessToken, refreshToken, response);
+        jwtHelper.removeToken(accessToken, refreshToken);
     }
 }
