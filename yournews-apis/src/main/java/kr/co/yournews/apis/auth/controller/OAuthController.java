@@ -6,12 +6,9 @@ import kr.co.yournews.apis.auth.dto.OAuthTokenDto;
 import kr.co.yournews.apis.auth.service.OAuthCommandService;
 import kr.co.yournews.auth.authentication.CustomUserDetails;
 import kr.co.yournews.auth.dto.SignUpDto;
-import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.common.response.success.SuccessResponse;
-import kr.co.yournews.common.util.CookieUtil;
 import kr.co.yournews.domain.user.type.OAuthPlatform;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,12 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-
-import static kr.co.yournews.common.util.AuthConstants.REFRESH_TOKEN_KEY;
 
 @RestController
 @RequestMapping("/api/v1/oauth")
