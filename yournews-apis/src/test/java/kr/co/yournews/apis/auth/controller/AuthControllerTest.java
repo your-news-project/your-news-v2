@@ -75,8 +75,9 @@ public class AuthControllerTest {
         @DisplayName("성공")
         void signUpSuccess() throws Exception {
             // given
-            SignUpDto.Auth signUpDto = new SignUpDto.Auth("test123", "password1234@",
-                    "테스터", "test@naver.com", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
+            SignUpDto.Auth signUpDto =
+                    new SignUpDto.Auth("test123", "password1234@", "테스터",
+                            "test@naver.com", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
 
             given(authCommandService.signUp(signUpDto)).willReturn(tokenDto);
 
@@ -101,7 +102,7 @@ public class AuthControllerTest {
             // given
             SignUpDto.Auth signUpDto =
                     new SignUpDto.Auth(null, null, null,
-                            null, List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
+                            null, List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -124,8 +125,9 @@ public class AuthControllerTest {
         @DisplayName("실패 - 조건 불충족")
         void signUpInsufficient() throws Exception {
             // given
-            SignUpDto.Auth signUpDto = new SignUpDto.Auth("te", "password", "x",
-                    "testgmail.com", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
+            SignUpDto.Auth signUpDto =
+                    new SignUpDto.Auth("te", "password", "x",
+                    "testgmail.com", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -148,8 +150,9 @@ public class AuthControllerTest {
         @DisplayName("실패 - 인증 코드 검증되지 않음")
         void signUpCodeNotVerified() throws Exception {
             // given
-            SignUpDto.Auth signUpDto = new SignUpDto.Auth("test123", "password1234@",
-                    "테스터", "test@naver.com", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
+            SignUpDto.Auth signUpDto =
+                    new SignUpDto.Auth("test123", "password1234@", "테스터",
+                            "test@naver.com", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
 
             doThrow(new CustomException(UserErrorType.CODE_NOT_VERIFIED))
                     .when(authCommandService).signUp(signUpDto);

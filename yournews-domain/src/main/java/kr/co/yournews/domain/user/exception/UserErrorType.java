@@ -19,6 +19,7 @@ public enum UserErrorType implements BaseErrorType {
     INVALID_USER_INFO(StatusCode.BAD_REQUEST, "U007", "정보를 정확히 입력해주세요."),
     UNAUTHORIZED_ACTION(StatusCode.FORBIDDEN, "U008", "권한이 없습니다."),
     CODE_NOT_VERIFIED(StatusCode.FORBIDDEN, "U009", "이메일 인증을 완료해주세요."),
+    EXIST_NICKNAME(StatusCode.CONFLICT, "U010", "이미 존재하는 닉네임입니다."),
     ;
 
     private final StatusCode status;

@@ -82,7 +82,7 @@ public class SecuredOAuthControllerTest {
     void signUpTest() throws Exception {
         // given
         SignUpDto.OAuth signUpDto =
-                new SignUpDto.OAuth("test", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
+                new SignUpDto.OAuth("test", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
 
         given(oAuthCommandService.signUp(userId, signUpDto)).willReturn(oAuthTokenDto);
 
@@ -107,7 +107,7 @@ public class SecuredOAuthControllerTest {
     void signUpInvalidFailedTest() throws Exception {
         // given
         SignUpDto.OAuth signUpDto =
-                new SignUpDto.OAuth(null, List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
+                new SignUpDto.OAuth(null, List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -129,7 +129,7 @@ public class SecuredOAuthControllerTest {
     void signUpInsufficientTest() throws Exception {
         // given
         SignUpDto.OAuth signUpDto =
-                new SignUpDto.OAuth("x", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true);
+                new SignUpDto.OAuth("x", List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
 
         // when
         ResultActions resultActions = mockMvc.perform(

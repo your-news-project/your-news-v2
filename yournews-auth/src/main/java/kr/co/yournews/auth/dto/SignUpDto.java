@@ -31,7 +31,9 @@ public class SignUpDto {
 
             List<String> keywords,
 
-            boolean subStatus
+            boolean subStatus,
+
+            boolean dailySubStatus
     ) {
         public User toEntity(String encodePassword) {
             return User.builder()
@@ -41,6 +43,7 @@ public class SignUpDto {
                     .email(email)
                     .signedUp(true)
                     .subStatus(subStatus)
+                    .dailySubStatus(dailySubStatus)
                     .role(Role.USER)
                     .build();
         }
@@ -55,6 +58,8 @@ public class SignUpDto {
 
             List<String> keywords,
 
-            boolean subStatus
+            boolean subStatus,
+
+            boolean dailySubStatus
     ) { }
 }
