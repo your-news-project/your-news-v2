@@ -66,9 +66,13 @@ public class User extends BaseTimeEntity {
     @Column(name = "sub_status")
     private boolean subStatus;
 
+    @ColumnDefault("false")
+    @Column(name = "daily_sub_status")
+    private boolean dailySubStatus;
+
     @Builder
     public User(String username, String password, String nickname, String email,
-                Role role, OAuthPlatform platform, boolean signedUp, boolean subStatus) {
+                Role role, OAuthPlatform platform, boolean signedUp, boolean subStatus, boolean dailySubStatus) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
@@ -77,6 +81,7 @@ public class User extends BaseTimeEntity {
         this.platform = platform;
         this.signedUp = signedUp;
         this.subStatus = subStatus;
+        this.dailySubStatus = dailySubStatus;
     }
 
     public void updateInfo(String nickname, boolean subStatus) {
