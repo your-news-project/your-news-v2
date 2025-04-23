@@ -53,3 +53,6 @@ openai:
     key: ${OPENAI_API_KEY}
     url: ${OPENAI_API_URL}
     model: ${OPENAI_API_MODEL}
+
+firebase:
+  key: ${FIREBASE_KEY}
