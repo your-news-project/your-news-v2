@@ -1,0 +1,60 @@
+package kr.co.yournews.infra.fcm;
+
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.MessagingErrorCode;
+import com.google.firebase.messaging.Notification;
+import kr.co.yournews.infra.fcm.response.FcmSendResult;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+public class FcmNotificationSender {
+
+    /**
+     * FCM 푸시 알림을 전송하고 결과를 반환하는 메서드
+     *
+     * @param token   : 수신자의 FCM 디바이스 토큰
+     * @param title   : 알림 제목
+     * @param content : 알림 내용
+     * @return FCM 전송 결과 객체
+     */
+    public FcmSendResult sendNotification(String token, String title, String content) {
+        Message message = buildMessage(token, title, content);
+
+        try {
+            String response = FirebaseMessaging.getInstance().send(message);
+            return FcmSendResult.success(response);
+        } catch (FirebaseMessagingException e) {
+            MessagingErrorCode code = e.getMessagingErrorCode();
+
+            if (code == MessagingErrorCode.UNREGISTERED || code == MessagingErrorCode.INVALID_ARGUMENT) {
+                log.warn("[FCM] Detected invalid token to be removed: {}", token);
+                return FcmSendResult.invalidToken(e.getMessage());
+            }
+
+            log.error("[FCM] Failed to send push notification: {}", e.getMessage(), e);
+            return FcmSendResult.failure(e.getMessage());
+        }
+    }
+
+    /**
+     * 주어진 정보로 FCM 메시지를 생성 메서드
+     *
+     * @param token   : 수신자 디바이스 토큰
+     * @param title   : 알림 제목
+     * @param content : 알림 내용
+     * @return 구성된 Message 객체
+     */
+    private Message buildMessage(String token, String title, String content) {
+        return Message.builder()
+                .setToken(token)
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(content)
+                        .build())
+                .build();
+    }
+}
