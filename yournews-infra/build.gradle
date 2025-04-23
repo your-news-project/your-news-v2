@@ -21,4 +21,7 @@ dependencies {
 
     /* Rate Limiter */
     implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
+
+    /* FCM (Firebase Cloud Messaging) */
+    implementation 'com.google.firebase:firebase-admin:9.1.1'
 }
