@@ -19,4 +19,8 @@ dependencies {
 
 	/* Jsoup */
 	implementation group: 'org.jsoup', name: 'jsoup', version: '1.17.2'
+
+	/* RabbitMQ */
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	testImplementation 'org.springframework.amqp:spring-rabbit-test'
 }
