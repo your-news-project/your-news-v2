@@ -77,6 +77,4 @@ public class YUNewsCrawlingStrategy implements CrawlingStrategy {
     public boolean isExisted(String postURL) {
         return processedUrlService.existsByUrl(postURL);
     }
-
-    // TODO : GPT 로직 구현
 }
