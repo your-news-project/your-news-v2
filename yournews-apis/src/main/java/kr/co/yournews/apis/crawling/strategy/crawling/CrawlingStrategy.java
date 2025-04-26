@@ -59,9 +59,9 @@ public interface CrawlingStrategy {
      * 해당 뉴스 이름을 구독 중인 사용자들의 이메일 목록을 조회
      *
      * @param newsName : 소식 이름
-     * @return : 사용자 이메일 목록
+     * @return : 사용자 pk값
      */
-    List<String> getSubscribedUsers(String newsName);
+    List<Long> getSubscribedUsers(String newsName);
 
     /**
      * 처리 완료된 게시글 url을 저장

@@ -1,6 +1,7 @@
 package kr.co.yournews.apis.crawling.strategy.crawling;
 
 import kr.co.yournews.domain.processedurl.service.ProcessedUrlService;
+import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,6 +16,7 @@ import static kr.co.yournews.infra.redis.util.RedisConstants.DEFAULT_URL_TTL_SEC
 @RequiredArgsConstructor
 public class DefaultCrawlingStrategy implements CrawlingStrategy {
     private final ProcessedUrlService processedUrlService;
+    private final UserService userService;
 
     private static final List<String> EXCLUDED_NEWS_NAME =
             List.of("YuTopia(비교과)", "영대소식", "반도체특성화대학", "AI/SW트랙", "취업처");
@@ -55,8 +57,8 @@ public class DefaultCrawlingStrategy implements CrawlingStrategy {
     }
 
     @Override
-    public List<String> getSubscribedUsers(String newsName) {
-        return List.of(); // TODO : User에 구독 상황 넣고 추가
+    public List<Long> getSubscribedUsers(String newsName) {
+        return userService.readAllUserIdsByNewsNameAndSubStatusTrue(newsName);
     }
 
     @Override
