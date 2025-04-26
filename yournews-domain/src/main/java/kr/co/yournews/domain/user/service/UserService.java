@@ -5,6 +5,7 @@ import kr.co.yournews.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,6 +27,10 @@ public class UserService {
 
     public Optional<User> readByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public List<Long> readAllUserIdsByNewsNameAndSubStatusTrue(String newsName) {
+        return userRepository.findUserIdsByNewsNameAndSubStatusTrue(newsName);
     }
 
     public void deleteById(Long id) {
