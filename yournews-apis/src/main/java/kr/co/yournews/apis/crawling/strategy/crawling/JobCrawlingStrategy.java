@@ -1,6 +1,7 @@
 package kr.co.yournews.apis.crawling.strategy.crawling;
 
 import kr.co.yournews.domain.processedurl.service.ProcessedUrlService;
+import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,6 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JobCrawlingStrategy implements CrawlingStrategy {
     private final ProcessedUrlService processedUrlService;
+    private final UserService userService;;
 
     private final Map<String, Long> deadlineCache = new HashMap<>();
 
@@ -70,8 +72,8 @@ public class JobCrawlingStrategy implements CrawlingStrategy {
     }
 
     @Override
-    public List<String> getSubscribedUsers(String newsName) {
-        return List.of(); // TODO : User에 구독 상황 넣고 추가
+    public List<Long> getSubscribedUsers(String newsName) {
+        return userService.readAllUserIdsByNewsNameAndSubStatusTrue(newsName);
     }
 
     @Override

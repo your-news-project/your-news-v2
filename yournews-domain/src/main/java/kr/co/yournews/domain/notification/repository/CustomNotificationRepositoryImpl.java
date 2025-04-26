@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -23,8 +25,12 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
      */
     @Override
     public void saveAllInBatch(List<Notification> notifications) {
-        String sql = "INSERT INTO notification (news_name, post_title, post_url, is_read, type, user_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO notification ("
+                + "news_name, post_title, post_url, is_read, type, user_id, public_id, created_at, updated_at"
+                + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+
+        LocalDateTime now = LocalDateTime.now();
 
         jdbcTemplate.batchUpdate(
                 sql,
@@ -36,7 +42,10 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
                     ps.setString(3, convertListToJson(notification.getPostUrl()));
                     ps.setBoolean(4, notification.isRead());
                     ps.setString(5, notification.getType().name());
-                    ps.setLong(6, notification.getUser().getId());
+                    ps.setLong(6, notification.getUserId());
+                    ps.setString(7, notification.getPublicId());
+                    ps.setTimestamp(8, Timestamp.valueOf(now));
+                    ps.setTimestamp(9, Timestamp.valueOf(now));
                 }
         );
     }
