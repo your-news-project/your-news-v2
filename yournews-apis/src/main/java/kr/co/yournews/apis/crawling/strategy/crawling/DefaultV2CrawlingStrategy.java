@@ -59,12 +59,12 @@ public class DefaultV2CrawlingStrategy implements CrawlingStrategy {
     }
 
     @Override
-    public void saveUrl(String postURL) {
-        processedUrlService.save(postURL, DEFAULT_URL_TTL_SECONDS);
+    public void saveUrl(String postUrl) {
+        processedUrlService.save(postUrl, DEFAULT_URL_TTL_SECONDS);
     }
 
     @Override
-    public boolean isExisted(String postURL) {
-        return processedUrlService.existsByUrl(postURL);
+    public boolean isExisted(String postUrl) {
+        return processedUrlService.existsByUrl(postUrl);
     }
 }
