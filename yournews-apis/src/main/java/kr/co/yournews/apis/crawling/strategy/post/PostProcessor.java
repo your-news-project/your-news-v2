@@ -32,9 +32,15 @@ public abstract class PostProcessor {
      */
     public abstract void process(String newsName, Elements elements, CrawlingStrategy strategy);
 
-    protected Notification buildNotification(
-            String newsName, List<String> titles, List<String> urls, String publicId, Long userId
-    ) {
+    /**
+     * Notification 엔티티 생성
+     */
+    protected Notification buildNotification(String newsName,
+                                             List<String> titles,
+                                             List<String> urls,
+                                             String publicId,
+                                             Long userId) {
+
         return Notification.builder()
                 .newsName(newsName)
                 .postTitle(titles)
@@ -46,6 +52,9 @@ public abstract class PostProcessor {
                 .build();
     }
 
+    /**
+     * FCM 메시지 전송 (RabbitMQ 이용)
+     */
     protected void sendFcmMessages(List<FcmToken> tokens, String newsName, String publicId) {
         for (FcmToken token : tokens) {
             rabbitMessagePublisher.send(FcmMessageDto.of(token.getToken(), newsName, publicId));

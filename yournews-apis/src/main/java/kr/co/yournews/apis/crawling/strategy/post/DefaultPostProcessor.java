@@ -29,27 +29,54 @@ public class DefaultPostProcessor extends PostProcessor {
         this.fcmTokenService = fcmTokenService;
     }
 
+    /**
+     * 이 프로세서가 지원하는 전략인지 여부
+     * - 기본 프로세서는 YUNewsCrawlingStrategy를 제외한 나머지를 처리
+     *
+     * @param strategy : 적용할 크롤링 전략
+     * @return : YUNewsCrawlingStrategy일 경우 false, 그 외 true
+     */
     @Override
     public boolean supports(CrawlingStrategy strategy) {
         return !(strategy instanceof YUNewsCrawlingStrategy);
     }
 
+    /**
+     * 주어진 게시글 요소(elements)를 처리하는 메서드
+     * - 새 게시글을 필터링하고
+     * - 사용자별 Notification 저장
+     * - FCM 알림 발송
+     *
+     * @param newsName : 등록된 소식 이름
+     * @param elements : 크롤링된 HTML 구조
+     * @param strategy : 크롤링 처리 전략
+     */
     @Override
     public void process(String newsName, Elements elements, CrawlingStrategy strategy) {
         CrawlingPostInfo postInfo = extractNewPosts(elements, strategy);
         if (postInfo.isEmpty()) return;
 
-        String publicId = UUID.randomUUID().toString();
-
         List<Long> userIds = strategy.getSubscribedUsers(newsName);
         if (userIds.isEmpty()) return;
 
-        createAndSaveNotifications(userIds, newsName, postInfo.titles(), postInfo.urls(), publicId);
+        // 모든 알림에 공통으로 사용될 public_id (알림 페이지 이동을 위해)
+        String publicId = UUID.randomUUID().toString();
+
+        saveNotifications(userIds, newsName, postInfo.titles(), postInfo.urls(), publicId);
 
         List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
         sendFcmMessages(tokens, newsName, publicId);
     }
 
+    /**
+     * Elements에서 새 게시글만 추출
+     * - 이미 존재하는 게시글은 제외
+     * - 크롤링 전략이 정의한 기준에 맞는 게시글만 추출
+     *
+     * @param elements : 크롤링된 HTML 구조
+     * @param strategy : 크롤링 처리 전략
+     * @return : 분류된 새 게시글 정보 dto (titles, urls)
+     */
     private CrawlingPostInfo extractNewPosts(Elements elements, CrawlingStrategy strategy) {
         List<String> titles = new ArrayList<>();
         List<String> urls = new ArrayList<>();
@@ -70,9 +97,18 @@ public class DefaultPostProcessor extends PostProcessor {
         return new CrawlingPostInfo(titles, urls);
     }
 
-    private void createAndSaveNotifications(List<Long> userIds, String newsName,
-                                            List<String> titles, List<String> urls,
-                                            String publicId) {
+    /**
+     * 사용자별 Notification 생성 및 저장
+     *
+     * @param userIds  : 알림을 보낼 사용자 ID 리스트
+     * @param newsName : 소식(뉴스) 이름
+     * @param titles   : 게시글 제목 리스트
+     * @param urls     : 게시글 URL 리스트
+     * @param publicId : 모든 알림에 공통으로 사용할 Public ID (묶음 식별용)
+     */
+    private void saveNotifications(List<Long> userIds, String newsName,
+                                   List<String> titles, List<String> urls,
+                                   String publicId) {
         List<Notification> notifications = userIds.stream()
                 .map(userId -> buildNotification(newsName, titles, urls, publicId, userId))
                 .toList();
