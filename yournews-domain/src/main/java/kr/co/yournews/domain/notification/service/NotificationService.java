@@ -24,11 +24,11 @@ public class NotificationService {
     }
 
     public Page<Notification> readAllByUserId(Long userId, Pageable pageable) {
-        return notificationRepository.findAllByUser_Id(userId, pageable);
+        return notificationRepository.findAllByUserId(userId, pageable);
     }
 
     public Page<Notification> readAllByUserIdAndIsRead(Long userId, boolean isRead, Pageable pageable) {
-        return notificationRepository.findAllByUser_IdAndIsRead(userId, isRead, pageable);
+        return notificationRepository.findAllByUserIdAndIsRead(userId, isRead, pageable);
     }
 
     public void deleteById(Long id) {
