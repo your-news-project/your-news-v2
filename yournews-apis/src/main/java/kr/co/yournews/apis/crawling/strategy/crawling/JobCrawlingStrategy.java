@@ -1,5 +1,6 @@
 package kr.co.yournews.apis.crawling.strategy.crawling;
 
+import kr.co.yournews.common.util.DateTimeFormatterUtil;
 import kr.co.yournews.domain.processedurl.service.ProcessedUrlService;
 import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JobCrawlingStrategy implements CrawlingStrategy {
     private final ProcessedUrlService processedUrlService;
-    private final UserService userService;;
+    private final UserService userService;
 
     private final Map<String, Long> deadlineCache = new HashMap<>();
 
@@ -48,18 +51,18 @@ public class JobCrawlingStrategy implements CrawlingStrategy {
         Element companyElement = postElement.selectFirst("td:nth-child(1) a");
         Element jobElement = postElement.selectFirst("td:nth-child(2) a");
 
-        return "회사 : " + companyElement.text() + "<br>직종 : " + jobElement.text();
+        return "회사 : " + companyElement.text() + "\n직종 : " + jobElement.text();
     }
 
     @Override
     public String extractPostUrl(Element postElement) {
         Element titleElement = postElement.selectFirst("td:nth-child(2) a");
 
-        String postURL = titleElement.absUrl("href");
+        String postUrl = titleElement.absUrl("href");
         long ttl = calculateTTL(extractDeadline(postElement));
-        deadlineCache.put(postURL, ttl);
+        deadlineCache.put(postUrl, ttl);
 
-        return postURL;
+        return postUrl;
     }
 
     private String extractDeadline(Element postElement) {
@@ -68,7 +71,12 @@ public class JobCrawlingStrategy implements CrawlingStrategy {
     }
 
     private long calculateTTL(String deadLine) {
-        return 0; // TODO : 게시글 ttl 설정
+        LocalDate deadlineDate = DateTimeFormatterUtil.parseToLocalDateTime(deadLine);
+        LocalDate currentDate = LocalDate.now();
+
+        long daysUntilDeadline = ChronoUnit.DAYS.between(currentDate, deadlineDate);
+
+        return (daysUntilDeadline + 1) * 86400;
     }
 
     @Override
@@ -77,13 +85,13 @@ public class JobCrawlingStrategy implements CrawlingStrategy {
     }
 
     @Override
-    public void saveUrl(String postURL) {
-        processedUrlService.save(postURL, deadlineCache.get(postURL));
-        deadlineCache.remove(postURL);
+    public void saveUrl(String postUrl) {
+        processedUrlService.save(postUrl, deadlineCache.get(postUrl));
+        deadlineCache.remove(postUrl);
     }
 
     @Override
-    public boolean isExisted(String postURL) {
-        return processedUrlService.existsByUrl(postURL);
+    public boolean isExisted(String postUrl) {
+        return processedUrlService.existsByUrl(postUrl);
     }
 }
