@@ -51,7 +51,7 @@ public class JobCrawlingStrategy implements CrawlingStrategy {
         Element companyElement = postElement.selectFirst("td:nth-child(1) a");
         Element jobElement = postElement.selectFirst("td:nth-child(2) a");
 
-        return "회사 : " + companyElement.text() + "<br>직종 : " + jobElement.text();
+        return "회사 : " + companyElement.text() + "\n직종 : " + jobElement.text();
     }
 
     @Override
