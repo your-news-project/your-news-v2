@@ -5,15 +5,12 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import kr.co.yournews.common.BaseTimeEntity;
 import kr.co.yournews.domain.notification.converter.StringListConverter;
 import kr.co.yournews.domain.notification.type.NotificationType;
-import kr.co.yournews.domain.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +24,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicUpdate
 @Entity(name = "notification")
-public class Notification {
+public class Notification extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,25 +44,25 @@ public class Notification {
     @Column(name = "is_read")
     private boolean isRead;
 
+    @Column(name = "public_id")
+    private String publicId;
+
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @Column(name = "user_id", insertable = false, updatable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
     @Builder
     public Notification(String newsName, List<String> postTitle, List<String> postUrl,
-                        boolean isRead, NotificationType type, User user) {
+                        boolean isRead, String publicId, NotificationType type, Long userId) {
         this.newsName = newsName;
         this.postTitle = postTitle;
         this.postUrl = postUrl;
         this.isRead = isRead;
+        this.publicId = publicId;
         this.type = type;
-        this.user = user;
+        this.userId = userId;
     }
 
     public void markAsRead() {
