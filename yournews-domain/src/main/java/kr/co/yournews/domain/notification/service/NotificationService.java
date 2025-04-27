@@ -23,6 +23,10 @@ public class NotificationService {
         return notificationRepository.findById(id);
     }
 
+    public Optional<Notification> readByUserIdAndPublicId(Long userId, String publicId) {
+        return notificationRepository.findByUserIdAndPublicId(userId, publicId);
+    }
+
     public Page<Notification> readAllByUserId(Long userId, Pageable pageable) {
         return notificationRepository.findAllByUserId(userId, pageable);
     }
