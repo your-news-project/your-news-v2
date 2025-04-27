@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -42,5 +43,14 @@ public class NotificationCommandService {
         }
 
         notificationService.deleteById(notificationId);
+    }
+
+    /**
+     * 10일이 지난 알림 삭제
+     */
+    @Transactional
+    public void deleteOldNotification() {
+        LocalDate dateTime = LocalDate.now().minusDays(10);
+        notificationService.deleteByDateTime(dateTime);
     }
 }
