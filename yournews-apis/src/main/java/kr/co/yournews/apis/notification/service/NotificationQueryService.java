@@ -17,7 +17,7 @@ public class NotificationQueryService {
     private final NotificationService notificationService;
 
     /**
-     * 특정 알림 조회 메서드
+     * 특정 알림 조회 메서드 - 알림의 pk 값을 통해 읽음
      * - 최초 조회 시, 읽음 처리 수행
      *
      * @param notificationId : 조회할 알림의 pk
@@ -27,6 +27,27 @@ public class NotificationQueryService {
     @Transactional
     public NotificationDto.Details getNotificationById(Long notificationId) {
         Notification notification = notificationService.readById(notificationId)
+                .orElseThrow(() -> new CustomException(NotificationErrorType.NOT_FOUND));
+
+        if (!notification.isRead()) {
+            notification.markAsRead();
+        }
+
+        return NotificationDto.Details.from(notification);
+    }
+
+    /**
+     * 특정 알림 조회 메서드 - 알림의 사용자 id & public id를 통해 읽음 (푸쉬 알림을 통해 바로 이동을 위한 메서드)
+     * - 최초 조회 시, 읽음 처리 수행
+     *
+     * @param userId   : 사용자 id
+     * @param publicId : 알림의 public id (UUID 형식)
+     * @return : 알림 상세 정보 DTO
+     * @throws CustomException NOT_FOUND : 알림가 존재하지 않는 경우
+     */
+    @Transactional
+    public NotificationDto.Details getNotificationByPublicId(Long userId, String publicId) {
+        Notification notification = notificationService.readByUserIdAndPublicId(userId, publicId)
                 .orElseThrow(() -> new CustomException(NotificationErrorType.NOT_FOUND));
 
         if (!notification.isRead()) {

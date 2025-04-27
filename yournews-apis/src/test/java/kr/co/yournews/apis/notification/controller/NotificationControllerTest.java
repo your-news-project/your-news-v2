@@ -82,19 +82,20 @@ public class NotificationControllerTest {
     @DisplayName("특정 알림 조회 테스트")
     class GetNotificationTest {
 
+        private final String publicId = "public-id";
+        private final NotificationDto.Details details = new NotificationDto.Details(
+                notificationId, "공지", List.of("제목"), List.of("url"), false, NotificationType.IMMEDIATE
+        );
+
         @Test
-        @DisplayName("성공")
+        @DisplayName("ID를 통한 조회 성공")
         void getNotificationByIdSuccess() throws Exception {
             // given
-            NotificationDto.Details details = new NotificationDto.Details(
-                    notificationId, "공지", List.of("제목"), List.of("url"), false, NotificationType.IMMEDIATE
-            );
-
             given(notificationQueryService.getNotificationById(notificationId)).willReturn(details);
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/notifies/{notificationId}", notificationId)
+                    get("/api/v1/notifies/id/{notificationId}", notificationId)
                             .with(user(userDetails))
             );
 
@@ -107,7 +108,7 @@ public class NotificationControllerTest {
         }
 
         @Test
-        @DisplayName("실패 - 알림 없음")
+        @DisplayName("ID를 통한 조회 실패 - 알림 없음")
         void getNotificationByIdFailNotFound() throws Exception {
             // given
             given(notificationQueryService.getNotificationById(notificationId))
@@ -115,7 +116,48 @@ public class NotificationControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/notifies/{notificationId}", notificationId)
+                    get("/api/v1/notifies/id/{notificationId}", notificationId)
+                            .with(user(userDetails))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value(NotificationErrorType.NOT_FOUND.getCode()))
+                    .andExpect(jsonPath("$.message").value(NotificationErrorType.NOT_FOUND.getMessage()));
+        }
+
+        @Test
+        @DisplayName("공동 ID를 통한 조회 성공")
+        void getNotificationByPublicIdSuccess() throws Exception {
+            // given
+            given(notificationQueryService.getNotificationByPublicId(userId, publicId)).willReturn(details);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/notifies/public-id/{publicId}", publicId)
+                            .with(user(userDetails))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.newsName").value("공지"))
+                    .andExpect(jsonPath("$.data.postTitle").value("제목"));
+        }
+
+        @Test
+        @DisplayName("공동 ID를 통한 조회 실패 - 알림 없음")
+        void getNotificationByPublicIdFailNotificationNotFound() throws Exception {
+            // given
+            given(notificationQueryService.getNotificationByPublicId(userId, publicId))
+                    .willThrow(new CustomException(NotificationErrorType.NOT_FOUND));
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/notifies/public-id/{publicId}", publicId)
                             .with(user(userDetails))
             );
 
