@@ -34,7 +34,7 @@ public class FcmTokenService {
     }
 
     public void deleteAllByUserId(Long userId) {
-        fcmTokenRepository.deleteAllByUser_Id(userId);
+        fcmTokenRepository.deleteAllByUserId(userId);
     }
 
     public void deleteByUserIdAndDeviceInfo(Long userId, String deviceInfo) {
