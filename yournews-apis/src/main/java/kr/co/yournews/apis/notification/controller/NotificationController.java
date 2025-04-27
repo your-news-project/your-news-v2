@@ -26,11 +26,21 @@ public class NotificationController {
     private final NotificationCommandService notificationCommandService;
     private final NotificationQueryService notificationQueryService;
 
-    @GetMapping("/{notificationId}")
+    @GetMapping("/id/{notificationId}")
     public ResponseEntity<?> getNotificationById(@PathVariable Long notificationId) {
         return ResponseEntity.ok(
                 SuccessResponse.from(
                         notificationQueryService.getNotificationById(notificationId)
+                )
+        );
+    }
+
+    @GetMapping("/public-id/{publicId}")
+    public ResponseEntity<?> getNotificationByPublicId(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                       @PathVariable String publicId) {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        notificationQueryService.getNotificationByPublicId(userDetails.getUserId(), publicId)
                 )
         );
     }
