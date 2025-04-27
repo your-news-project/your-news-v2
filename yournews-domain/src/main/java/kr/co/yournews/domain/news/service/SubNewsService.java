@@ -2,7 +2,7 @@ package kr.co.yournews.domain.news.service;
 
 import kr.co.yournews.domain.news.dto.UserKeywordDto;
 import kr.co.yournews.domain.news.entity.SubNews;
-import kr.co.yournews.domain.news.repository.SubNewsRepository;
+import kr.co.yournews.domain.news.repository.subnews.SubNewsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

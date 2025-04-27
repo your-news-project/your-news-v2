@@ -1,4 +1,4 @@
-package kr.co.yournews.domain.news.repository;
+package kr.co.yournews.domain.news.repository.keyword;
 
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;

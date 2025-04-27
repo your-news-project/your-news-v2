@@ -1,7 +1,7 @@
 package kr.co.yournews.domain.news.service;
 
 import kr.co.yournews.domain.news.entity.Keyword;
-import kr.co.yournews.domain.news.repository.KeywordRepository;
+import kr.co.yournews.domain.news.repository.keyword.KeywordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

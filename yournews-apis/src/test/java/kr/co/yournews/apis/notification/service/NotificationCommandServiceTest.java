@@ -12,11 +12,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -107,5 +109,17 @@ public class NotificationCommandServiceTest {
             verify(notificationService, times(1)).readById(notificationId);
             verify(notificationService, never()).deleteById(notificationId);
         }
+    }
+
+    @Test
+    @DisplayName("오래된 알림 삭제 성공")
+    void deleteOldNotification() {
+        // given
+
+        // when
+        notificationCommandService.deleteOldNotification();
+
+        // then
+        verify(notificationService, times(1)).deleteByDateTime(any(LocalDate.class));
     }
 }
