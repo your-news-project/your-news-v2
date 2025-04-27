@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,5 +38,9 @@ public class NotificationService {
 
     public void deleteById(Long id) {
         notificationRepository.deleteById(id);
+    }
+
+    public void deleteByDateTime(LocalDate dateTime) {
+        notificationRepository.deleteByDateTimeBefore(dateTime);
     }
 }
