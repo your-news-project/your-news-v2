@@ -1,4 +1,4 @@
-package kr.co.yournews.domain.news.repository;
+package kr.co.yournews.domain.news.repository.subnews;
 
 import kr.co.yournews.domain.news.dto.UserKeywordDto;
 

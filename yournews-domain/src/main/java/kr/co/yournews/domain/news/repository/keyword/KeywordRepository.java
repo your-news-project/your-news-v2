@@ -1,4 +1,4 @@
-package kr.co.yournews.domain.news.repository;
+package kr.co.yournews.domain.news.repository.keyword;
 
 import kr.co.yournews.domain.news.entity.Keyword;
 import org.springframework.data.jpa.repository.JpaRepository;
