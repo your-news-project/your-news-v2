@@ -40,11 +40,19 @@ public class NotificationQueryServiceTest {
     @DisplayName("특정 알림 조회 테스트")
     class GetNotificationTest {
 
+        private final Long notificationId = 1L;
+
+        private final Notification notification = Notification.builder()
+                .newsName("공지사항")
+                .postTitle(List.of("제목"))
+                .postUrl(List.of("url"))
+                .isRead(false)
+                .build();
+
         @Test
-        @DisplayName("성공")
+        @DisplayName("ID를 통한 조회 성공")
         void getNotificationByIdSuccess() {
             // given
-            Long notificationId = 1L;
             Notification notification = Notification.builder()
                     .newsName("공지사항")
                     .postTitle(List.of("제목"))
@@ -64,10 +72,9 @@ public class NotificationQueryServiceTest {
         }
 
         @Test
-        @DisplayName("실패 - 알림이 존재하지 않음")
+        @DisplayName("ID를 통한 조회 실패 - 알림이 존재하지 않음")
         void getNotificationByIdFailNotificationNotFound() {
             // given
-            Long notificationId = 1L;
             given(notificationService.readById(notificationId)).willReturn(Optional.empty());
 
             // when
@@ -78,11 +85,47 @@ public class NotificationQueryServiceTest {
             assertEquals(NotificationErrorType.NOT_FOUND, exception.getErrorType());
             verify(notificationService, times(1)).readById(notificationId);
         }
+
+        @Test
+        @DisplayName("공동 ID를 통한 조회 성공")
+        void getNotificationByPublicIdSuccess() {
+            // given
+            Long userId = 1L;
+            String publicId = "public-id";
+
+            given(notificationService.readByUserIdAndPublicId(userId, publicId)).willReturn(Optional.ofNullable(notification));
+
+            // when
+            NotificationDto.Details result = notificationQueryService.getNotificationByPublicId(userId, publicId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.newsName()).isEqualTo("공지사항");
+            assertThat(notification.isRead()).isTrue();
+        }
+
+        @Test
+        @DisplayName("공동 ID를 통한 조회 실패 - 알림이 존재하지 않음")
+        void getNotificationByPublicIdFailNotificationNotFound() {
+            // given
+            Long userId = 1L;
+            String publicId = "public-id";
+
+            given(notificationService.readByUserIdAndPublicId(userId, publicId)).willReturn(Optional.empty());
+
+            // when
+            CustomException exception = assertThrows(CustomException.class,
+                    () -> notificationQueryService.getNotificationByPublicId(userId, publicId));
+
+            // then
+            assertEquals(NotificationErrorType.NOT_FOUND, exception.getErrorType());
+            verify(notificationService, times(1)).readByUserIdAndPublicId(userId, publicId);
+        }
     }
 
     @Test
     @DisplayName("사용자 알림 전체 조회")
-    void getNotificationsByUserId_success() {
+    void getNotificationsByUserIdSuccess() {
         // given
         Long userId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
@@ -106,7 +149,7 @@ public class NotificationQueryServiceTest {
 
     @Test
     @DisplayName("사용자 알림 조회 - 읽음 여부 필터")
-    void getNotificationsByUserIdAndIsRead_success() {
+    void getNotificationsByUserIdAndIsReadSuccess() {
         // given
         Long userId = 1L;
         boolean isRead = false;
