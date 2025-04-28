@@ -19,4 +19,8 @@ public class KeywordService {
     public void deleteAllByUserId(Long userId) {
         keywordRepository.deleteAllByUserId(userId);
     }
+
+    public void deleteAllByUserIds(List<Long> userIds) {
+        keywordRepository.deleteAllByUserIds(userIds);
+    }
 }
