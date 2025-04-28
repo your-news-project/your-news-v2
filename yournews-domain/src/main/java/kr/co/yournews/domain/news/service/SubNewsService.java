@@ -32,4 +32,8 @@ public class SubNewsService {
     public void deleteAllByUserId(Long userId) {
         subNewsRepository.deleteAllByUserId(userId);
     }
+
+    public void deleteAllByUserIds(List<Long> userIds) {
+        subNewsRepository.deleteAllByUserIds(userIds);
+    }
 }
