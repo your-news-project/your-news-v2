@@ -5,6 +5,7 @@ import kr.co.yournews.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,10 @@ public class UserService {
         return userRepository.findUserIdsByNewsNameAndSubStatusTrue(newsName);
     }
 
+    public List<Long> readSoftDeleteUsersBefore(LocalDate localDate) {
+        return userRepository.findSoftDeletedUserIdsBefore(localDate);
+    }
+
     public void deleteById(Long id) {
         userRepository.deleteById(id);
     }
@@ -51,5 +56,9 @@ public class UserService {
 
     public boolean existsByUsernameAndEmail(String username, String email) {
         return userRepository.existsByUsernameAndEmail(username, email);
+    }
+
+    public void deleteAllByIds(List<Long> userIds) {
+        userRepository.deleteAllByIds(userIds);
     }
 }
