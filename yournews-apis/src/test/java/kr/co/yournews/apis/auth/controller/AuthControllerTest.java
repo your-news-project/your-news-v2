@@ -1,6 +1,7 @@
 package kr.co.yournews.apis.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.co.yournews.apis.auth.dto.RestoreUserDto;
 import kr.co.yournews.apis.auth.service.AuthCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
@@ -24,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 
 import static kr.co.yournews.common.util.AuthConstants.AUTHORIZATION;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -173,12 +175,12 @@ public class AuthControllerTest {
     @DisplayName("로그인")
     class SignInTest {
 
+        private final SignInDto signInDto = new SignInDto("test", "pass1234@");
+
         @Test
         @DisplayName("성공")
         void signInSuccess() throws Exception {
             // given
-            SignInDto signInDto = new SignInDto("test", "pass1234@");
-
             given(authCommandService.signIn(signInDto)).willReturn(tokenDto);
 
             // then
@@ -201,8 +203,6 @@ public class AuthControllerTest {
         @DisplayName("실패 - 없는 사용자")
         void signInFailedByUserNotFound() throws Exception {
             // given
-            SignInDto signInDto = new SignInDto("test", "pass1234@");
-
             given(authCommandService.signIn(signInDto))
                     .willThrow(new CustomException(UserErrorType.NOT_FOUND));
 
@@ -225,8 +225,6 @@ public class AuthControllerTest {
         @DisplayName("실패 - 비밀번호 불일치")
         void signInFailedByMisMatchPass() throws Exception {
             // given
-            SignInDto signInDto = new SignInDto("test", "pass1234@");
-
             given(authCommandService.signIn(signInDto))
                     .willThrow(new CustomException(UserErrorType.NOT_MATCHED_PASSWORD));
 
@@ -243,6 +241,79 @@ public class AuthControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value(UserErrorType.NOT_MATCHED_PASSWORD.getMessage()))
                     .andExpect(jsonPath("$.code").value(UserErrorType.NOT_MATCHED_PASSWORD.getCode()));
+        }
+
+        @Test
+        @DisplayName("실패 - Soft Deleted User")
+        void signInFailedBySoftDeletedUser() throws Exception {
+            // given
+            given(authCommandService.signIn(signInDto))
+                    .willThrow(new CustomException(UserErrorType.DEACTIVATED));
+
+            // then
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/sign-in")
+                            .content(objectMapper.writeValueAsBytes(signInDto))
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.message").value(UserErrorType.DEACTIVATED.getMessage()))
+                    .andExpect(jsonPath("$.code").value(UserErrorType.DEACTIVATED.getCode()));
+        }
+    }
+
+    @Nested
+    @DisplayName("계정 복구 테스트")
+    class RestoreUserTest {
+
+        private final RestoreUserDto.Request request = new RestoreUserDto.Request("username");
+
+        @Test
+        @DisplayName("성공")
+        void restoreDeletedUserSuccess() throws Exception {
+            // given
+            given(authCommandService.restoreUser(any())).willReturn(tokenDto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/restore")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
+                    .andExpect(jsonPath("$.data.accessToken").value(tokenDto.accessToken()))
+                    .andExpect(jsonPath("$.data.refreshToken").value(tokenDto.refreshToken()));
+        }
+
+        @Test
+        @DisplayName("실패 - 이미 활성화된 사용자")
+        void restoreAlreadyActiveUserFail() throws Exception {
+            // given
+            given(authCommandService.restoreUser(request)).willThrow(
+                    new CustomException(UserErrorType.ALREADY_ACTIVE)
+            );
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/auth/restore")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.message").value(UserErrorType.ALREADY_ACTIVE.getMessage()))
+                    .andExpect(jsonPath("$.code").value(UserErrorType.ALREADY_ACTIVE.getCode()));
         }
     }
 
