@@ -30,9 +30,6 @@ public class UserCleanupService {
         LocalDate deletedBeforeDate = LocalDate.now().minusDays(14);
         List<Long> userIds = userService.readSoftDeleteUsersBefore(deletedBeforeDate);
 
-        for (Long id : userIds) {
-            System.out.println(id);
-        }
         if (userIds.isEmpty()) {
             return;
         }

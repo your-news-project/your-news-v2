@@ -6,7 +6,9 @@ import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
+import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
+import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import kr.co.yournews.domain.user.type.OAuthPlatform;
 import kr.co.yournews.infra.oauth.OAuthClient;
@@ -17,14 +19,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,7 +96,7 @@ public class OAuthCommandServiceTest {
         // given
         given(oAuthClientFactory.getPlatformService(platform)).willReturn(oAuthClient);
         given(oAuthClient.fetchUserInfoFromPlatform("authCode123")).willReturn(userInfoRes);
-        given(userService.readByUsername("nickname_oauthId123")).willReturn(Optional.of(user));
+        given(userService.readByUsernameIncludeDeleted("nickname_oauthId123")).willReturn(Optional.of(user));
         given(jwtHelper.createToken(user)).willReturn(tokenDto);
 
         // when
@@ -108,7 +114,7 @@ public class OAuthCommandServiceTest {
         // given
         given(oAuthClientFactory.getPlatformService(platform)).willReturn(oAuthClient);
         given(oAuthClient.fetchUserInfoFromPlatform("authCode123")).willReturn(userInfoRes);
-        given(userService.readByUsername("nickname_oauthId123")).willReturn(Optional.empty());
+        given(userService.readByUsernameIncludeDeleted("nickname_oauthId123")).willReturn(Optional.empty());
         given(userService.save(any(User.class))).willReturn(user);
         given(jwtHelper.createToken(user)).willReturn(tokenDto);
 
@@ -119,6 +125,29 @@ public class OAuthCommandServiceTest {
         assertThat(result.tokenDto().accessToken()).isEqualTo("access");
         assertThat(result.tokenDto().refreshToken()).isEqualTo("refresh");
         assertThat(result.isSignUp()).isFalse();
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - Soft Deleted User")
+    void signInFailBySoftDeletedUser() {
+        // given
+        User user = User.builder()
+                .username(userInfoRes.nickname() + "_" + userInfoRes.id())
+                .build();
+        ReflectionTestUtils.setField(user, "deletedAt", LocalDateTime.now().minusDays(2));
+
+        given(oAuthClientFactory.getPlatformService(platform)).willReturn(oAuthClient);
+        given(oAuthClient.fetchUserInfoFromPlatform("authCode123")).willReturn(userInfoRes);
+        given(userService.readByUsernameIncludeDeleted("nickname_oauthId123")).willReturn(Optional.of(user));
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () ->
+            oAuthCommandService.signIn(platform, oAuthCode)
+        );
+
+        // then
+        assertEquals(UserErrorType.DEACTIVATED, exception.getErrorType());
+        verify(jwtHelper, never()).createToken(user);
     }
 }
 

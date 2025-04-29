@@ -1,6 +1,7 @@
 package kr.co.yournews.apis.auth.controller;
 
 import jakarta.validation.Valid;
+import kr.co.yournews.apis.auth.dto.RestoreUserDto;
 import kr.co.yournews.apis.auth.service.AuthCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
@@ -30,6 +31,11 @@ public class AuthController {
     @PostMapping("/sign-in")
     public ResponseEntity<?> signIn(@RequestBody @Valid SignInDto signInDto) {
         return createTokenRes(authCommandService.signIn(signInDto));
+    }
+
+    @PostMapping("/restore")
+    public ResponseEntity<?> restoreUser(@RequestBody RestoreUserDto.Request restoreRequest) {
+        return createTokenRes(authCommandService.restoreUser(restoreRequest));
     }
 
     @PostMapping("/sign-out")

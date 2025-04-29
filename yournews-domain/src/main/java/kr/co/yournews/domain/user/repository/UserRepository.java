@@ -27,6 +27,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """)
     List<Long> findUserIdsByNewsNameAndSubStatusTrue(@Param("newsName") String newsName);
 
+    @Query(value = "SELECT * FROM user WHERE username = :username", nativeQuery = true)
+    Optional<User> findByUsernameIncludeDeleted(@Param("username") String username);
+
     @Query(value = "SELECT id FROM user WHERE deleted_at IS NOT NULL AND deleted_at <= :dateTime", nativeQuery = true)
     List<Long> findSoftDeletedUserIdsBefore(@Param("dateTime") LocalDate dateTime);
 

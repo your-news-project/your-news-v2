@@ -104,4 +104,12 @@ public class User extends BaseTimeEntity {
         this.subStatus = subStatus;
         this.dailySubStatus = dailySubStatus;
     }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
+
+    public void restore() {
+        this.deletedAt = null;
+    }
 }

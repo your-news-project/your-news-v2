@@ -1,5 +1,6 @@
 package kr.co.yournews.apis.auth.service;
 
+import kr.co.yournews.apis.auth.dto.RestoreUserDto;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeService;
 import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
@@ -21,10 +22,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -130,13 +133,13 @@ public class AuthCommandServiceTest {
     @DisplayName("로그인")
     class SignInTest {
 
+        private final SignInDto signInDto = new SignInDto(username, password);
+
         @Test
         @DisplayName("로그인 성공 시 토큰 반환")
         void signInSuccess() {
             // given
-            SignInDto signInDto = new SignInDto(username, password);
-
-            given(userService.readByUsername(username)).willReturn(Optional.of(user));
+            given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.of(user));
             given(passwordEncodeService.matches(password, encodedPassword)).willReturn(true);
             given(jwtHelper.createToken(user)).willReturn(tokenDto);
 
@@ -152,8 +155,7 @@ public class AuthCommandServiceTest {
         @DisplayName("실패 - 존재하지 않는 사용자")
         void signInFailUserNotFound() {
             // given
-            SignInDto signInDto = new SignInDto(username, password);
-            given(userService.readByUsername(username)).willReturn(Optional.empty());
+            given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.empty());
 
             // when
             CustomException exception = assertThrows(CustomException.class,
@@ -161,14 +163,14 @@ public class AuthCommandServiceTest {
 
             // then
             assertEquals(UserErrorType.NOT_FOUND, exception.getErrorType());
+            verify(jwtHelper, never()).createToken(user);
         }
 
         @Test
         @DisplayName("실패 - 비밀번호 불일치")
         void signInFailInvalidPassword() {
             // given
-            SignInDto signInDto = new SignInDto(username, password);
-            given(userService.readByUsername(username)).willReturn(Optional.of(user));
+            given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.of(user));
             given(passwordEncodeService.matches(password, encodedPassword)).willReturn(false);
 
             // when
@@ -177,6 +179,81 @@ public class AuthCommandServiceTest {
 
             // then
             assertEquals(UserErrorType.NOT_MATCHED_PASSWORD, exception.getErrorType());
+            verify(jwtHelper, never()).createToken(user);
+        }
+
+        @Test
+        @DisplayName("실패 - Soft Deleted User")
+        void signInFailBySoftDeletedUser() {
+            // given
+            user = User.builder()
+                    .username(username)
+                    .nickname(nickname)
+                    .password(encodedPassword)
+                    .build();
+            ReflectionTestUtils.setField(user, "id", userId);
+            ReflectionTestUtils.setField(user, "deletedAt", LocalDateTime.now().minusDays(1));
+
+            given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.of(user));
+            given(passwordEncodeService.matches(password, user.getPassword())).willReturn(true);
+
+            // when
+            CustomException exception = assertThrows(CustomException.class, () ->
+                authCommandService.signIn(signInDto)
+            );
+
+            // then
+            assertEquals(UserErrorType.DEACTIVATED, exception.getErrorType());
+            verify(jwtHelper, never()).createToken(user);
+        }
+    }
+
+    @Nested
+    @DisplayName("계정 복구 테스트")
+    class RestoreUserTest {
+
+        private final RestoreUserDto.Request request = new RestoreUserDto.Request(username);
+
+        @Test
+        @DisplayName("성공")
+        void restoreDeletedUserSuccess() {
+            // given
+            user = User.builder()
+                    .username(username)
+                    .nickname(nickname)
+                    .password(encodedPassword)
+                    .build();
+            ReflectionTestUtils.setField(user, "id", userId);
+            ReflectionTestUtils.setField(user, "deletedAt", LocalDateTime.now().minusDays(2));
+
+            given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.of(user));
+            given(jwtHelper.createToken(user)).willReturn(tokenDto);
+
+            // when
+            TokenDto result = authCommandService.restoreUser(request);
+
+            // then
+            assertEquals(tokenDto.accessToken(), result.accessToken());
+            assertEquals(tokenDto.refreshToken(), result.refreshToken());
+            assertNull(user.getDeletedAt());
+            verify(jwtHelper, times(1)).createToken(user);
+        }
+
+        @Test
+        @DisplayName("실패 - 이미 활성화된 사용자")
+        void restoreAlreadyActiveUserFail() {
+            // given
+            given(userService.readByUsernameIncludeDeleted(username))
+                    .willReturn(Optional.of(user)); // 전체 클래스에 지정된 이미 존재하는 사용자
+
+            // when
+            CustomException exception = assertThrows(CustomException.class, () ->
+                authCommandService.restoreUser(request)
+            );
+
+            // then
+            assertEquals(UserErrorType.ALREADY_ACTIVE, exception.getErrorType());
+            verify(jwtHelper, never()).createToken(user);
         }
     }
 

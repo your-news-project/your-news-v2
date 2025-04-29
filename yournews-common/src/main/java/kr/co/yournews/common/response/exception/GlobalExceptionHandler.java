@@ -23,7 +23,16 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<?> handleCustomException(final CustomException e) {
         BaseErrorType error = e.getErrorType();
         log.error("[Error Occurred] {}", error.getMessage());
-        return ResponseEntity.status(error.getStatus().getCode()).body(ErrorResponse.from(error));
+
+        if (e.getData() != null) {
+            return ResponseEntity
+                    .status(error.getStatus().getCode())
+                    .body(ErrorResponse.from(error, e.getData()));
+        }
+
+        return ResponseEntity
+                .status(error.getStatus().getCode())
+                .body(ErrorResponse.from(error));
     }
 
     /* Argument Validation 예외 처리 */

@@ -5,6 +5,8 @@ import kr.co.yournews.apis.auth.dto.OAuthCode;
 import kr.co.yournews.apis.auth.dto.OAuthTokenDto;
 import kr.co.yournews.apis.auth.service.OAuthCommandService;
 import kr.co.yournews.auth.dto.TokenDto;
+import kr.co.yournews.common.response.exception.CustomException;
+import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.type.OAuthPlatform;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -77,5 +79,31 @@ public class OAuthControllerTest {
                 .andExpect(jsonPath("$.data.tokenDto.accessToken").value(oAuthTokenDto.tokenDto().accessToken()))
                 .andExpect(jsonPath("$.data.tokenDto.refreshToken").value(oAuthTokenDto.tokenDto().refreshToken()))
                 .andExpect(jsonPath("$.data.isSignUp").value(oAuthTokenDto.isSignUp()));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - Soft Deleted User")
+    void signInFailBySoftDeletedUser() throws Exception {
+        // given
+        OAuthPlatform platform = OAuthPlatform.NAVER;
+        OAuthCode oAuthCode = new OAuthCode("oauth-code");
+
+        given(oAuthCommandService.signIn(platform, oAuthCode))
+                .willThrow(new CustomException(UserErrorType.DEACTIVATED));
+
+
+        // then
+        ResultActions resultActions = mockMvc.perform(
+                post("/api/v1/oauth/sign-in/{platform}", "NAVER")
+                        .content(objectMapper.writeValueAsBytes(oAuthCode))
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value(UserErrorType.DEACTIVATED.getMessage()))
+                .andExpect(jsonPath("$.code").value(UserErrorType.DEACTIVATED.getCode()));
     }
 }

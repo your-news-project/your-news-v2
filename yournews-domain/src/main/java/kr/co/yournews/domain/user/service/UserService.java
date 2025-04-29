@@ -38,6 +38,10 @@ public class UserService {
         return userRepository.findSoftDeletedUserIdsBefore(localDate);
     }
 
+    public Optional<User> readByUsernameIncludeDeleted(String username) {
+        return userRepository.findByUsernameIncludeDeleted(username);
+    }
+
     public void deleteById(Long id) {
         userRepository.deleteById(id);
     }

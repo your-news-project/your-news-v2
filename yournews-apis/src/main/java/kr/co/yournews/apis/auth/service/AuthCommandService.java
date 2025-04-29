@@ -1,5 +1,6 @@
 package kr.co.yournews.apis.auth.service;
 
+import kr.co.yournews.apis.auth.dto.RestoreUserDto;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeService;
 import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
@@ -48,18 +49,51 @@ public class AuthCommandService {
     /**
      * 서비스 이용을 위한 로그인 메서드
      *
+     * - 이미 가입된 사용자가 소프트 딜리트 상태라면 복구 안내 에러를 발생
+     * - 비밀번호 일치 여부를 검증한 뒤 정상 사용자에게 토큰을 발급
+     *
      * @param signInDto : 사용자가 입력한 정보
      * @return : jwt token
      */
     @Transactional(readOnly = true)
     public TokenDto signIn(SignInDto signInDto) {
-        User user = userService.readByUsername(signInDto.username())
+        User user = userService.readByUsernameIncludeDeleted(signInDto.username())
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
         if (!passwordEncodeService.matches(signInDto.password(), user.getPassword())) {
             throw new CustomException(UserErrorType.NOT_MATCHED_PASSWORD);
         }
 
+        if (user.isDeleted()) {
+            throw new CustomException(
+                    UserErrorType.DEACTIVATED,
+                    RestoreUserDto.AuthErrorData.of(user.getDeletedAt())
+            );
+        }
+
+        return jwtHelper.createToken(user);
+    }
+
+    /**
+     * 소프트 딜리트된 사용자를 복구하는 메서드
+     *
+     * - username 기준으로 삭제된 사용자를 조회하고 복구
+     * - 복구가 완료되면 바로 JWT 토큰을 발급해 로그인 처리 진행
+     * - 이미 활성화된 사용자는 복구할 수 없음.
+     *
+     * @param restoreRequest : 복구 요청 정보 (username)
+     * @return : jwt token
+     */
+    @Transactional
+    public TokenDto restoreUser(RestoreUserDto.Request restoreRequest) {
+        User user = userService.readByUsernameIncludeDeleted(restoreRequest.username())
+                .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
+
+        if (!user.isDeleted()) {
+            throw new CustomException(UserErrorType.ALREADY_ACTIVE);
+        }
+
+        user.restore();
         return jwtHelper.createToken(user);
     }
 
