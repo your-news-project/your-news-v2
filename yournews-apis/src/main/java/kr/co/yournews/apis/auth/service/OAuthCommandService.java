@@ -2,6 +2,7 @@ package kr.co.yournews.apis.auth.service;
 
 import kr.co.yournews.apis.auth.dto.OAuthCode;
 import kr.co.yournews.apis.auth.dto.OAuthTokenDto;
+import kr.co.yournews.apis.auth.dto.RestoreUserDto;
 import kr.co.yournews.apis.auth.dto.UserStatusDto;
 import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignUpDto;
@@ -68,6 +69,10 @@ public class OAuthCommandService {
     /**
      * 사용자 상태 확인 및 등록
      *
+     * - 이미 가입된 사용자가 소프트 딜리트 상태라면 복구 안내 에러를 발생
+     * - 정상 사용자라면 사용자 정보를 반환
+     * - 존재하지 않는 경우 신규 사용자를 등록하고 반환
+     *
      * @param platform    : OAuth 플랫폼
      * @param userInfoRes : 플랫폼 사용자 정보
      * @return : 사용자 상태 정보
@@ -75,8 +80,16 @@ public class OAuthCommandService {
     private UserStatusDto findOrRegisterUser(OAuthPlatform platform, OAuthUserInfoRes userInfoRes) {
         String username = userInfoRes.nickname() + "_" + userInfoRes.id();
 
-        return userService.readByUsername(username)
-                .map(user -> UserStatusDto.of(user, user.isSignedUp()))
+        return userService.readByUsernameIncludeDeleted(username)
+                .map(user -> {
+                    if (user.isDeleted()) {
+                        throw new CustomException(
+                                UserErrorType.DEACTIVATED,
+                                RestoreUserDto.OAuthErrorData.of(user.getUsername(), user.getDeletedAt())
+                        );
+                    }
+                    return UserStatusDto.of(user, user.isSignedUp());
+                })
                 .orElseGet(() -> registerNewUser(platform, username, userInfoRes.email()));
     }
 
