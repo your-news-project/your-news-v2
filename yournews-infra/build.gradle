@@ -2,6 +2,7 @@ bootJar { enabled = false }
 jar { enabled = true }
 
 dependencies {
+    implementation project(':yournews-domain')
     implementation project(':yournews-common')
 
     /* Redis */
