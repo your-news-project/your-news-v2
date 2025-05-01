@@ -1,24 +1,25 @@
 package kr.co.yournews.domain.processedurl.service;
 
-import kr.co.yournews.infra.redis.RedisRepository;
+import kr.co.yournews.domain.processedurl.spi.ProcessedUrlStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 
-import static kr.co.yournews.infra.redis.util.RedisConstants.PROCESSED_URL_PREFIX;
-
 @Service
 @RequiredArgsConstructor
 public class ProcessedUrlService {
-    private final RedisRepository redisRepository;
+    private final ProcessedUrlStore processedUrlStore;
+
+    private static final String PROCESSED_URL_PREFIX = "processed-url::";
 
     public void save(String url, long ttl) {
         String key = PROCESSED_URL_PREFIX + url;
-        redisRepository.set(key, url, Duration.ofSeconds(ttl));
+        processedUrlStore.save(key, url, Duration.ofSeconds(ttl));
     }
 
     public boolean existsByUrl(String url) {
-        return redisRepository.existed(PROCESSED_URL_PREFIX + url);
+        String key = PROCESSED_URL_PREFIX + url;
+        return processedUrlStore.exists(key);
     }
 }
