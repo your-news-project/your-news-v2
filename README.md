@@ -15,9 +15,13 @@
 ## 🚀 Tech Stacks
  - Language: Java
  - Build tool: Gradle
- - Frameworks & Libraries: Spring Boot, Spring Data JPA, Spring Security, Lombok, JJWT, Redis, firebase
+ - Frameworks & Libraries: JDK 17, Spring Boot, Spring Data JPA, Spring Security, Lombok, jjwt 0.12.3, jsoup 1.17.2
  - Databases & Caching: MySQL, Redis
+ - Messaging: RabbitMQ
  - DevOps & Cloud: GitHub Actions, Docker, AWS (예정)
+
+## 🔄 System Flow
+![your-news-v2-system-flow](https://github.com/user-attachments/assets/c9836b7f-3f91-42e7-97ac-a92411d8892e)
 
 ## 🏗️ Multi Module Architecture
 ![image](https://github.com/user-attachments/assets/cc0e5376-d95a-49be-bdaa-ba678f1e8cc0)
