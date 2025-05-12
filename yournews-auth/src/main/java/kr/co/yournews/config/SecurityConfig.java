@@ -23,12 +23,12 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
 
-    private static final String[] AUTH_ENDPOINTS = {
+    private static final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/auth/**",
-            "/api/v1/oauth/sign-in/**"
+            "/api/v1/oauth/sign-in/**", "/api/v1/news/**"
     };
-    private static final String[] ADMIN_ENDPOINTS = { "/api/v1/admin/**" };
-    private static final String[] GUEST_ENDPOINTS = { "/api/v1/oauth/sign-up" };
+    private static final String[] ADMIN_ENDPOINTS = {"/api/v1/admin/**"};
+    private static final String[] GUEST_ENDPOINTS = {"/api/v1/oauth/sign-up"};
 
     @Bean
     public PasswordEncoder bCryptPasswordEncoder() {
@@ -44,12 +44,12 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(AUTH_ENDPOINTS).permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole(Role.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, GUEST_ENDPOINTS).hasRole(Role.GUEST.name())
                         .anyRequest().hasAnyRole(Role.USER.name(), Role.ADMIN.name())
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter .class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
         return http.build();
