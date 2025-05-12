@@ -5,6 +5,7 @@ import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.news.entity.News;
 import kr.co.yournews.domain.news.exception.NewsErrorType;
 import kr.co.yournews.domain.news.service.NewsService;
+import kr.co.yournews.domain.news.type.College;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -75,8 +76,8 @@ public class NewsQueryServiceTest {
     void getAllNewsSuccess() {
         // given
         List<News> newsList = List.of(
-                News.builder().name("이름1").url("https://test1.com").build(),
-                News.builder().name("이름2").url("https://test2.com").build()
+                News.builder().name("이름1").url("https://test1.com").college(College.ENGINEERING).build(),
+                News.builder().name("이름2").url("https://test2.com").college(College.ARTS).build()
         );
 
         given(newsService.readAll()).willReturn(newsList);

@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -84,7 +85,7 @@ public class NotificationControllerTest {
 
         private final String publicId = "public-id";
         private final NotificationDto.Details details = new NotificationDto.Details(
-                notificationId, "공지", List.of("제목"), List.of("url"), false, NotificationType.IMMEDIATE
+                notificationId, "공지", List.of("제목"), List.of("url"), false, NotificationType.IMMEDIATE, LocalDateTime.now()
         );
 
         @Test
@@ -179,7 +180,7 @@ public class NotificationControllerTest {
         void getNotificationsSuccess() throws Exception {
             // given
             Page<NotificationDto.Summary> page = new PageImpl<>(List.of(
-                    new NotificationDto.Summary(1L, "공지", "제목", false, NotificationType.IMMEDIATE)
+                    new NotificationDto.Summary(1L, "공지", false, NotificationType.IMMEDIATE, LocalDateTime.now())
             ));
 
             given(notificationQueryService.getNotificationsByUserId(eq(userId), any(Pageable.class)))
@@ -205,7 +206,7 @@ public class NotificationControllerTest {
             // given
 
             Page<NotificationDto.Summary> page = new PageImpl<>(List.of(
-                    new NotificationDto.Summary(2L, "공지", "읽은 알림", true, NotificationType.IMMEDIATE)
+                    new NotificationDto.Summary(2L, "공지", true, NotificationType.IMMEDIATE, LocalDateTime.now())
             ));
 
             given(notificationQueryService.getNotificationsByUserIdAndIsRead(eq(userId), eq(true), any(Pageable.class)))
