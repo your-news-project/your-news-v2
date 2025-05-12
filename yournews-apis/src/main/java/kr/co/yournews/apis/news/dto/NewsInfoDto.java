@@ -17,11 +17,10 @@ public class NewsInfoDto {
     public record Details(
             Long id,
             String name,
-            String url
-            // TODO : 구독자 수 추가
+            String college
     ) {
         public static Details from(News news) {
-            return new Details(news.getId(), news.getName(), news.getUrl());
+            return new Details(news.getId(), news.getName(), news.getCollege().getLabel());
         }
     }
 }

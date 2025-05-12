@@ -2,9 +2,12 @@ package kr.co.yournews.domain.news.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import kr.co.yournews.domain.news.type.College;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,10 +30,15 @@ public class News {
     @Column(nullable = false, unique = true)
     private String url;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "college")
+    private College college;
+
     @Builder
-    public News(String name, String url) {
+    public News(String name, String url, College college) {
         this.name = name;
         this.url = url;
+        this.college = college;
     }
 
     /**
