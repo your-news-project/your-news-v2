@@ -57,6 +57,15 @@ public class NotificationController {
         return ResponseEntity.ok(SuccessResponse.from(result));
     }
 
+    @GetMapping("/unread/count")
+    public ResponseEntity<?> getUnreadCount(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        notificationQueryService.getUnreadCount(userDetails.getUserId())
+                )
+        );
+    }
+
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<?> deleteNotification(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                 @PathVariable Long notificationId) {
