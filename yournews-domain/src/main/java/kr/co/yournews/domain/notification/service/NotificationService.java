@@ -36,6 +36,10 @@ public class NotificationService {
         return notificationRepository.findAllByUserIdAndIsRead(userId, isRead, pageable);
     }
 
+    public Long readUnreadCountByUserId(Long userId) {
+        return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    }
+
     public void deleteById(Long id) {
         notificationRepository.deleteById(id);
     }

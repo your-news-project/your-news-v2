@@ -84,4 +84,9 @@ public class NotificationQueryService {
         return notificationService.readAllByUserIdAndIsRead(userId, isRead, pageable)
                 .map(NotificationDto.Summary::from);
     }
+
+    @Transactional(readOnly = true)
+    public Long getUnreadCount(Long userId) {
+        return notificationService.readUnreadCountByUserId(userId);
+    }
 }
