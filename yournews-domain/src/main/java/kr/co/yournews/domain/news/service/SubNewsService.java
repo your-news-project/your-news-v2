@@ -1,5 +1,6 @@
 package kr.co.yournews.domain.news.service;
 
+import kr.co.yournews.domain.news.dto.SubNewsQueryDto;
 import kr.co.yournews.domain.news.dto.UserKeywordDto;
 import kr.co.yournews.domain.news.entity.SubNews;
 import kr.co.yournews.domain.news.repository.subnews.SubNewsRepository;
@@ -27,6 +28,10 @@ public class SubNewsService {
 
     public List<UserKeywordDto> readUserKeywordsByUserIds(List<Long> userIds) {
         return subNewsRepository.findUserKeywordsByUserIds(userIds);
+    }
+
+    public List<SubNewsQueryDto> readSubNewsWithKeywordsByUserId(Long userId) {
+        return subNewsRepository.findSubNewsWithKeywordsByUserId(userId);
     }
 
     public void deleteAllByUserId(Long userId) {
