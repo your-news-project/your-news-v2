@@ -25,6 +25,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.List;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -86,7 +88,7 @@ public class SecuredUserControllerTest {
         @DisplayName("사용자 정보 조회 성공")
         void getUserInfoSuccess() throws Exception {
             // given
-            UserRes userRes = new UserRes(userId, "test", "테스터", "test@gmail.com");
+            UserRes userRes = new UserRes(userId, "test", "테스터", "test@gmail.com", List.of(), List.of());
 
             given(userQueryService.getUserInfoById(userId)).willReturn(userRes);
 

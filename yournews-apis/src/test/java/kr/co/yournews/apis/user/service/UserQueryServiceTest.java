@@ -2,6 +2,7 @@ package kr.co.yournews.apis.user.service;
 
 import kr.co.yournews.apis.user.dto.UserRes;
 import kr.co.yournews.common.response.exception.CustomException;
+import kr.co.yournews.domain.news.service.SubNewsService;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
@@ -24,6 +25,9 @@ public class UserQueryServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private SubNewsService subNewsService;
 
     @InjectMocks
     private UserQueryService userQueryService;
