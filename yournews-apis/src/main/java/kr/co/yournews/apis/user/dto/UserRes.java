@@ -1,14 +1,38 @@
 package kr.co.yournews.apis.user.dto;
 
+import kr.co.yournews.domain.news.dto.SubNewsQueryDto;
+import kr.co.yournews.domain.news.type.KeywordType;
 import kr.co.yournews.domain.user.entity.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public record UserRes(
         Long id,
         String username,
         String nickname,
-        String email
+        String email,
+        List<String> subscriptions,
+        List<KeywordType> keywords
 ) {
-    public static UserRes from(User user) {
-        return new UserRes(user.getId(), user.getUsername(), user.getNickname(), user.getEmail());
+    public static UserRes from(User user, List<SubNewsQueryDto> subNewsList) {
+        List<String> newsNames = new ArrayList<>();
+        List<KeywordType> keywords = new ArrayList<>();
+
+        for (SubNewsQueryDto dto : subNewsList) {
+            newsNames.add(dto.newsName());
+            if (dto.keywordTypes() != null) {
+                keywords.addAll(dto.keywordTypes());
+            }
+        }
+
+        return new UserRes(
+                user.getId(),
+                user.getUsername(),
+                user.getNickname(),
+                user.getEmail(),
+                newsNames,
+                keywords
+        );
     }
 }
