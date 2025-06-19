@@ -59,6 +59,7 @@ public class FcmTokenCommandService {
      *
      * @param userId : 사용자 pk
      */
+    @Transactional
     public void deleteTokenByUserId(Long userId) {
         fcmTokenService.deleteAllByUserId(userId);
     }

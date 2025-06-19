@@ -4,6 +4,7 @@ import kr.co.yournews.apis.news.dto.SubNewsDto;
 import kr.co.yournews.domain.news.service.SubNewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class SubNewsQueryService {
      * @param userId : 사용자 pk
      * @return : 사용자가 구독한 뉴스 목록 DTO 리스트
      */
+    @Transactional(readOnly = true)
     public List<SubNewsDto.Response> getAllSubNews(Long userId) {
         return subNewsService.readByUserId(userId)
                 .stream().map(SubNewsDto.Response::from)
