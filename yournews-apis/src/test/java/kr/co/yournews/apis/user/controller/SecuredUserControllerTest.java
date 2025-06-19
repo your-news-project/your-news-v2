@@ -88,7 +88,7 @@ public class SecuredUserControllerTest {
         @DisplayName("사용자 정보 조회 성공")
         void getUserInfoSuccess() throws Exception {
             // given
-            UserRes userRes = new UserRes(userId, "test", "테스터", "test@gmail.com", List.of(), List.of());
+            UserRes userRes = new UserRes(userId, "test", "테스터", "test@gmail.com", List.of(), List.of(), true, true);
 
             given(userQueryService.getUserInfoById(userId)).willReturn(userRes);
 

@@ -13,16 +13,20 @@ public record UserRes(
         String nickname,
         String email,
         List<String> subscriptions,
-        List<KeywordType> keywords
+        List<String> keywords,
+        boolean subStatus,
+        boolean dailySubStatus
 ) {
     public static UserRes from(User user, List<SubNewsQueryDto> subNewsList) {
         List<String> newsNames = new ArrayList<>();
-        List<KeywordType> keywords = new ArrayList<>();
+        List<String> keywords = new ArrayList<>();
 
         for (SubNewsQueryDto dto : subNewsList) {
             newsNames.add(dto.newsName());
             if (dto.keywordTypes() != null) {
-                keywords.addAll(dto.keywordTypes());
+                for (KeywordType keyword : dto.keywordTypes()) {
+                    keywords.add(keyword.getLabel());
+                }
             }
         }
 
@@ -32,7 +36,9 @@ public record UserRes(
                 user.getNickname(),
                 user.getEmail(),
                 newsNames,
-                keywords
+                keywords,
+                user.isSubStatus(),
+                user.isDailySubStatus()
         );
     }
 }
