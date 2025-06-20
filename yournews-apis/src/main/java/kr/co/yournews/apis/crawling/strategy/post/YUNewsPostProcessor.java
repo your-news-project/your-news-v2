@@ -3,6 +3,7 @@ package kr.co.yournews.apis.crawling.strategy.post;
 import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
 import kr.co.yournews.apis.crawling.strategy.crawling.YUNewsCrawlingStrategy;
 import kr.co.yournews.apis.crawling.strategy.dto.CrawlingPostInfo;
+import kr.co.yournews.apis.notification.service.DailyNotificationService;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
 import kr.co.yournews.domain.news.dto.UserKeywordDto;
 import kr.co.yournews.domain.news.service.SubNewsService;
@@ -27,15 +28,18 @@ public class YUNewsPostProcessor extends PostProcessor {
     private final NotificationCommandService notificationCommandService;
     private final FcmTokenService fcmTokenService;
     private final SubNewsService subNewsService;
+    private final DailyNotificationService dailyNotificationService;
 
     public YUNewsPostProcessor(NotificationCommandService notificationCommandService,
                                FcmTokenService fcmTokenService,
                                SubNewsService subNewsService,
-                               RabbitMessagePublisher rabbitMessagePublisher) {
+                               RabbitMessagePublisher rabbitMessagePublisher,
+                               DailyNotificationService dailyNotificationService) {
         super(rabbitMessagePublisher);
         this.notificationCommandService = notificationCommandService;
         this.fcmTokenService = fcmTokenService;
         this.subNewsService = subNewsService;
+        this.dailyNotificationService = dailyNotificationService;
     }
 
     /**
@@ -52,6 +56,7 @@ public class YUNewsPostProcessor extends PostProcessor {
     /**
      * 주어진 게시글 요소(elements)를 처리하는 메서드
      * - 키워드 기반으로 새 게시글을 분류
+     * - 일간 소식 정보 저장
      * - 사용자별 Notification 저장
      * - FCM 알림 전송
      *
@@ -65,6 +70,8 @@ public class YUNewsPostProcessor extends PostProcessor {
 
         Map<KeywordType, CrawlingPostInfo> keywordToPosts = extractNewPostsByKeyword(elements, yuNewsStrategy);
         if (keywordToPosts.isEmpty()) return;
+
+        saveDailyNewsInfo(newsName, keywordToPosts);
 
         List<Long> userIds = yuNewsStrategy.getSubscribedUsers(newsName);
         if (userIds.isEmpty()) return;
@@ -104,13 +111,36 @@ public class YUNewsPostProcessor extends PostProcessor {
 
             // 존재하는 키워드에 게시글 추가
             CrawlingPostInfo postInfo = keywordToPosts.get(keyword);
-            postInfo.titles().add(postTitle);
+
+            String keywordTitle = "[" + keyword.getLabel() + "] \n" + postTitle;
+            postInfo.titles().add(keywordTitle);
             postInfo.urls().add(postUrl);
 
             strategy.saveUrl(postUrl);
         }
 
         return keywordToPosts;
+    }
+
+    /**
+     * 일간 알림 발송을 위한 새로운 소식 정보 저장 메서드
+     * - 새로운 전체 소식들을 리스트로 묶은 후 저장
+     *
+     * @param newsName       : 소식 이름
+     * @param keywordToPosts : 새로운 소식 정보 (키워드별)
+     */
+    private void saveDailyNewsInfo(String newsName, Map<KeywordType, CrawlingPostInfo> keywordToPosts) {
+        List<String> titles = new ArrayList<>();
+        List<String> urls = new ArrayList<>();
+
+        for (CrawlingPostInfo postInfo : keywordToPosts.values()) {
+            if (postInfo != null) {
+                titles.addAll(postInfo.titles());
+                urls.addAll(postInfo.urls());
+            }
+        }
+
+        dailyNotificationService.saveNewsInfo(newsName, titles, urls);
     }
 
     /**
