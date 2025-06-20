@@ -3,6 +3,7 @@ package kr.co.yournews.apis.crawling.strategy.post;
 import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
 import kr.co.yournews.apis.crawling.strategy.crawling.YUNewsCrawlingStrategy;
 import kr.co.yournews.apis.crawling.strategy.dto.CrawlingPostInfo;
+import kr.co.yournews.apis.notification.service.DailyNotificationService;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.user.entity.FcmToken;
@@ -20,13 +21,16 @@ import java.util.UUID;
 public class DefaultPostProcessor extends PostProcessor {
     private final NotificationCommandService notificationCommandService;
     private final FcmTokenService fcmTokenService;
+    private final DailyNotificationService dailyNotificationService;
 
     public DefaultPostProcessor(NotificationCommandService notificationCommandService,
                                 FcmTokenService fcmTokenService,
-                                RabbitMessagePublisher rabbitMessagePublisher) {
+                                RabbitMessagePublisher rabbitMessagePublisher,
+                                DailyNotificationService dailyNotificationService) {
         super(rabbitMessagePublisher);
         this.notificationCommandService = notificationCommandService;
         this.fcmTokenService = fcmTokenService;
+        this.dailyNotificationService = dailyNotificationService;
     }
 
     /**
@@ -43,7 +47,8 @@ public class DefaultPostProcessor extends PostProcessor {
 
     /**
      * 주어진 게시글 요소(elements)를 처리하는 메서드
-     * - 새 게시글을 필터링하고
+     * - 새 게시글을 필터링
+     * - 일간 소식 정보 저장
      * - 사용자별 Notification 저장
      * - FCM 알림 발송
      *
@@ -55,6 +60,9 @@ public class DefaultPostProcessor extends PostProcessor {
     public void process(String newsName, Elements elements, CrawlingStrategy strategy) {
         CrawlingPostInfo postInfo = extractNewPosts(elements, strategy);
         if (postInfo.isEmpty()) return;
+
+        // 일간 소식 정보 저장
+        dailyNotificationService.saveNewsInfo(newsName, postInfo.titles(), postInfo.urls());
 
         List<Long> userIds = strategy.getSubscribedUsers(newsName);
         if (userIds.isEmpty()) return;

@@ -5,6 +5,7 @@ import kr.co.yournews.apis.fcm.dto.FcmMessageDto;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.type.NotificationType;
 import kr.co.yournews.domain.user.entity.FcmToken;
+import kr.co.yournews.infra.fcm.constant.FcmConstant;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.select.Elements;
@@ -56,8 +57,10 @@ public abstract class PostProcessor {
      * FCM 메시지 전송 (RabbitMQ 이용)
      */
     protected void sendFcmMessages(List<FcmToken> tokens, String newsName, String publicId) {
+        String title = FcmConstant.getNewsNotificationTitle(newsName);
+
         for (FcmToken token : tokens) {
-            rabbitMessagePublisher.send(FcmMessageDto.of(token.getToken(), newsName, publicId));
+            rabbitMessagePublisher.send(FcmMessageDto.of(token.getToken(), title, publicId));
         }
     }
 }

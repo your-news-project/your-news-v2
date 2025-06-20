@@ -26,4 +26,17 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                 )
                 .fetch();
     }
+
+    @Override
+    public List<Long> findUserIdsByNewsNameAndDailySubStatus(String newsName) {
+        return jpaQueryFactory
+                .select(user.id)
+                .from(user)
+                .join(subNews).on(subNews.user.id.eq(user.id))
+                .where(
+                        user.dailySubStatus.isTrue(),
+                        subNews.newsName.eq(newsName)
+                )
+                .fetch();
+    }
 }

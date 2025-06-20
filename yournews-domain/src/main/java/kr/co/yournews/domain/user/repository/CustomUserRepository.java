@@ -4,4 +4,5 @@ import java.util.List;
 
 public interface CustomUserRepository {
     List<Long> findUserIdsByNewsNameAndSubStatusTrue(String newsName);
+    List<Long> findUserIdsByNewsNameAndDailySubStatus(String newsName);
 }

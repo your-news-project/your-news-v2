@@ -34,6 +34,10 @@ public class UserService {
         return userRepository.findUserIdsByNewsNameAndSubStatusTrue(newsName);
     }
 
+    public List<Long> readAllUserIdsByNewsNameAndDailySubStatusTrue(String newsName) {
+        return userRepository.findUserIdsByNewsNameAndDailySubStatus(newsName);
+    }
+
     public List<Long> readSoftDeleteUsersBefore(LocalDate localDate) {
         return userRepository.findSoftDeletedUserIdsBefore(localDate);
     }

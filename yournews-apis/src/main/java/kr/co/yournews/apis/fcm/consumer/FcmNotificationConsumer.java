@@ -21,7 +21,7 @@ public class FcmNotificationConsumer {
 
     /**
      * RabbitMQ로부터 수신된 FCM 메시지를 처리하는 메서드
-     * <p>
+     *
      * 1. FCM 서버에 푸시 알림을 전송
      * 2. 전송 결과에 따라 유효하지 않은 토큰을 삭제
      * 3. 전송 실패 시 RuntimeException을 발생시켜 재시도 처리를 유도함
@@ -30,12 +30,11 @@ public class FcmNotificationConsumer {
      */
     @RabbitListener(queues = "${rabbitmq.queue-name}", containerFactory = "rabbitListenerContainerFactory")
     public void handleMessage(FcmMessageDto message) {
-        String title = FcmConstant.getNewsNotificationTitle(message.title());
         String content = FcmConstant.NEWS_NOTIFICATION_CONTENT;
         Map<String, String> data = buildMessageData(message.data());
 
         FcmSendResult result = fcmNotificationSender.sendNotification(
-                message.token(), title, content, data
+                message.token(), message.title(), content, data
         );
 
         if (result.shouldRemoveToken()) {
