@@ -22,6 +22,7 @@ public enum UserErrorType implements BaseErrorType {
     EXIST_NICKNAME(StatusCode.CONFLICT, "U010", "이미 존재하는 닉네임입니다."),
     DEACTIVATED(StatusCode.FORBIDDEN, "U011", "탈퇴한 사용자입니다."),
     ALREADY_ACTIVE(StatusCode.CONFLICT, "U012", "이미 활성화된 사용자입니다."),
+    NOT_ADMIN(StatusCode.FORBIDDEN, "U013", "관리자 권한이 없습니다."),
     ;
 
     private final StatusCode status;
