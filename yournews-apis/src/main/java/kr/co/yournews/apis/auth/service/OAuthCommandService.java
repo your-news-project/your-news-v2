@@ -109,6 +109,7 @@ public class OAuthCommandService {
                         .nickname(username)
                         .email(email)
                         .platform(platform)
+                        .status(UserStatus.ACTIVE)
                         .signedUp(false)
                         .role(Role.GUEST)
                         .build()

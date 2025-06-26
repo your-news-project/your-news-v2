@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.type.Role;
+import kr.co.yournews.domain.user.type.UserStatus;
 
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class SignUpDto {
                     .nickname(nickname)
                     .email(email)
                     .signedUp(true)
+                    .status(UserStatus.ACTIVE)
                     .subStatus(subStatus)
                     .dailySubStatus(dailySubStatus)
                     .role(Role.USER)
