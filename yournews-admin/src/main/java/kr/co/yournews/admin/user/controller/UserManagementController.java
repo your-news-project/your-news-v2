@@ -40,14 +40,22 @@ public class UserManagementController {
     }
 
     @GetMapping
-    public ResponseEntity<?> findAllUsers(
+    public ResponseEntity<?> getAllUsers(
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return ResponseEntity.ok(userManagementQueryService.findAllUsers(pageable));
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        userManagementQueryService.getAllUsers(pageable)
+                )
+        );
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<?> findUserById(@PathVariable Long userId) {
-        return ResponseEntity.ok(userManagementQueryService.findUserById(userId));
+    public ResponseEntity<?> getUserById(@PathVariable Long userId) {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        userManagementQueryService.getUserById(userId)
+                )
+        );
     }
 }

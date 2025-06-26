@@ -2,11 +2,8 @@ package kr.co.yournews.apis.news.controller;
 
 import kr.co.yournews.apis.news.dto.NewsInfoDto;
 import kr.co.yournews.apis.news.service.NewsQueryService;
-import kr.co.yournews.common.response.exception.CustomException;
-import kr.co.yournews.domain.news.exception.NewsErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -41,60 +38,13 @@ public class NewsControllerTest {
                 .build();
     }
 
-    @Nested
-    @DisplayName("특정 뉴스 조회")
-    class NewsInfoTest {
-
-        private final Long newsId = 1L;
-
-        @Test
-        @DisplayName("성공")
-        void getNewsInfoSuccess() throws Exception {
-            // given
-            NewsInfoDto.Summary dto = new NewsInfoDto.Summary(newsId, "이름1", "https://test.com");
-            given(newsQueryService.getNewsInfo(newsId)).willReturn(dto);
-
-            // when
-            ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/news/{newsId}", newsId)
-            );
-
-            // then
-            resultActions
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."))
-                    .andExpect(jsonPath("$.data.id").value(newsId))
-                    .andExpect(jsonPath("$.data.name").value(dto.name()))
-                    .andExpect(jsonPath("$.data.url").value(dto.url()));
-        }
-
-        @Test
-        @DisplayName("실패 - 존재하지 않는 뉴스")
-        void getNewsInfoFailNotFound() throws Exception {
-            // given
-            given(newsQueryService.getNewsInfo(newsId)).willThrow(new CustomException(NewsErrorType.NOT_FOUND));
-
-            // when
-            ResultActions result = mockMvc.perform(
-                    get("/api/v1/news/{newsId}", newsId)
-            );
-
-            // then
-            result.andDo(print())
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.code").value(NewsErrorType.NOT_FOUND.getCode()))
-                    .andExpect(jsonPath("$.message").value(NewsErrorType.NOT_FOUND.getMessage()));
-        }
-    }
-
     @Test
     @DisplayName("뉴스 전체 조회 - 성공")
     void getAllNewsSuccess() throws Exception {
         // given
-        List<NewsInfoDto.Details> dtoList = List.of(
-                new NewsInfoDto.Details(1L, "이름1", "https://test1.com"),
-                new NewsInfoDto.Details(2L, "이름2", "https://test2.com")
+        List<NewsInfoDto> dtoList = List.of(
+                new NewsInfoDto(1L, "이름1", "https://test1.com"),
+                new NewsInfoDto(2L, "이름2", "https://test2.com")
         );
 
         given(newsQueryService.getAllNews()).willReturn(dtoList);
