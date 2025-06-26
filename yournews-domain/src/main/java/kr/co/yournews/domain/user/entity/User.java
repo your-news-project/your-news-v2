@@ -116,4 +116,8 @@ public class User extends BaseTimeEntity {
     public boolean isOauthUser() {
         return this.platform != null;
     }
+
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
+    }
 }
