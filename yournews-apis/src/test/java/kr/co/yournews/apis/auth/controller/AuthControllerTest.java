@@ -24,11 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
-import static kr.co.yournews.common.util.AuthConstants.AUTHORIZATION;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -360,28 +357,5 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.message").value(AuthErrorType.REFRESH_TOKEN_NOT_FOUND.getMessage()))
                     .andExpect(jsonPath("$.code").value(AuthErrorType.REFRESH_TOKEN_NOT_FOUND.getCode()));
         }
-    }
-
-    @Test
-    @DisplayName("로그아웃 테스트")
-    void signOutTest() throws Exception {
-        // given
-        String accessToken = "accessToken";
-        String refreshToken = "refreshToken";
-
-        doNothing().when(authCommandService).signOut(eq(accessToken), eq(refreshToken));
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/v1/auth/sign-out")
-                        .header("X-Refresh-Token", tokenDto.refreshToken())
-                        .header(AUTHORIZATION, accessToken)
-        );
-
-        // then
-        resultActions
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
     }
 }

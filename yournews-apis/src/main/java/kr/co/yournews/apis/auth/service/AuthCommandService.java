@@ -1,8 +1,10 @@
 package kr.co.yournews.apis.auth.service;
 
 import kr.co.yournews.apis.auth.dto.RestoreUserDto;
+import kr.co.yournews.apis.auth.dto.SignOutDto;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeService;
 import kr.co.yournews.apis.news.service.SubNewsCommandService;
+import kr.co.yournews.apis.user.service.FcmTokenCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
@@ -26,6 +28,7 @@ public class AuthCommandService {
     private final JwtHelper jwtHelper;
     private final AuthCodeService authCodeService;
     private final SubNewsCommandService subNewsCommandService;
+    private final FcmTokenCommandService fcmTokenCommandService;
 
     /**
      * dto를 통해 비밀번호 인코딩 후, 회원가입 진행 메서드.
@@ -113,7 +116,13 @@ public class AuthCommandService {
      * @param accessTokenInHeader : 헤더에 있는 accessToken
      * @param refreshToken        : refresh token
      */
-    public void signOut(String accessTokenInHeader, String refreshToken) {
+    public void signOut(
+            String accessTokenInHeader,
+            String refreshToken,
+            Long userId,
+            SignOutDto signOutDto
+    ) {
+        fcmTokenCommandService.deleteTokenByUserAndDevice(userId, signOutDto.deviceInfo());
         String accessToken = accessTokenInHeader.substring(TOKEN_TYPE.length()).trim();
         jwtHelper.removeToken(accessToken, refreshToken);
     }
