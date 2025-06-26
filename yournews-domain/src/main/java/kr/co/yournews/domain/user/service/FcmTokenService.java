@@ -25,7 +25,7 @@ public class FcmTokenService {
         return fcmTokenRepository.findAllByUserIdIn(userIds);
     }
 
-    public Optional<FcmToken> readAllByUserIdAndDeviceInfo(Long userId, String deviceInfo) {
+    public Optional<FcmToken> readByUserIdAndDeviceInfo(Long userId, String deviceInfo) {
         return fcmTokenRepository.findByUser_IdAndDeviceInfo(userId, deviceInfo);
     }
 

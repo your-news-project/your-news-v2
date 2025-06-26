@@ -29,7 +29,7 @@ public class FcmTokenCommandService {
      */
     @Transactional
     public void registerFcmToken(Long userId, FcmTokenReq.Register registerDto) {
-        Optional<FcmToken> fcmToken = fcmTokenService.readAllByUserIdAndDeviceInfo(userId, registerDto.deviceInfo());
+        Optional<FcmToken> fcmToken = fcmTokenService.readByUserIdAndDeviceInfo(userId, registerDto.deviceInfo());
 
         if (fcmToken.isPresent()) {
             fcmToken.get().updateToken(registerDto.token());
