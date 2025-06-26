@@ -8,6 +8,7 @@ import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
+import kr.co.yournews.auth.helper.TokenMode;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
@@ -45,7 +46,7 @@ public class OAuthCommandService {
         user.updateInfo(signUpDto.nickname(), signUpDto.subStatus(), signUpDto.dailySubStatus());
         subNewsCommandService.subscribeToNews(user, signUpDto.newsIds(), signUpDto.keywords());
 
-        return OAuthTokenDto.of(jwtHelper.createToken(user), user.isSignedUp());
+        return OAuthTokenDto.of(jwtHelper.createToken(user, TokenMode.FULL), user.isSignedUp());
     }
 
     /**
@@ -61,7 +62,7 @@ public class OAuthCommandService {
 
         OAuthUserInfoRes userInfoRes = oAuthClient.fetchUserInfoFromPlatform(oAuthCode.code());
         UserStatusDto userStatusDto = findOrRegisterUser(platform, userInfoRes);
-        TokenDto tokenDto = jwtHelper.createToken(userStatusDto.user());
+        TokenDto tokenDto = jwtHelper.createToken(userStatusDto.user(), TokenMode.FULL);
 
         return OAuthTokenDto.of(tokenDto, userStatusDto.isSignUp());
     }

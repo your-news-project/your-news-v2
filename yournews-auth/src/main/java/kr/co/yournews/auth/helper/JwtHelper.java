@@ -21,21 +21,27 @@ public class JwtHelper {
 
     /**
      * accessToken, refreshToken 생성
+     * - TokenMode.FULL : 일반 사용자 로그인 (Access, Refresh 모두 발급)
+     * - TokenMode.ACCESS_ONLY : ADMIN 로그인 (Access만 발급)
      *
-     * @param user : 사용자 정보
+     * @param user      : 사용자 정보
+     * @param tokenMode : 토큰 반환 모드 선택
      * @return : token을 담은 TokenDto
      */
-    public TokenDto createToken(User user) {
+    public TokenDto createToken(User user, TokenMode tokenMode) {
         Long userId = user.getId();
         String username = user.getUsername();
         String nickname = user.getNickname();
 
         String accessToken = jwtProvider.generateAccessToken(username, nickname, userId);
-        String refreshToken = jwtProvider.generateRefreshToken(username, nickname, userId);
 
-        refreshTokenService.saveRefreshToken(username, refreshToken);
+        if (tokenMode == TokenMode.FULL) {
+            String refreshToken = jwtProvider.generateRefreshToken(username, nickname, userId);
+            refreshTokenService.saveRefreshToken(username, refreshToken);
+            return TokenDto.of(accessToken, refreshToken);
+        }
 
-        return TokenDto.of(accessToken, refreshToken);
+        return TokenDto.of(accessToken, null);
     }
 
     /**
@@ -74,19 +80,15 @@ public class JwtHelper {
         deleteRefreshToken(refreshToken);
     }
 
-//    /**
-//     * 로그아웃 시 refreshToken 제거 메서드 (외부에서 호출)
-//     * - accessToken은 블랙리스트 등록
-//     * - refreshToken은 쿠키 제거 + Redis에서 삭제
-//     *
-//     * @param accessToken  : 헤더에 담긴 JWT access token
-//     * @param refreshToken : 쿠키에 저장된 refreshToken
-//     * @param response     : 쿠키 제거용 HttpServletResponse
-//     */
-//    public void removeToken(String accessToken, String refreshToken, HttpServletResponse response) {
-//        deleteAccessToken(accessToken);
-//        deleteRefreshToken(refreshToken, response);
-//    }
+    /**
+     * ADMIN 로그아웃 시 토큰 제거 메서드
+     * - accessToken 블랙리스트 등록
+     *
+     * @param accessToken : 헤더에 담긴 JWT access token
+     */
+    public void removeToken(String accessToken) {
+        deleteAccessToken(accessToken);
+    }
 
     /**
      * accessToken을 블랙리스트에 등록 (로그아웃 처리용)
@@ -110,17 +112,4 @@ public class JwtHelper {
         String username = jwtProvider.getUsername(refreshToken);
         refreshTokenService.deleteRefreshToken(username);
     }
-
-//    /**
-//     * refreshToken 제거 내부 메서드
-//     * - 쿠키 삭제 + 저장소(예: Redis)에서 refreshToken 제거
-//     *
-//     * @param refreshToken : 클라이언트에서 전달받은 refreshToken
-//     * @param response     : 쿠키 삭제를 위한 응답 객체
-//     */
-//    private void deleteRefreshToken(String refreshToken, HttpServletResponse response) {
-//        String username = jwtProvider.getUsername(refreshToken);
-//        CookieUtil.deleteCookie(REFRESH_TOKEN_KEY, response);
-//        refreshTokenService.deleteRefreshToken(username);
-//    }
 }
