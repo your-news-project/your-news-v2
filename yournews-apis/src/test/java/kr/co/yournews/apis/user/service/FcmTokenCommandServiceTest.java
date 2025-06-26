@@ -111,10 +111,9 @@ public class FcmTokenCommandServiceTest {
         @DisplayName("성공 - 디바이스 정보 기반 FCM 토큰 삭제")
         void deleteTokenByUserAndDevice() {
             // given
-            FcmTokenReq.Delete dto = new FcmTokenReq.Delete(deviceInfo);
 
             // when
-            fcmTokenCommandService.deleteTokenByUserAndDevice(userId, dto);
+            fcmTokenCommandService.deleteTokenByUserAndDevice(userId, deviceInfo);
 
             // then
             verify(fcmTokenService).deleteByUserIdAndDeviceInfo(userId, deviceInfo);

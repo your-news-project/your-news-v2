@@ -94,7 +94,7 @@ public class FcmTokenControllerTest {
         // given
         FcmTokenReq.Delete dto = new FcmTokenReq.Delete("iPhone15");
 
-        doNothing().when(fcmTokenCommandService).deleteTokenByUserAndDevice(userId, dto);
+        doNothing().when(fcmTokenCommandService).deleteTokenByUserAndDevice(userId, dto.deviceInfo());
 
         // when
         ResultActions resultActions = mockMvc.perform(
