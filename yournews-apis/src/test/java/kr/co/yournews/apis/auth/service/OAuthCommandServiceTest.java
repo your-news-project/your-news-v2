@@ -6,6 +6,7 @@ import kr.co.yournews.apis.news.service.SubNewsCommandService;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
+import kr.co.yournews.auth.helper.TokenMode;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
@@ -78,13 +79,13 @@ public class OAuthCommandServiceTest {
         Long userId = 1L;
 
         given(userService.readById(userId)).willReturn(Optional.ofNullable(user));
-        given(jwtHelper.createToken(any(User.class))).willReturn(tokenDto);
+        given(jwtHelper.createToken(any(User.class), any(TokenMode.class))).willReturn(tokenDto);
 
         // when
         OAuthTokenDto result = oAuthCommandService.signUp(userId, signUpDto);
 
         // then
-        verify(jwtHelper).createToken(any(User.class));
+        verify(jwtHelper).createToken(any(User.class), any(TokenMode.class));
         assertEquals(tokenDto.accessToken(), result.tokenDto().accessToken());
         assertEquals(tokenDto.refreshToken(), result.tokenDto().refreshToken());
         assertThat(result.isSignUp()).isTrue();
@@ -97,7 +98,7 @@ public class OAuthCommandServiceTest {
         given(oAuthClientFactory.getPlatformService(platform)).willReturn(oAuthClient);
         given(oAuthClient.fetchUserInfoFromPlatform("authCode123")).willReturn(userInfoRes);
         given(userService.readByUsernameIncludeDeleted("nickname_oauthId123")).willReturn(Optional.of(user));
-        given(jwtHelper.createToken(user)).willReturn(tokenDto);
+        given(jwtHelper.createToken(user, TokenMode.FULL)).willReturn(tokenDto);
 
         // when
         OAuthTokenDto result = oAuthCommandService.signIn(platform, oAuthCode);
@@ -116,7 +117,7 @@ public class OAuthCommandServiceTest {
         given(oAuthClient.fetchUserInfoFromPlatform("authCode123")).willReturn(userInfoRes);
         given(userService.readByUsernameIncludeDeleted("nickname_oauthId123")).willReturn(Optional.empty());
         given(userService.save(any(User.class))).willReturn(user);
-        given(jwtHelper.createToken(user)).willReturn(tokenDto);
+        given(jwtHelper.createToken(user, TokenMode.FULL)).willReturn(tokenDto);
 
         // when
         OAuthTokenDto result = oAuthCommandService.signIn(platform, oAuthCode);
@@ -142,12 +143,12 @@ public class OAuthCommandServiceTest {
 
         // when
         CustomException exception = assertThrows(CustomException.class, () ->
-            oAuthCommandService.signIn(platform, oAuthCode)
+                oAuthCommandService.signIn(platform, oAuthCode)
         );
 
         // then
         assertEquals(UserErrorType.DEACTIVATED, exception.getErrorType());
-        verify(jwtHelper, never()).createToken(user);
+        verify(jwtHelper, never()).createToken(user, TokenMode.FULL);
     }
 }
 

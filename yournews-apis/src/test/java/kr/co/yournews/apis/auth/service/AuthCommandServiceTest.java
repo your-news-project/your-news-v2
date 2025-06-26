@@ -9,6 +9,7 @@ import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
+import kr.co.yournews.auth.helper.TokenMode;
 import kr.co.yournews.auth.service.PasswordEncodeService;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
@@ -97,7 +98,7 @@ public class AuthCommandServiceTest {
                             List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
 
             given(passwordEncodeService.encode(password)).willReturn(encodedPassword);
-            given(jwtHelper.createToken(any(User.class))).willReturn(tokenDto);
+            given(jwtHelper.createToken(any(User.class), any(TokenMode.class))).willReturn(tokenDto);
 
             // when
             TokenDto result = authCommandService.signUp(signUpDto);
@@ -105,7 +106,7 @@ public class AuthCommandServiceTest {
             // then
             verify(authCodeService).ensureVerifiedAndConsume(email);
             verify(userService).save(any(User.class));
-            verify(jwtHelper).createToken(any(User.class));
+            verify(jwtHelper).createToken(any(User.class), any(TokenMode.class));
 
             assertEquals(tokenDto.accessToken(), result.accessToken());
             assertEquals(tokenDto.refreshToken(), result.refreshToken());
@@ -130,7 +131,7 @@ public class AuthCommandServiceTest {
             assertEquals(UserErrorType.CODE_NOT_VERIFIED, exception.getErrorType());
             verify(authCodeService).ensureVerifiedAndConsume(email);
             verify(userService, never()).save(any());
-            verify(jwtHelper, never()).createToken(any());
+            verify(jwtHelper, never()).createToken(any(), any());
         }
     }
 
@@ -146,14 +147,14 @@ public class AuthCommandServiceTest {
             // given
             given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.of(user));
             given(passwordEncodeService.matches(password, encodedPassword)).willReturn(true);
-            given(jwtHelper.createToken(user)).willReturn(tokenDto);
+            given(jwtHelper.createToken(user, TokenMode.FULL)).willReturn(tokenDto);
 
             // when
             TokenDto result = authCommandService.signIn(signInDto);
 
             // then
             assertEquals(tokenDto.accessToken(), result.accessToken());
-            verify(jwtHelper, times(1)).createToken(user);
+            verify(jwtHelper, times(1)).createToken(user, TokenMode.FULL);
         }
 
         @Test
@@ -168,7 +169,7 @@ public class AuthCommandServiceTest {
 
             // then
             assertEquals(UserErrorType.NOT_FOUND, exception.getErrorType());
-            verify(jwtHelper, never()).createToken(user);
+            verify(jwtHelper, never()).createToken(user, TokenMode.FULL);
         }
 
         @Test
@@ -184,7 +185,7 @@ public class AuthCommandServiceTest {
 
             // then
             assertEquals(UserErrorType.NOT_MATCHED_PASSWORD, exception.getErrorType());
-            verify(jwtHelper, never()).createToken(user);
+            verify(jwtHelper, never()).createToken(user, TokenMode.FULL);
         }
 
         @Test
@@ -209,7 +210,7 @@ public class AuthCommandServiceTest {
 
             // then
             assertEquals(UserErrorType.DEACTIVATED, exception.getErrorType());
-            verify(jwtHelper, never()).createToken(user);
+            verify(jwtHelper, never()).createToken(user, TokenMode.FULL);
         }
     }
 
@@ -232,7 +233,7 @@ public class AuthCommandServiceTest {
             ReflectionTestUtils.setField(user, "deletedAt", LocalDateTime.now().minusDays(2));
 
             given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.of(user));
-            given(jwtHelper.createToken(user)).willReturn(tokenDto);
+            given(jwtHelper.createToken(user, TokenMode.FULL)).willReturn(tokenDto);
 
             // when
             TokenDto result = authCommandService.restoreUser(request);
@@ -241,7 +242,7 @@ public class AuthCommandServiceTest {
             assertEquals(tokenDto.accessToken(), result.accessToken());
             assertEquals(tokenDto.refreshToken(), result.refreshToken());
             assertNull(user.getDeletedAt());
-            verify(jwtHelper, times(1)).createToken(user);
+            verify(jwtHelper, times(1)).createToken(user, TokenMode.FULL);
         }
 
         @Test
@@ -258,7 +259,7 @@ public class AuthCommandServiceTest {
 
             // then
             assertEquals(UserErrorType.ALREADY_ACTIVE, exception.getErrorType());
-            verify(jwtHelper, never()).createToken(user);
+            verify(jwtHelper, never()).createToken(user, TokenMode.FULL);
         }
     }
 

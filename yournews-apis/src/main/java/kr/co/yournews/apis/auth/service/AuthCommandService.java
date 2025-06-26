@@ -9,6 +9,7 @@ import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
 import kr.co.yournews.auth.helper.JwtHelper;
+import kr.co.yournews.auth.helper.TokenMode;
 import kr.co.yournews.auth.service.PasswordEncodeService;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
@@ -46,7 +47,7 @@ public class AuthCommandService {
         userService.save(user);
 
         subNewsCommandService.subscribeToNews(user, signUpDto.newsIds(), signUpDto.keywords());
-        return jwtHelper.createToken(user);
+        return jwtHelper.createToken(user, TokenMode.FULL);
     }
 
     /**
@@ -74,7 +75,7 @@ public class AuthCommandService {
             );
         }
 
-        return jwtHelper.createToken(user);
+        return jwtHelper.createToken(user, TokenMode.FULL);
     }
 
     /**
@@ -97,7 +98,7 @@ public class AuthCommandService {
         }
 
         user.restore();
-        return jwtHelper.createToken(user);
+        return jwtHelper.createToken(user, TokenMode.FULL);
     }
 
     /**
