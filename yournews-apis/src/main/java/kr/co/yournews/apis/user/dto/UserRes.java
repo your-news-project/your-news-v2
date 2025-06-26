@@ -15,7 +15,8 @@ public record UserRes(
         List<String> subscriptions,
         List<String> keywords,
         boolean subStatus,
-        boolean dailySubStatus
+        boolean dailySubStatus,
+        boolean isOauth
 ) {
     public static UserRes from(User user, List<SubNewsQueryDto> subNewsList) {
         List<String> newsNames = new ArrayList<>();
@@ -38,7 +39,8 @@ public record UserRes(
                 newsNames,
                 keywords,
                 user.isSubStatus(),
-                user.isDailySubStatus()
+                user.isDailySubStatus(),
+                user.isOauthUser()
         );
     }
 }

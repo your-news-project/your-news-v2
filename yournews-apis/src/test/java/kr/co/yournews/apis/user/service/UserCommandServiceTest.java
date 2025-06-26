@@ -5,7 +5,6 @@ import kr.co.yournews.auth.service.PasswordEncodeService;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
-import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -36,7 +35,7 @@ public class UserCommandServiceTest {
     private PasswordEncodeService passwordEncodeService;
 
     @Mock
-    private FcmTokenService fcmTokenService;
+    private FcmTokenCommandService fcmTokenCommandService;
 
     @InjectMocks
     private UserCommandService userCommandService;
@@ -221,6 +220,6 @@ public class UserCommandServiceTest {
 
         // then
         verify(userService, times(1)).deleteById(userId);
-        verify(fcmTokenService, times(1)).deleteAllByUserId(userId);
+        verify(fcmTokenCommandService, times(1)).deleteTokenByUserId(userId);
     }
 }

@@ -44,7 +44,7 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Enumerated(EnumType.STRING)
@@ -111,5 +111,9 @@ public class User extends BaseTimeEntity {
 
     public void restore() {
         this.deletedAt = null;
+    }
+
+    public boolean isOauthUser() {
+        return this.platform != null;
     }
 }

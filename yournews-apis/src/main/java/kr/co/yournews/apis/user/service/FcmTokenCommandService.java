@@ -29,7 +29,7 @@ public class FcmTokenCommandService {
      */
     @Transactional
     public void registerFcmToken(Long userId, FcmTokenReq.Register registerDto) {
-        Optional<FcmToken> fcmToken = fcmTokenService.readAllByUserIdAndDeviceInfo(userId, registerDto.deviceInfo());
+        Optional<FcmToken> fcmToken = fcmTokenService.readByUserIdAndDeviceInfo(userId, registerDto.deviceInfo());
 
         if (fcmToken.isPresent()) {
             fcmToken.get().updateToken(registerDto.token());
@@ -45,12 +45,12 @@ public class FcmTokenCommandService {
      * 특정 사용자와 디바이스 정보를 기준으로 해당 FCM 토큰을 삭제하는 메서드
      * - 로그아웃 시, 사용
      *
-     * @param userId    : 사용자 pk
-     * @param deleteDto : 디바이스 정보 DTO
+     * @param userId     : 사용자 pk
+     * @param deviceInfo : 디바이스 정보
      */
     @Transactional
-    public void deleteTokenByUserAndDevice(Long userId, FcmTokenReq.Delete deleteDto) {
-        fcmTokenService.deleteByUserIdAndDeviceInfo(userId, deleteDto.deviceInfo());
+    public void deleteTokenByUserAndDevice(Long userId, String deviceInfo) {
+        fcmTokenService.deleteByUserIdAndDeviceInfo(userId, deviceInfo);
     }
 
     /**

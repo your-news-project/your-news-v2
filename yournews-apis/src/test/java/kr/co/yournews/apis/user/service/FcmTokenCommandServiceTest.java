@@ -51,7 +51,7 @@ public class FcmTokenCommandServiceTest {
         void registerFcmTokenUpdate() {
             // given
             FcmToken existingToken = mock(FcmToken.class);
-            given(fcmTokenService.readAllByUserIdAndDeviceInfo(userId, deviceInfo))
+            given(fcmTokenService.readByUserIdAndDeviceInfo(userId, deviceInfo))
                     .willReturn(Optional.of(existingToken));
 
             FcmTokenReq.Register dto = new FcmTokenReq.Register(token, deviceInfo);
@@ -68,7 +68,7 @@ public class FcmTokenCommandServiceTest {
         @DisplayName("성공 - 기존 디바이스가 없을 경우 새로 저장")
         void registerFcmTokenSaveNew() {
             // given
-            given(fcmTokenService.readAllByUserIdAndDeviceInfo(userId, deviceInfo))
+            given(fcmTokenService.readByUserIdAndDeviceInfo(userId, deviceInfo))
                     .willReturn(Optional.empty());
 
             User user = mock(User.class);
@@ -87,7 +87,7 @@ public class FcmTokenCommandServiceTest {
         @DisplayName("실패 - 사용자 정보 없음")
         void registerFcmTokenUserNotFound() {
             // given
-            given(fcmTokenService.readAllByUserIdAndDeviceInfo(userId, deviceInfo))
+            given(fcmTokenService.readByUserIdAndDeviceInfo(userId, deviceInfo))
                     .willReturn(Optional.empty());
 
             given(userService.readById(userId)).willReturn(Optional.empty());
@@ -111,10 +111,9 @@ public class FcmTokenCommandServiceTest {
         @DisplayName("성공 - 디바이스 정보 기반 FCM 토큰 삭제")
         void deleteTokenByUserAndDevice() {
             // given
-            FcmTokenReq.Delete dto = new FcmTokenReq.Delete(deviceInfo);
 
             // when
-            fcmTokenCommandService.deleteTokenByUserAndDevice(userId, dto);
+            fcmTokenCommandService.deleteTokenByUserAndDevice(userId, deviceInfo);
 
             // then
             verify(fcmTokenService).deleteByUserIdAndDeviceInfo(userId, deviceInfo);

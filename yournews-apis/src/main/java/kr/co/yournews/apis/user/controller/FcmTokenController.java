@@ -30,7 +30,7 @@ public class FcmTokenController {
     @DeleteMapping
     public ResponseEntity<?> deleteToken(@AuthenticationPrincipal CustomUserDetails userDetails,
                                          @RequestBody FcmTokenReq.Delete deleteDto) {
-        fcmTokenCommandService.deleteTokenByUserAndDevice(userDetails.getUserId(), deleteDto);
+        fcmTokenCommandService.deleteTokenByUserAndDevice(userDetails.getUserId(), deleteDto.deviceInfo());
         return ResponseEntity.ok(SuccessResponse.ok());
     }
 }

@@ -1,8 +1,10 @@
 package kr.co.yournews.apis.auth.service;
 
 import kr.co.yournews.apis.auth.dto.RestoreUserDto;
+import kr.co.yournews.apis.auth.dto.SignOutDto;
 import kr.co.yournews.apis.auth.service.mail.AuthCodeService;
 import kr.co.yournews.apis.news.service.SubNewsCommandService;
+import kr.co.yournews.apis.user.service.FcmTokenCommandService;
 import kr.co.yournews.auth.dto.SignInDto;
 import kr.co.yournews.auth.dto.SignUpDto;
 import kr.co.yournews.auth.dto.TokenDto;
@@ -53,6 +55,9 @@ public class AuthCommandServiceTest {
 
     @Mock
     private SubNewsCommandService subNewsCommandService;
+
+    @Mock
+    private FcmTokenCommandService fcmTokenCommandService;
 
     @InjectMocks
     private AuthCommandService authCommandService;
@@ -280,9 +285,10 @@ public class AuthCommandServiceTest {
         String accessTokenInHeader = "Bearer accessToken";
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
+        SignOutDto signOutDto = new SignOutDto("device-info");
 
         // when
-        authCommandService.signOut(accessTokenInHeader, refreshToken);
+        authCommandService.signOut(accessTokenInHeader, refreshToken, userId, signOutDto);
 
         // then
         verify(jwtHelper, times(1)).removeToken(accessToken, refreshToken);

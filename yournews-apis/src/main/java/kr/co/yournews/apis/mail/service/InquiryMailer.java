@@ -1,6 +1,6 @@
-package kr.co.yournews.apis.auth.mail.service;
+package kr.co.yournews.apis.mail.service;
 
-import kr.co.yournews.apis.auth.mail.dto.InquiryMailReq;
+import kr.co.yournews.apis.mail.dto.InquiryMailReq;
 import kr.co.yournews.infra.mail.MailSenderAdapter;
 import kr.co.yournews.infra.mail.strategy.MailStrategyFactory;
 import kr.co.yournews.infra.mail.type.MailType;

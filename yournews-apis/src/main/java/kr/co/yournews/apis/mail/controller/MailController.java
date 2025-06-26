@@ -1,8 +1,8 @@
-package kr.co.yournews.apis.auth.mail.controller;
+package kr.co.yournews.apis.mail.controller;
 
 import jakarta.validation.Valid;
-import kr.co.yournews.apis.auth.mail.dto.InquiryMailReq;
-import kr.co.yournews.apis.auth.mail.service.InquiryMailer;
+import kr.co.yournews.apis.mail.dto.InquiryMailReq;
+import kr.co.yournews.apis.mail.service.InquiryMailer;
 import kr.co.yournews.common.response.success.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
