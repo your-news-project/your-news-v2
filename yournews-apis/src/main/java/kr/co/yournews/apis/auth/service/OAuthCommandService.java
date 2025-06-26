@@ -15,6 +15,7 @@ import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import kr.co.yournews.domain.user.type.OAuthPlatform;
 import kr.co.yournews.domain.user.type.Role;
+import kr.co.yournews.domain.user.type.UserStatus;
 import kr.co.yournews.infra.oauth.OAuthClient;
 import kr.co.yournews.infra.oauth.dto.OAuthUserInfoRes;
 import lombok.RequiredArgsConstructor;
@@ -69,9 +70,9 @@ public class OAuthCommandService {
 
     /**
      * 사용자 상태 확인 및 등록
-     *
-     * - 이미 가입된 사용자가 소프트 딜리트 상태라면 복구 안내 에러를 발생
+     * - 가입된 사용자가 소프트 딜리트 상태라면 복구 안내 에러를 발생
      * - 정상 사용자라면 사용자 정보를 반환
+     * - BAN 여부 확인
      * - 존재하지 않는 경우 신규 사용자를 등록하고 반환
      *
      * @param platform    : OAuth 플랫폼
@@ -83,6 +84,10 @@ public class OAuthCommandService {
 
         return userService.readByUsernameIncludeDeleted(username)
                 .map(user -> {
+                    if (user.isBanned()) {
+                        throw new CustomException(UserErrorType.BANNED);
+                    }
+
                     if (user.isDeleted()) {
                         throw new CustomException(
                                 UserErrorType.DEACTIVATED,
