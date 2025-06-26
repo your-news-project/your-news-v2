@@ -5,7 +5,6 @@ import kr.co.yournews.auth.service.PasswordEncodeService;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
-import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserCommandService {
     private final UserService userService;
     private final PasswordEncodeService passwordEncodeService;
-    private final FcmTokenService fcmTokenService;
+    private final FcmTokenCommandService fcmTokenCommandService;
 
     /**
      * 비밀번호 재설정 메서드
@@ -82,7 +81,7 @@ public class UserCommandService {
      */
     @Transactional
     public void deleteUser(Long userId) {
-        fcmTokenService.deleteAllByUserId(userId);
+        fcmTokenCommandService.deleteTokenByUserId(userId);
         userService.deleteById(userId);
     }
 }
