@@ -24,7 +24,7 @@ public class SecurityConfig {
     private final JwtExceptionFilter jwtExceptionFilter;
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/v1/auth/**", "/api/v1/admin/sign-in",
+            "/api/v1/auth/**", "/api/v1/admin/auth/sign-in",
             "/api/v1/oauth/sign-in/**", "/api/v1/news/**"
     };
     private static final String[] ADMIN_ENDPOINTS = {"/api/v1/admin/**"};

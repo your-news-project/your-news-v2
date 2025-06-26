@@ -52,9 +52,9 @@ public class AuthCommandService {
 
     /**
      * 서비스 이용을 위한 로그인 메서드
-     *
-     * - 이미 가입된 사용자가 소프트 딜리트 상태라면 복구 안내 에러를 발생
+     * - 가입된 사용자가 소프트 딜리트 상태라면 복구 안내 에러를 발생
      * - 비밀번호 일치 여부를 검증한 뒤 정상 사용자에게 토큰을 발급
+     * - BAN 여부 확인
      *
      * @param signInDto : 사용자가 입력한 정보
      * @return : jwt token
@@ -66,6 +66,10 @@ public class AuthCommandService {
 
         if (!passwordEncodeService.matches(signInDto.password(), user.getPassword())) {
             throw new CustomException(UserErrorType.NOT_MATCHED_PASSWORD);
+        }
+
+        if (user.isBanned()) {
+            throw new CustomException(UserErrorType.BANNED);
         }
 
         if (user.isDeleted()) {

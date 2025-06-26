@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import kr.co.yournews.common.BaseTimeEntity;
 import kr.co.yournews.domain.user.type.OAuthPlatform;
 import kr.co.yournews.domain.user.type.Role;
+import kr.co.yournews.domain.user.type.UserStatus;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,6 +54,17 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private OAuthPlatform platform;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
+    @Column(name = "ban_reason")
+    private String banReason;
+
+    @JsonIgnore
+    @ColumnDefault("NULL")
+    @Column(name = "banned_at")
+    private LocalDateTime bannedAt;
+
     @JsonIgnore
     @ColumnDefault("NULL")
     @Column(name = "deleted_at")
@@ -72,13 +84,15 @@ public class User extends BaseTimeEntity {
 
     @Builder
     public User(String username, String password, String nickname, String email,
-                Role role, OAuthPlatform platform, boolean signedUp, boolean subStatus, boolean dailySubStatus) {
+                Role role, OAuthPlatform platform, UserStatus status,
+                boolean signedUp, boolean subStatus, boolean dailySubStatus) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
         this.email = email;
         this.role = role;
         this.platform = platform;
+        this.status = status;
         this.signedUp = signedUp;
         this.subStatus = subStatus;
         this.dailySubStatus = dailySubStatus;
@@ -119,5 +133,21 @@ public class User extends BaseTimeEntity {
 
     public boolean isAdmin() {
         return role == Role.ADMIN;
+    }
+
+    public boolean isBanned() {
+        return this.status == UserStatus.BANNED;
+    }
+
+    public void ban(String reason) {
+        this.status = UserStatus.BANNED;
+        this.banReason = reason;
+        this.bannedAt = LocalDateTime.now();
+    }
+
+    public void unban() {
+        this.status = UserStatus.ACTIVE;
+        this.banReason = null;
+        this.bannedAt = null;
     }
 }
