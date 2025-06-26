@@ -3,6 +3,8 @@ package kr.co.yournews.domain.user.service;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -44,6 +46,10 @@ public class UserService {
 
     public Optional<User> readByUsernameIncludeDeleted(String username) {
         return userRepository.findByUsernameIncludeDeleted(username);
+    }
+
+    public Page<User> readAll(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
     public void deleteById(Long id) {
