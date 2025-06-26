@@ -1,9 +1,8 @@
 package kr.co.yournews.apis.mail.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.co.yournews.apis.auth.mail.controller.MailController;
-import kr.co.yournews.apis.auth.mail.dto.InquiryMailReq;
-import kr.co.yournews.apis.auth.mail.service.InquiryMailer;
+import kr.co.yournews.apis.mail.dto.InquiryMailReq;
+import kr.co.yournews.apis.mail.service.InquiryMailer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

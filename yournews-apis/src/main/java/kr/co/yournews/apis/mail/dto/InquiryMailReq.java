@@ -1,4 +1,4 @@
-package kr.co.yournews.apis.auth.mail.dto;
+package kr.co.yournews.apis.mail.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
