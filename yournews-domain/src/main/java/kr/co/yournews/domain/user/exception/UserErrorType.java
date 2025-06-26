@@ -1,7 +1,7 @@
 package kr.co.yournews.domain.user.exception;
 
-import kr.co.yournews.common.response.error.type.BaseErrorType;
 import kr.co.yournews.common.response.StatusCode;
+import kr.co.yournews.common.response.error.type.BaseErrorType;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -23,6 +23,7 @@ public enum UserErrorType implements BaseErrorType {
     DEACTIVATED(StatusCode.FORBIDDEN, "U011", "탈퇴한 사용자입니다."),
     ALREADY_ACTIVE(StatusCode.CONFLICT, "U012", "이미 활성화된 사용자입니다."),
     NOT_ADMIN(StatusCode.FORBIDDEN, "U013", "관리자 권한이 없습니다."),
+    BANNED(StatusCode.FORBIDDEN, "U014", "정지된 사용자입니다. 관리자에게 문의해주세요."),
     ;
 
     private final StatusCode status;
