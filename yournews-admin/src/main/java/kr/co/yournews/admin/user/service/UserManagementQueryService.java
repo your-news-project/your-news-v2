@@ -27,7 +27,7 @@ public class UserManagementQueryService {
      * @return : 페이징 처리된 사용자 리스트
      */
     @Transactional(readOnly = true)
-    public Page<UserRes.Summary> findAllUsers(Pageable pageable) {
+    public Page<UserRes.Summary> getAllUsers(Pageable pageable) {
         return userService.readAll(pageable)
                 .map(UserRes.Summary::from);
     }
@@ -39,7 +39,7 @@ public class UserManagementQueryService {
      * @return : 조회된 사용자 정보
      */
     @Transactional(readOnly = true)
-    public UserRes.Details findUserById(Long userId) {
+    public UserRes.Details getUserById(Long userId) {
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
