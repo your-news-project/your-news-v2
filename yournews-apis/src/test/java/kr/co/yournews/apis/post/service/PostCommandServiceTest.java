@@ -4,6 +4,7 @@ import kr.co.yournews.apis.post.dto.PostDto;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.post.entity.Post;
 import kr.co.yournews.domain.post.exception.PostErrorType;
+import kr.co.yournews.domain.post.service.PostLikeService;
 import kr.co.yournews.domain.post.service.PostService;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
@@ -35,6 +36,9 @@ public class PostCommandServiceTest {
 
     @Mock
     private PostService postService;
+
+    @Mock
+    private PostLikeService postLikeService;
 
     @InjectMocks
     private PostCommandService postCommandService;
@@ -157,6 +161,7 @@ public class PostCommandServiceTest {
             postCommandService.deletePost(userId, postId);
 
             // then
+            verify(postLikeService, times(1)).deleteAllByPostId(postId);
             verify(postService, times(1)).deleteById(postId);
         }
 

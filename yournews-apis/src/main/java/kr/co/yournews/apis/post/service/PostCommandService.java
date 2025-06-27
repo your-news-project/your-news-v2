@@ -4,6 +4,7 @@ import kr.co.yournews.apis.post.dto.PostDto;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.post.entity.Post;
 import kr.co.yournews.domain.post.exception.PostErrorType;
+import kr.co.yournews.domain.post.service.PostLikeService;
 import kr.co.yournews.domain.post.service.PostService;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostCommandService {
     private final UserService userService;
     private final PostService postService;
+    private final PostLikeService postLikeService;
 
     /**
      * 게시글 생성 메서드
@@ -37,10 +39,10 @@ public class PostCommandService {
     }
 
     /**
-     * 게시글 삭제 메서드
+     * 게시글 업데이트 메서드
      *
      * @param userId : 요청한 사용자 ID
-     * @param postId : 삭제할 게시글 ID
+     * @param postId : 업데이트할 게시글 ID
      * @throws CustomException NOT_FOUND: 게시글이 존재하지 않을 경우
      *                         FORBIDDEN: 작성자가 아닐 경우
      */
@@ -73,6 +75,7 @@ public class PostCommandService {
             throw new CustomException(PostErrorType.FORBIDDEN);
         }
 
+        postLikeService.deleteAllByPostId(postId);
         postService.deleteById(postId);
     }
 }
