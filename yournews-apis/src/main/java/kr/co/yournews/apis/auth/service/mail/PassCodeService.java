@@ -1,5 +1,7 @@
 package kr.co.yournews.apis.auth.service.mail;
 
+import kr.co.yournews.common.response.exception.CustomException;
+import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.infra.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,17 +41,19 @@ public class PassCodeService {
      *
      * @param username : 사용자 아이디
      * @param uuid     : 전달한 uuid
-     * @return : 검증 결과 (true: 일치함)
      */
-    public boolean validateResetUuid(String username, String uuid) {
+    public void validateResetUuid(String username, String uuid) {
         String key = PASS_KEY_PREFIX + username;
         String savedCode = (String) redisRepository.get(key);
 
-        if (savedCode == null || !savedCode.equals(uuid)) {
-            return false;
+        if (savedCode == null) {
+            throw new CustomException(UserErrorType.EXPIRED_PASSWORD_RESET_CODE);
+        }
+
+        if (!uuid.equals(savedCode)) {
+            throw new CustomException(UserErrorType.INVALID_PASSWORD_RESET_REQUEST);
         }
 
         redisRepository.del(key);
-        return true;
     }
 }

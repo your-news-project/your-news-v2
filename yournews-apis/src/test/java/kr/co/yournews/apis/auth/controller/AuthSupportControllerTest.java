@@ -304,7 +304,7 @@ public class AuthSupportControllerTest {
                     "user1", "wrong-uuid", "Abcdefg123!"
             );
 
-            doThrow(new CustomException(UserErrorType.UNAUTHORIZED_ACTION))
+            doThrow(new CustomException(UserErrorType.INVALID_PASSWORD_RESET_REQUEST))
                     .when(passCodeManager).applyNewPassword(dto);
 
             // when
@@ -316,9 +316,9 @@ public class AuthSupportControllerTest {
 
             // then
             resultActions
-                    .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.code").value(UserErrorType.UNAUTHORIZED_ACTION.getCode()))
-                    .andExpect(jsonPath("$.message").value(UserErrorType.UNAUTHORIZED_ACTION.getMessage()));
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value(UserErrorType.INVALID_PASSWORD_RESET_REQUEST.getCode()))
+                    .andExpect(jsonPath("$.message").value(UserErrorType.INVALID_PASSWORD_RESET_REQUEST.getMessage()));
         }
     }
 
