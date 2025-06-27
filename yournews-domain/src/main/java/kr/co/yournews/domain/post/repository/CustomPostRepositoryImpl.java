@@ -86,4 +86,28 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         return Optional.ofNullable(details);
     }
+
+    @Override
+    public Optional<PostQueryDto.DetailsForAdmin> findDetailsById(Long postId) {
+        PostQueryDto.DetailsForAdmin details = jpaQueryFactory
+                .select(Projections.constructor(
+                        PostQueryDto.DetailsForAdmin.class,
+                        post.id,
+                        post.title,
+                        post.content,
+                        user.nickname.coalesce(User.UNKNOWN_NICKNAME),
+                        post.createdAt,
+                        post.userId,
+                        JPAExpressions
+                                .select(postLike.count())
+                                .from(postLike)
+                                .where(postLike.post.id.eq(post.id))
+                ))
+                .from(post)
+                .leftJoin(post.user, user)
+                .where(post.id.eq(postId))
+                .fetchOne();
+
+        return Optional.ofNullable(details);
+    }
 }

@@ -28,6 +28,10 @@ public class PostService {
         return postRepository.findDetailsById(postId, userId);
     }
 
+    public Optional<PostQueryDto.DetailsForAdmin> readDetailsById(Long postId) {
+        return postRepository.findDetailsById(postId);
+    }
+
     public Page<PostQueryDto.Summary> readByCategory(Category category, Pageable pageable) {
         return postRepository.findAllByCategory(category, pageable);
     }
