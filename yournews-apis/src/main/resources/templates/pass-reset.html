@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>Your-News</title>
+    <link rel="stylesheet" href="/pass-reset/css/reset.css" />
+</head>
+<body>
+<div class="container">
+    <h2>🔒 비밀번호 재설정</h2>
+
+    <form id="reset-form">
+        <input type="text" id="username" placeholder="아이디" required />
+
+        <input type="password" id="password" placeholder="새 비밀번호" required />
+
+        <input type="password" id="password-check" placeholder="비밀번호 확인" required />
+
+        <button type="submit">비밀번호 변경</button>
+        <p class="info">비밀번호 재설정 링크는 10분간만 유효합니다.</p>
+    </form>
+
+    <p class="error" id="error-message"></p>
+    <p class="success" id="success-message"></p>
+</div>
+
+<script src="/pass-reset/js/pass-reset.js"></script>
+</body>
+</html>
