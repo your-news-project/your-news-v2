@@ -24,6 +24,10 @@ public class PostLikeService {
         postLikeRepository.deleteAllByUserIds(userIds);
     }
 
+    public void deleteAllByPostId(Long postId) {
+        postLikeRepository.deleteAllByPostId(postId);
+    }
+
     public boolean existsByUserIdAndPostId(Long userId, Long poseId) {
         return postLikeRepository.existsByUser_IdAndPost_Id(userId, poseId);
     }
