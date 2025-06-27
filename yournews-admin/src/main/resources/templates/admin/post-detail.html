@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Your-News</title>
+    <link rel="stylesheet" href="/admin/css/detail.css">
+</head>
+<body>
+<div class="container">
+    <h2>게시글 상세 정보</h2>
+
+    <div class="detail-group"><strong>ID:</strong> <span id="detail-id"></span></div>
+    <div class="detail-group"><strong>제목:</strong> <span id="detail-title"></span></div>
+    <div class="detail-group"><strong>내용:</strong> <span id="detail-content"></span></div>
+    <div class="detail-group"><strong>작성자:</strong> <span id="detail-nickname"></span></div>
+    <div class="detail-group"><strong>작성일:</strong> <span id="detail-createdAt"></span></div>
+    <div class="detail-group">
+        <strong>작성자 ID:</strong>
+        <span id="detail-userId"></span>
+    </div>
+    <div class="detail-group"><strong>좋아요 수:</strong> <span id="detail-likeCount"></span></div>
+
+    <div class="action-buttons">
+        <button id="edit-button">수정</button>
+        <button id="delete-button">삭제</button>
+        <button id="back-button">목록으로</button>
+    </div>
+</div>
+
+<script src="/admin/js/utils/fetchWithAuth.js"></script>
+<script src="/admin/js/auth-check.js"></script>
+<script src="/admin/js/post-detail.js"></script>
+<script th:inline="javascript">
+    const postId = /*[[${postId}]]*/ 0;
+</script>
+</body>
+</html>

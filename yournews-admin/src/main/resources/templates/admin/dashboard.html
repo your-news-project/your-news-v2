@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Your-News</title>
+    <link rel="stylesheet" href="/admin/css/dashboard.css">
+</head>
+<body>
+<div class="dashboard-container">
+    <h1>관리자 대시보드</h1>
+    <div class="card-container">
+        <div class="card" onclick="navigateTo('users')">
+            🙍 사용자 관리
+        </div>
+        <div class="card" onclick="navigateTo('posts')">
+            📝 게시물 관리
+        </div>
+        <div class="card" onclick="navigateTo('news')">
+            📢 소식 관리
+        </div>
+    </div>
+    <button id="logoutBtn">로그아웃</button>
+</div>
+<script src="/admin/js/utils/fetchWithAuth.js"></script>
+<script src="/admin/js/auth-check.js"></script>
+<script src="/admin/js/dashboard.js"></script>
+</body>
+</html>

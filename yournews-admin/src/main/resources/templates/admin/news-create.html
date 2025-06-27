@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Your-News</title>
+    <link rel="stylesheet" href="/admin/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2 class="page-title">소식 생성</h2>
+
+    <form id="create-form">
+        <div class="form-group">
+            <label for="name">소식 제목:</label>
+            <input type="text" id="name" name="name" required maxlength="50" class="text-input" />
+        </div>
+
+        <div class="form-group">
+            <label for="url">소식 주소(URL):</label>
+            <input type="url" id="url" name="url" required class="text-input" />
+        </div>
+
+        <div class="form-group">
+            <label for="college">소속 단과대:</label>
+            <select id="college" name="college" required class="text-input">
+            </select>
+        </div>
+
+        <div class="action-buttons">
+            <button type="submit" id="create-button" class="primary-button">생성</button>
+            <button type="button" id="cancel-button" class="secondary-button">취소</button>
+        </div>
+    </form>
+</div>
+
+<script src="/admin/js/utils/fetchWithAuth.js"></script>
+<script src="/admin/js/auth-check.js"></script>
+<script src="/admin/js/news-create.js"></script>
+</body>
+</html>

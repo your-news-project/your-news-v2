@@ -18,4 +18,8 @@ public interface SubNewsRepository extends JpaRepository<SubNews, Long>, CustomS
     @Modifying
     @Query("DELETE FROM sub_news s WHERE s.user.id IN :userIds")
     void deleteAllByUserIds(@Param("userIds") List<Long> userIds);
+
+    @Modifying
+    @Query("DELETE FROM sub_news s WHERE s.news.id = :newsId")
+    void deleteAllByNewsId(@Param("newsId") Long newsId);
 }
