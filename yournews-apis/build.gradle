@@ -9,6 +9,7 @@ dependencies {
 
 	/* Web */
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	/* Security */
 	implementation 'org.springframework.boot:spring-boot-starter-security'
