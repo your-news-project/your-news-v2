@@ -22,4 +22,14 @@ public class PostQueryDto {
             Long likeCount,
             Boolean liked
     ) { }
+
+    public record DetailsForAdmin(
+            Long id,
+            String title,
+            String content,
+            String nickname,
+            LocalDateTime createdAt,
+            Long userId,
+            Long likeCount
+    ) { }
 }
