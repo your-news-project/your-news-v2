@@ -1,5 +1,7 @@
 package kr.co.yournews.apis.auth.service.mail;
 
+import kr.co.yournews.common.response.exception.CustomException;
+import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.infra.redis.RedisRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,9 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Duration;
 
 import static kr.co.yournews.infra.redis.util.RedisConstants.PASS_KEY_PREFIX;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
@@ -55,10 +58,9 @@ public class PassCodeServiceTest {
         given(redisRepository.get(PASS_KEY_PREFIX + username)).willReturn(uuid);
 
         // when
-        boolean result = passCodeService.validateResetUuid(username, uuid);
+        assertDoesNotThrow(() -> passCodeService.validateResetUuid(username, uuid));
 
         // then
-        assertTrue(result);
         verify(redisRepository, times(1)).del(PASS_KEY_PREFIX + username);
     }
 
@@ -72,10 +74,12 @@ public class PassCodeServiceTest {
         given(redisRepository.get(PASS_KEY_PREFIX + username)).willReturn(saved);
 
         // when
-        boolean result = passCodeService.validateResetUuid(username, input);
+        CustomException ex = assertThrows(CustomException.class,
+                () -> passCodeService.validateResetUuid(username, input));
 
         // then
-        assertFalse(result);
+        assertEquals(UserErrorType.INVALID_PASSWORD_RESET_REQUEST, ex.getErrorType());
+
         verify(redisRepository, never()).del(anyString());
     }
 
@@ -87,10 +91,11 @@ public class PassCodeServiceTest {
         given(redisRepository.get(PASS_KEY_PREFIX + username)).willReturn(null);
 
         // when
-        boolean result = passCodeService.validateResetUuid(username, "invalid");
+        CustomException ex = assertThrows(CustomException.class,
+                () -> passCodeService.validateResetUuid(username, "invalid"));
 
         // then
-        assertFalse(result);
+        assertEquals(UserErrorType.EXPIRED_PASSWORD_RESET_CODE, ex.getErrorType());
         verify(redisRepository, never()).del(anyString());
     }
 }

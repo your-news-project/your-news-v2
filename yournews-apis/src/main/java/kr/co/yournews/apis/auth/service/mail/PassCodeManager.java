@@ -40,7 +40,6 @@ public class PassCodeManager {
                 uuid,
                 mailStrategyFactory.getStrategy(MailType.PASS)
         );
-        System.out.println(uuid);
     }
 
     /**
@@ -51,9 +50,7 @@ public class PassCodeManager {
      */
     @Transactional
     public void applyNewPassword(PassResetDto.ResetPassword resetPasswordDto) {
-        if (!passCodeService.validateResetUuid(resetPasswordDto.username(), resetPasswordDto.uuid())) {
-            throw new CustomException(UserErrorType.UNAUTHORIZED_ACTION);
-        }
+        passCodeService.validateResetUuid(resetPasswordDto.username(), resetPasswordDto.uuid());
 
         User user = userService.readByUsername(resetPasswordDto.username())
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));

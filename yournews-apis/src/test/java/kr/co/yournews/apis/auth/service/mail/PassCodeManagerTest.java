@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -97,7 +98,6 @@ public class PassCodeManagerTest {
 
             User mockUser = mock(User.class);
 
-            given(passCodeService.validateResetUuid(dto.username(), dto.uuid())).willReturn(true);
             given(userService.readByUsername(dto.username())).willReturn(Optional.of(mockUser));
             given(passwordEncodeService.encode(dto.password())).willReturn("encoded");
 
@@ -115,14 +115,16 @@ public class PassCodeManagerTest {
             PassResetDto.ResetPassword dto =
                     new PassResetDto.ResetPassword("user1", "invalid-uuid", "newPassword");
 
-            given(passCodeService.validateResetUuid(dto.username(), dto.uuid())).willReturn(false);
+            doThrow(new CustomException(UserErrorType.INVALID_PASSWORD_RESET_REQUEST))
+                    .when(passCodeService)
+                    .validateResetUuid(dto.username(), dto.uuid());
 
             // when
             CustomException ex = assertThrows(CustomException.class,
                     () -> passCodeManager.applyNewPassword(dto));
 
             // then
-            assertEquals(UserErrorType.UNAUTHORIZED_ACTION, ex.getErrorType());
+            assertEquals(UserErrorType.INVALID_PASSWORD_RESET_REQUEST, ex.getErrorType());
         }
 
         @Test
@@ -132,7 +134,6 @@ public class PassCodeManagerTest {
             PassResetDto.ResetPassword dto =
                     new PassResetDto.ResetPassword("user1", "uuid-1234", "newPassword");
 
-            given(passCodeService.validateResetUuid(dto.username(), dto.uuid())).willReturn(true);
             given(userService.readByUsername(dto.username())).willReturn(Optional.empty());
 
             // when
