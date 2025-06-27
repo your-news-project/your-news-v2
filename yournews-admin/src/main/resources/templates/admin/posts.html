@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 목록</title>
+    <link rel="stylesheet" href="/admin/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>게시글 목록</h2>
+
+    <div class="category-select">
+        <label for="category">카테고리:</label>
+        <select id="category">
+            <option value="NOTICE">공지사항</option>
+            <option value="NEWS_REQUEST">소식 추가 요청</option>
+        </select>
+        <button id="load-button">불러오기</button>
+
+        <button id="create-button">공지사항 작성</button>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
+            <th>좋아요 수</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody id="post-table-body"></tbody>
+    </table>
+
+    <div id="pagination" class="pagination"></div>
+</div>
+
+<script src="/admin/js/utils/fetchWithAuth.js"></script>
+<script src="/admin/js/auth-check.js"></script>
+<script src="/admin/js/posts.js"></script>
+</body>
+</html>

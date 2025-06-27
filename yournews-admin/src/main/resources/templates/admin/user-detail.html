@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>사용자 상세</title>
+    <link rel="stylesheet" href="/admin/css/detail.css" />
+</head>
+<body>
+<div class="container">
+    <h2>사용자 상세 정보</h2>
+
+    <div class="detail-group"><strong>ID:</strong> <span id="detail-id"></span></div>
+    <div class="detail-group"><strong>아이디:</strong> <span id="detail-username"></span></div>
+    <div class="detail-group"><strong>닉네임:</strong> <span id="detail-nickname"></span></div>
+    <div class="detail-group"><strong>이메일:</strong> <span id="detail-email"></span></div>
+    <div class="detail-group"><strong>플랫폼:</strong> <span id="detail-platform"></span></div>
+    <div class="detail-group"><strong>구독한 소식:</strong> <span id="detail-subscriptions"></span></div>
+    <div class="detail-group"><strong>키워드:</strong> <span id="detail-keywords"></span></div>
+    <div class="detail-group"><strong>상태:</strong> <span id="detail-status"></span></div>
+
+    <div id="ban-reason-group" style="display: none;">
+        <div class="detail-group"><strong>차단 일시:</strong> <span id="detail-bannedAt"></span></div>
+        <div class="detail-group"><strong>차단 사유:</strong> <span id="detail-banReason"></span></div>
+    </div>
+
+    <div class="action-buttons">
+        <button id="ban-button">차단</button>
+        <button id="back-button">목록으로</button>
+    </div>
+</div>
+<script src="/admin/js/utils/fetchWithAuth.js"></script>
+<script src="/admin/js/auth-check.js"></script>
+<script src="/admin/js/user-detail.js"></script>
+<script th:inline="javascript">
+    const userId = /*[[${userId}]]*/ 0;
+</script>
+</body>
+</html>

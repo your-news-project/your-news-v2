@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 작성</title>
+    <link rel="stylesheet" href="/admin/css/post.css">
+</head>
+<body>
+<div class="container">
+    <h2 class="page-title">게시글 작성</h2>
+
+    <form id="create-form">
+        <div class="form-group">
+            <label for="title">제목:</label>
+            <input type="text" id="title" name="title" required maxlength="50" class="text-input" />
+        </div>
+
+        <div class="form-group">
+            <label for="content">내용:</label>
+            <textarea id="content" name="content" required rows="10" class="textarea-input"></textarea>
+        </div>
+
+        <div class="action-buttons">
+            <button type="submit" id="create-button" class="primary-button">작성 완료</button>
+            <button type="button" id="cancel-button" class="secondary-button">취소</button>
+        </div>
+    </form>
+</div>
+
+<script src="/admin/js/utils/fetchWithAuth.js"></script>
+<script src="/admin/js/auth-check.js"></script>
+<script src="/admin/js/post-create.js"></script>
+</body>
+</html>

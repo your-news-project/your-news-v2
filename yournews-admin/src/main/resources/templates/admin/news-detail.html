@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>소식 상세</title>
+    <link rel="stylesheet" href="/admin/css/detail.css">
+</head>
+<body>
+<div class="container">
+    <h2>소식 상세 정보</h2>
+
+    <div class="detail-group"><strong>ID:</strong> <span id="detail-id"></span></div>
+    <div class="detail-group"><strong>이름:</strong> <span id="detail-name"></span></div>
+    <div class="detail-group"><strong>URL:</strong> <span id="detail-url"></span></div>
+    <div class="detail-group"><strong>소속 단과대:</strong> <span id="detail-college"></span></div>
+    <div class="detail-group"><strong>구독자 수:</strong> <span id="detail-subMember"></span></div>
+
+    <div class="action-buttons">
+        <button id="delete-button">삭제</button>
+        <button id="back-button">목록으로</button>
+    </div>
+</div>
+
+<script src="/admin/js/utils/fetchWithAuth.js"></script>
+<script src="/admin/js/auth-check.js"></script>
+<script src="/admin/js/news-detail.js"></script>
+<script th:inline="javascript">
+    const newsId = /*[[${news}]]*/ 0;
+</script>
+</body>
+</html>

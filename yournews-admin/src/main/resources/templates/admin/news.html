@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>소식 목록</title>
+    <link rel="stylesheet" href="/admin/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>소식 목록</h2>
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+        <button id="create-button">소식 생성하기</button>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>이름</th>
+            <th>URL</th>
+            <th>소속 대학</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody id="news-table-body"></tbody>
+    </table>
+
+    <div id="pagination" class="pagination"></div>
+</div>
+
+<script src="/admin/js/utils/fetchWithAuth.js"></script>
+<script src="/admin/js/auth-check.js"></script>
+<script src="/admin/js/news.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 수정</title>
+    <link rel="stylesheet" href="/admin/css/post.css">
+</head>
+<body>
+<div class="container">
+    <h2>게시글 수정</h2>
+
+    <form id="edit-form">
+        <div class="detail-group input-group">
+            <strong>제목:</strong>
+            <input type="text" id="title" name="title" required maxlength="50" class="text-input" />
+        </div>
+
+        <div class="detail-group textarea-group">
+            <strong>내용:</strong>
+            <textarea id="content" name="content" required rows="10" class="textarea-input"></textarea>
+        </div>
+
+        <div class="action-buttons">
+            <button type="submit" id="save-button">수정 완료</button>
+            <button type="button" id="cancel-button">취소</button>
+        </div>
+    </form>
+</div>
+
+<script src="/admin/js/utils/fetchWithAuth.js"></script>
+<script src="/admin/js/auth-check.js"></script>
+<script src="/admin/js/post-edit.js"></script>
+<script th:inline="javascript">
+    const postId = /*[[${postId}]]*/ 0;
+</script>
+</body>
+</html>
