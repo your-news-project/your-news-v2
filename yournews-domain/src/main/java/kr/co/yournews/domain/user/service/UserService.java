@@ -29,7 +29,7 @@ public class UserService {
     }
 
     public Optional<User> readByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmailIncludeDeleted(email);
     }
 
     public List<Long> readAllUserIdsByNewsNameAndSubStatusTrue(String newsName) {
@@ -57,15 +57,15 @@ public class UserService {
     }
 
     public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+        return userRepository.existsByEmailIncludeDeleted(email) == 1;
     }
 
     public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
+        return userRepository.existsByUsernameIncludeDeleted(username) == 1;
     }
 
     public boolean existsByNickname(String nickname) {
-        return userRepository.existsByNickname(nickname);
+        return userRepository.existsByNicknameIncludeDeleted(nickname) == 1;
     }
 
     public boolean existsByUsernameAndEmail(String username, String email) {

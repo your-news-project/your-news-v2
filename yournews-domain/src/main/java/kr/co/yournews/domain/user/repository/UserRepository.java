@@ -12,17 +12,25 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, CustomUserRepository {
     Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);
-    boolean existsByEmail(String email);
-    boolean existsByUsername(String username);
-    boolean existsByNickname(String nickname);
     boolean existsByUsernameAndEmail(String username, String email);
+
+    @Query(value = "SELECT * FROM user WHERE email = :email", nativeQuery = true)
+    Optional<User> findByEmailIncludeDeleted(@Param("email") String email);
 
     @Query(value = "SELECT * FROM user WHERE username = :username", nativeQuery = true)
     Optional<User> findByUsernameIncludeDeleted(@Param("username") String username);
 
     @Query(value = "SELECT id FROM user WHERE deleted_at IS NOT NULL AND deleted_at <= :dateTime", nativeQuery = true)
     List<Long> findSoftDeletedUserIdsBefore(@Param("dateTime") LocalDate dateTime);
+
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM user WHERE email = :email)", nativeQuery = true)
+    Long existsByEmailIncludeDeleted(@Param("email") String email);
+
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM user WHERE username = :username)", nativeQuery = true)
+    Long existsByUsernameIncludeDeleted(@Param("username") String username);
+
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM user WHERE nickname = :nickname)", nativeQuery = true)
+    Long existsByNicknameIncludeDeleted(@Param("nickname") String nickname);
 
     @Modifying
     @Query(value = "DELETE FROM user WHERE id IN :ids", nativeQuery = true)
