@@ -13,7 +13,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -22,6 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final AccessDeniedHandler accessDeniedHandler;
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/auth/**", "/api/v1/admin/auth/sign-in",
@@ -51,7 +55,11 @@ public class SecurityConfig {
                         .anyRequest().hasAnyRole(Role.USER.name(), Role.ADMIN.name())
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
+                .exceptionHandling(exceptionConfig -> exceptionConfig
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                );
 
         return http.build();
     }
