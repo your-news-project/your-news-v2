@@ -69,7 +69,7 @@ public class JwtHelperTest {
         given(jwtProvider.generateRefreshToken(username, nickname, userId)).willReturn(refreshToken);
 
         // when
-        TokenDto returnTokenDto = jwtHelper.createToken(user);
+        TokenDto returnTokenDto = jwtHelper.createToken(user, TokenMode.FULL);
 
         // then
         verify(refreshTokenService, times(1)).saveRefreshToken(username, refreshToken);

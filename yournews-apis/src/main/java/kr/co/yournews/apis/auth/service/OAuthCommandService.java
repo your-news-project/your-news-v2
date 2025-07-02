@@ -61,7 +61,7 @@ public class OAuthCommandService {
     public OAuthTokenDto signIn(OAuthPlatform platform, OAuthCode oAuthCode) {
         OAuthClient oAuthClient = oAuthClientFactory.getPlatformService(platform);
 
-        OAuthUserInfoRes userInfoRes = oAuthClient.fetchUserInfoFromPlatform(oAuthCode.code());
+        OAuthUserInfoRes userInfoRes = oAuthClient.authenticate(oAuthCode.code());
         UserStatusDto userStatusDto = findOrRegisterUser(platform, userInfoRes);
         TokenDto tokenDto = jwtHelper.createToken(userStatusDto.user(), TokenMode.FULL);
 
@@ -80,7 +80,7 @@ public class OAuthCommandService {
      * @return : 사용자 상태 정보
      */
     private UserStatusDto findOrRegisterUser(OAuthPlatform platform, OAuthUserInfoRes userInfoRes) {
-        String username = userInfoRes.nickname() + "_" + userInfoRes.id();
+        String username = platform.name().toLowerCase() + "_" + userInfoRes.id();
 
         return userService.readByUsernameIncludeDeleted(username)
                 .map(user -> {

@@ -42,23 +42,35 @@ mail:
     email: ${ADMIN_EMAIL}
 
 oauth2:
-  kakao:
-    tokenUri: https://kauth.kakao.com/oauth/token
-    clientId: ${KAKAO_CLIENT_ID}
-    clientSecret: ${KAKAO_CLIENT_SECRET}
-    redirectUri: ${KAKAO_REDIRECT_URL}
-    userInfoUri: https://kapi.kakao.com/v2/user/me
-
   naver:
     tokenUri: https://nid.naver.com/oauth2.0/token
     clientId: ${NAVER_CLIENT_ID}
     clientSecret: ${NAVER_CLIENT_SECRET}
-    redirectUri: ${NAVER_REDIRECT_URL}
+    redirectUri: ${NAVER_REDIRECT_URI}
     userInfoUri: https://openapi.naver.com/v1/nid/me
+
+  kakao:
+    tokenUri: https://kauth.kakao.com/oauth/token
+    clientId: ${KAKAO_CLIENT_ID}
+    clientSecret: ${KAKAO_CLIENT_SECRET}
+    redirectUri: ${KAKAO_REDIRECT_URI}
+    userInfoUri: https://kapi.kakao.com/v2/user/me
+    issuer: https://kauth.kakao.com
+
+  apple:
+    tokenUri: https://appleid.apple.com/auth/token
+    clientId: ${APPLE_CLIENT_ID}
+    redirectUri: ${APPLE_REDIRECT_URI}
+    userInfoUri: https://appleid.apple.com/auth/token
+    issuer: https://appleid.apple.com
+    teamId: ${APPLE_TEAM_ID}
+    keyId: ${APPLE_KEY_ID}
+    privateKey: ${APPLE_KEY}
 
 cache:
   ttl:
     default: ${CACHE_TTL:30}
+    apple-client-secret: ${CLIENT_SECRET_TTL:15552000}
 
 openai:
   api:

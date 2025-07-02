@@ -1,4 +1,4 @@
-package kr.co.yournews.infra.oauth;
+package kr.co.yournews.infra.oauth.basic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

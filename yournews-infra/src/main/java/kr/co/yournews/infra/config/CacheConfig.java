@@ -13,6 +13,8 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableCaching
@@ -21,15 +23,23 @@ public class CacheConfig {
     @Value("${cache.ttl.default}")
     private long defaultCacheTtl;
 
+    @Value("${cache.ttl.apple-client-secret}")
+    private long appleClientSecretTtl;
+
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
-        RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
+        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(defaultCacheTtl))
                 .disableCachingNullValues()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(RedisSerializer.json()));
+
+        Map<String, RedisCacheConfiguration> configMap = new HashMap<>();
+        configMap.put("appleClientSecret", defaultConfig.entryTtl(Duration.ofSeconds(appleClientSecretTtl)));
+
         return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(cacheConfiguration)
+                .cacheDefaults(defaultConfig)
+                .withInitialCacheConfigurations(configMap)
                 .build();
     }
 

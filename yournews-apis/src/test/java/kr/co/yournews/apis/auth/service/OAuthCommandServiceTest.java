@@ -58,7 +58,9 @@ public class OAuthCommandServiceTest {
     private final OAuthPlatform platform = OAuthPlatform.NAVER;
     private final OAuthCode oAuthCode = new OAuthCode("authCode123");
 
-    private final OAuthUserInfoRes userInfoRes = new OAuthUserInfoRes("oauthId123", "nickname", "test@naver.com");
+    private final OAuthUserInfoRes userInfoRes = new OAuthUserInfoRes("oauthId123", "test@naver.com");
+
+    private final String username = platform.name().toLowerCase() + "_" + userInfoRes.id();
 
     private final User user = User.builder()
             .username("nickname_oauthId123")
@@ -96,8 +98,8 @@ public class OAuthCommandServiceTest {
     void signInExistingUserSuccess() {
         // given
         given(oAuthClientFactory.getPlatformService(platform)).willReturn(oAuthClient);
-        given(oAuthClient.fetchUserInfoFromPlatform("authCode123")).willReturn(userInfoRes);
-        given(userService.readByUsernameIncludeDeleted("nickname_oauthId123")).willReturn(Optional.of(user));
+        given(oAuthClient.authenticate("authCode123")).willReturn(userInfoRes);
+        given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.of(user));
         given(jwtHelper.createToken(user, TokenMode.FULL)).willReturn(tokenDto);
 
         // when
@@ -114,8 +116,8 @@ public class OAuthCommandServiceTest {
     void signInNewUserRegisterAndLogin() {
         // given
         given(oAuthClientFactory.getPlatformService(platform)).willReturn(oAuthClient);
-        given(oAuthClient.fetchUserInfoFromPlatform("authCode123")).willReturn(userInfoRes);
-        given(userService.readByUsernameIncludeDeleted("nickname_oauthId123")).willReturn(Optional.empty());
+        given(oAuthClient.authenticate("authCode123")).willReturn(userInfoRes);
+        given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.empty());
         given(userService.save(any(User.class))).willReturn(user);
         given(jwtHelper.createToken(user, TokenMode.FULL)).willReturn(tokenDto);
 
@@ -133,13 +135,13 @@ public class OAuthCommandServiceTest {
     void signInFailBySoftDeletedUser() {
         // given
         User user = User.builder()
-                .username(userInfoRes.nickname() + "_" + userInfoRes.id())
+                .username(username)
                 .build();
         ReflectionTestUtils.setField(user, "deletedAt", LocalDateTime.now().minusDays(2));
 
         given(oAuthClientFactory.getPlatformService(platform)).willReturn(oAuthClient);
-        given(oAuthClient.fetchUserInfoFromPlatform("authCode123")).willReturn(userInfoRes);
-        given(userService.readByUsernameIncludeDeleted("nickname_oauthId123")).willReturn(Optional.of(user));
+        given(oAuthClient.authenticate("authCode123")).willReturn(userInfoRes);
+        given(userService.readByUsernameIncludeDeleted(username)).willReturn(Optional.of(user));
 
         // when
         CustomException exception = assertThrows(CustomException.class, () ->
