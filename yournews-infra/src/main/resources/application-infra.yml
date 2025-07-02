@@ -70,6 +70,7 @@ oauth2:
 cache:
   ttl:
     default: ${CACHE_TTL:30}
+    apple-client-secret: ${CLIENT_SECRET_TTL:15552000}
 
 openai:
   api:
