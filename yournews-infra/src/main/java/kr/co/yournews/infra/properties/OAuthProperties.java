@@ -1,7 +1,6 @@
 package kr.co.yournews.infra.properties;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -12,14 +11,22 @@ import org.springframework.stereotype.Component;
 public class OAuthProperties {
     private Platform kakao;
     private Platform naver;
+    private ApplePlatform apple;
 
-    @Getter
-    @RequiredArgsConstructor
+    @Getter @Setter
     public static class Platform {
-        private final String tokenUri;
-        private final String userInfoUri;
-        private final String clientId;
-        private final String clientSecret;
-        private final String redirectUri;
+        private String tokenUri;
+        private String userInfoUri;
+        private String clientId;
+        private String clientSecret;
+        private String redirectUri;
+        private String issuer;
+    }
+
+    @Getter @Setter
+    public static class ApplePlatform extends Platform {
+        private String teamId;
+        private String keyId;
+        private String privateKey;
     }
 }
