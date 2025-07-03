@@ -5,11 +5,13 @@ import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.news.exception.NewsErrorType;
 import kr.co.yournews.domain.news.service.NewsService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NewsManagementQueryService {
@@ -22,6 +24,7 @@ public class NewsManagementQueryService {
      */
     @Transactional(readOnly = true)
     public Page<NewsRes.Summary> getAllNews(Pageable pageable) {
+        log.info("[ADMIN 소식 목록 조회 요청]");
         return newsService.readAll(pageable)
                 .map(NewsRes.Summary::from);
     }
@@ -35,6 +38,7 @@ public class NewsManagementQueryService {
      */
     @Transactional(readOnly = true)
     public NewsRes.Details getNewsInfoById(Long newsId) {
+        log.info("[ADMIN 소식 조회 요청] newsId: {}", newsId);
         return NewsRes.Details.from(
                 newsService.readById(newsId)
                         .orElseThrow(() -> new CustomException(NewsErrorType.NOT_FOUND))

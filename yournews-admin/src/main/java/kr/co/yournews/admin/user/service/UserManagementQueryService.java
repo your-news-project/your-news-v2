@@ -8,6 +8,7 @@ import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserManagementQueryService {
@@ -28,6 +30,7 @@ public class UserManagementQueryService {
      */
     @Transactional(readOnly = true)
     public Page<UserRes.Summary> getAllUsers(Pageable pageable) {
+        log.info("[ADMIN 사용자 목록 조회 요청]");
         return userService.readAll(pageable)
                 .map(UserRes.Summary::from);
     }

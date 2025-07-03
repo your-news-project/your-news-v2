@@ -6,9 +6,11 @@ import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserManagementCommandService {
@@ -23,10 +25,13 @@ public class UserManagementCommandService {
      */
     @Transactional
     public void banUser(Long userId, UserWithdrawDto userWithdrawDto) {
+        log.info("[ADMIN 사용자 BAN 처리 요청] userId: {}, reason: {}", userId, userWithdrawDto.reason());
+
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
         user.ban(userWithdrawDto.reason());
+        log.info("[ADMIN 사용자 BAN 처리 완료] userId: {}, reason: {}", userId, userWithdrawDto.reason());
     }
 
     /**
@@ -37,9 +42,12 @@ public class UserManagementCommandService {
      */
     @Transactional
     public void unbanUser(Long userId) {
+        log.info("[ADMIN 사용자 BAN 해지 요청] userId: {}", userId);
+
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
         user.unban();
+        log.info("[ADMIN 사용자 BAN 해지 완료] userId: {}", userId);
     }
 }

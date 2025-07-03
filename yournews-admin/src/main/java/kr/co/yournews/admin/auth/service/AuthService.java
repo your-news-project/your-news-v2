@@ -10,11 +10,13 @@ import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static kr.co.yournews.common.util.AuthConstants.TOKEN_TYPE;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -31,6 +33,8 @@ public class AuthService {
      */
     @Transactional(readOnly = true)
     public TokenDto signIn(SignInDto signInDto) {
+        log.info("[ADMIN 로그인 요청] username: {}", signInDto.username());
+
         User user = userService.readByUsername(signInDto.username())
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
@@ -42,6 +46,7 @@ public class AuthService {
             throw new CustomException(UserErrorType.NOT_ADMIN);
         }
 
+        log.info("[ADMIN 로그인 성공] userId: {}", user.getId());
         return jwtHelper.createToken(user, TokenMode.ACCESS_ONLY);
     }
 
@@ -53,5 +58,7 @@ public class AuthService {
     public void signOut(String accessTokenInHeader) {
         String accessToken = accessTokenInHeader.substring(TOKEN_TYPE.length()).trim();
         jwtHelper.removeToken(accessToken);
+
+        log.info("[ADMIN 로그아웃 성공]");
     }
 }
