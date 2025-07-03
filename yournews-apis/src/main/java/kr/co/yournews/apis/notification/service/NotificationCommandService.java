@@ -5,12 +5,14 @@ import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.exception.NotificationErrorType;
 import kr.co.yournews.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationCommandService {
@@ -51,6 +53,10 @@ public class NotificationCommandService {
     @Transactional
     public void deleteOldNotification() {
         LocalDate dateTime = LocalDate.now().minusDays(10);
+        log.info("[오래된 알림 삭제 요청] 기준일: {}", dateTime);
+
         notificationService.deleteByDateTime(dateTime);
+
+        log.info("[오래된 알림 삭제 완료] 기준일 이전 데이터 삭제 완료");
     }
 }

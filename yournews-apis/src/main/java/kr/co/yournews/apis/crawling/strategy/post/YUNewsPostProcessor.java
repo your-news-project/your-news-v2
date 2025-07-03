@@ -12,6 +12,7 @@ import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class YUNewsPostProcessor extends PostProcessor {
     private final NotificationCommandService notificationCommandService;
@@ -66,22 +68,29 @@ public class YUNewsPostProcessor extends PostProcessor {
      */
     @Override
     public void process(String newsName, Elements elements, CrawlingStrategy strategy) {
+        log.info("[YUNews 크롤링 처리 시작] newsName: {}, strategy: {}", newsName, strategy.getClass().getSimpleName());
         YUNewsCrawlingStrategy yuNewsStrategy = (YUNewsCrawlingStrategy) strategy;
 
         Map<KeywordType, CrawlingPostInfo> keywordToPosts = extractNewPostsByKeyword(elements, yuNewsStrategy);
-        if (keywordToPosts.isEmpty()) return;
+        if (keywordToPosts.isEmpty()) {
+            log.info("[YUNews 새 게시글 없음] newsName: {}", newsName);
+            return;
+        }
 
         saveDailyNewsInfo(newsName, keywordToPosts);
 
         List<Long> userIds = yuNewsStrategy.getSubscribedUsers(newsName);
-        if (userIds.isEmpty()) return;
+        if (userIds.isEmpty()) {
+            log.info("[YUNews 구독자 없음] newsName: {}", newsName);
+            return;
+        }
 
         Map<Long, List<KeywordType>> userToKeywords = getUserToKeywords(userIds);
 
         // 모든 알림에 공통으로 사용될 public_id (알림 페이지 이동을 위해)
         String publicId = UUID.randomUUID().toString();
-
         saveNotifications(userIds, userToKeywords, keywordToPosts, newsName, publicId);
+        log.info("[YUNews 알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}", userIds.size(), newsName, publicId);
 
         List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
         sendFcmMessages(tokens, newsName, publicId);

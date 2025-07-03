@@ -4,11 +4,13 @@ import kr.co.yournews.apis.notification.dto.DailyNewsDto;
 import kr.co.yournews.infra.redis.RedisRepository;
 import kr.co.yournews.infra.redis.util.RedisConstants;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DailyNotificationService {
@@ -28,6 +30,8 @@ public class DailyNotificationService {
                 .toList();
 
         redisRepository.setListAll(key, dailyNewsDtos);
+
+        log.info("[새로운 소식 저장 완료] newsName: {}, 저장 개수: {}, key: {}", newsName, dailyNewsDtos.size(), key);
     }
 
     /**

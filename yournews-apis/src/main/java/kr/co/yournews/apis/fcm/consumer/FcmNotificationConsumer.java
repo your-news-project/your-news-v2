@@ -7,12 +7,14 @@ import kr.co.yournews.infra.fcm.constant.FcmConstant;
 import kr.co.yournews.infra.fcm.exception.FcmSendFailureException;
 import kr.co.yournews.infra.fcm.response.FcmSendResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FcmNotificationConsumer {
@@ -38,12 +40,18 @@ public class FcmNotificationConsumer {
         );
 
         if (result.shouldRemoveToken()) {
+            log.warn("[FCM] 유효하지 않은 토큰 삭제 - token: {}", message.token());
             fcmTokenService.deleteByToken(message.token());
             return;
         }
 
         if (!result.success()) {
+            log.error("[FCM] 전송 실패 (재시도 처리) - token: {}, reason: {}", message.token(), result.message());
             throw new FcmSendFailureException(result.message());
+        }
+
+        if (message.isLast()) {
+            log.info("[FCM] 소식 단위 전송 완료 (추정) - title: {}", message.title());
         }
     }
 

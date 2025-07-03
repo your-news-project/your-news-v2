@@ -5,6 +5,7 @@ import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import kr.co.yournews.infra.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import static kr.co.yournews.infra.redis.util.RedisConstants.CODE_PREFIX;
 import static kr.co.yournews.infra.redis.util.RedisConstants.VERIFIED_PREFIX;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthCodeService {
@@ -43,6 +45,7 @@ public class AuthCodeService {
         String code = generateCode();
         redisRepository.set(key, code, TTL);
 
+        log.info("[인증코드 생성 및 저장 완료] email={}, code={}", email, code);
         return code;
     }
 
@@ -109,6 +112,8 @@ public class AuthCodeService {
      * @throws CustomException CODE_NOT_VERIFIED: 인증되지 않은 경우
      */
     public void ensureVerifiedAndConsume(String email) {
+        log.info("[이메일 인증 상태 검증] email={}", email);
+
         String key = VERIFIED_PREFIX + email;
         Boolean isVerified = (Boolean) redisRepository.get(key);
 
@@ -117,5 +122,7 @@ public class AuthCodeService {
         }
 
         redisRepository.del(key);
+
+        log.info("[이메일 인증 상태 확인 완료] email={}", email);
     }
 }

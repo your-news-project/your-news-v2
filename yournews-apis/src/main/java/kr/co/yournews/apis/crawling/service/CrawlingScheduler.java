@@ -3,6 +3,7 @@ package kr.co.yournews.apis.crawling.service;
 import jakarta.annotation.PostConstruct;
 import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.TimeZone;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CrawlingScheduler {
@@ -23,9 +25,13 @@ public class CrawlingScheduler {
      */
     @PostConstruct
     public void scheduleCrawlingTasks() {
+        log.info("[크롤링 스케줄링 등록 시작] 등록된 전략 수: {}", strategies.size());
+
         strategies.forEach(strategy -> taskScheduler.schedule(
                 () -> crawlingExecutor.executeStrategy(strategy),
                 new CronTrigger(strategy.getScheduledTime(), TimeZone.getTimeZone("Asia/Seoul"))
         ));
+
+        log.info("[크롤링 스케줄링 등록 완료]");
     }
 }

@@ -6,6 +6,7 @@ import kr.co.yournews.apis.crawling.strategy.post.PostProcessor;
 import kr.co.yournews.domain.news.service.NewsService;
 import kr.co.yournews.infra.crawling.NewsProcessor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.scheduling.annotation.Async;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CrawlingExecutor {
@@ -28,6 +30,9 @@ public class CrawlingExecutor {
      */
     @Async
     public void executeStrategy(CrawlingStrategy strategy) {
+        String strategyName = strategy.getClass().getSimpleName();
+        log.info("[크롤링 시작] strategy: {}", strategyName);
+
         newsService.readAll().stream()
                 .filter(news -> strategy.canHandle(news.getName()))
                 .forEach(news -> {
@@ -39,6 +44,7 @@ public class CrawlingExecutor {
                         crawlAndProcess(news.getName(), news.getUrl(), strategy);
                     }
                 });
+        log.info("[크롤링 완료] strategy: {}", strategyName);
     }
 
     /**
@@ -50,13 +56,21 @@ public class CrawlingExecutor {
      * @param strategy : 크롤링 전략
      */
     private void crawlAndProcess(String newsName, String url, CrawlingStrategy strategy) {
+        log.info("[크롤링 요청] newsName: {}, url: {}", newsName, url);
+
         Document doc = newsProcessor.fetch(url);
 
-        if (doc == null) return;
+        if (doc == null) {
+            log.warn("[크롤링 실패] Document null - newsName: {}, url: {}", newsName, url);
+            return;
+        }
 
         Elements elements = strategy.getPostElements(doc);
 
-        if (elements.isEmpty()) return;
+        if (elements.isEmpty()) {
+            log.warn("[소식 내 게시글 없음] newsName: {}, url: {}", newsName, url);
+            return;
+        }
 
         postProcessors.stream()
                 .filter(processor -> processor.supports(strategy))

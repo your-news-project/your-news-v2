@@ -8,11 +8,13 @@ import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FcmTokenCommandService {
@@ -33,11 +35,13 @@ public class FcmTokenCommandService {
 
         if (fcmToken.isPresent()) {
             fcmToken.get().updateToken(registerDto.token());
+            log.info("[FCM 토큰 갱신 성공] userId: {}, deviceInfo: {}", userId, registerDto.deviceInfo());
         } else {
             User user = userService.readById(userId)
                     .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
             fcmTokenService.save(registerDto.toEntity(user));
+            log.info("[FCM 토큰 등록 완료] userId: {}, deviceInfo: {}", userId, registerDto.deviceInfo());
         }
     }
 
@@ -51,6 +55,7 @@ public class FcmTokenCommandService {
     @Transactional
     public void deleteTokenByUserAndDevice(Long userId, String deviceInfo) {
         fcmTokenService.deleteByUserIdAndDeviceInfo(userId, deviceInfo);
+        log.info("[FCM 토큰 삭제] userId: {}, deviceInfo: {}", userId, deviceInfo);
     }
 
     /**
@@ -62,5 +67,6 @@ public class FcmTokenCommandService {
     @Transactional
     public void deleteTokenByUserId(Long userId) {
         fcmTokenService.deleteAllByUserId(userId);
+        log.info("[FCM 토큰 전체 삭제] userId: {}", userId);
     }
 }

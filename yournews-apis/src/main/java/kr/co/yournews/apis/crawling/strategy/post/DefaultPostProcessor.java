@@ -9,6 +9,7 @@ import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class DefaultPostProcessor extends PostProcessor {
     private final NotificationCommandService notificationCommandService;
@@ -58,19 +60,27 @@ public class DefaultPostProcessor extends PostProcessor {
      */
     @Override
     public void process(String newsName, Elements elements, CrawlingStrategy strategy) {
+        log.info("[크롤링 처리 시작] newsName: {}, strategy: {}", newsName, strategy.getClass().getSimpleName());
+
         CrawlingPostInfo postInfo = extractNewPosts(elements, strategy);
-        if (postInfo.isEmpty()) return;
+        if (postInfo.isEmpty()) {
+            log.info("[새 게시글 없음] newsName: {}", newsName);
+            return;
+        }
 
         // 일간 소식 정보 저장
         dailyNotificationService.saveNewsInfo(newsName, postInfo.titles(), postInfo.urls());
 
         List<Long> userIds = strategy.getSubscribedUsers(newsName);
-        if (userIds.isEmpty()) return;
+        if (userIds.isEmpty()) {
+            log.info("[구독자 없음] newsName: {}", newsName);
+            return;
+        }
 
         // 모든 알림에 공통으로 사용될 public_id (알림 페이지 이동을 위해)
         String publicId = UUID.randomUUID().toString();
-
         saveNotifications(userIds, newsName, postInfo.titles(), postInfo.urls(), publicId);
+        log.info("[알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}", userIds.size(), newsName, publicId);
 
         List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
         sendFcmMessages(tokens, newsName, publicId);
