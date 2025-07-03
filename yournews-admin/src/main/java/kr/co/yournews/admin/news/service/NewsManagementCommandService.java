@@ -4,9 +4,11 @@ import kr.co.yournews.admin.news.dto.NewsReq;
 import kr.co.yournews.domain.news.service.NewsService;
 import kr.co.yournews.domain.news.service.SubNewsService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NewsManagementCommandService {
@@ -20,7 +22,9 @@ public class NewsManagementCommandService {
      */
     @Transactional
     public void createNews(NewsReq newsReq) {
+        log.info("[ADMIN 소식 생성 요청] newsName: {}", newsReq.name());
         newsService.save(newsReq.toEntity());
+        log.info("[ADMIN 소식 생성 완료] newsName: {}", newsReq.name());
     }
 
     /**
@@ -33,5 +37,6 @@ public class NewsManagementCommandService {
     public void deleteNews(Long newsId) {
         subNewsService.deleteAllByNewsId(newsId);
         newsService.deleteById(newsId);
+        log.info("[ADMIN 소식 삭제 완료] newsId: {}", newsId);
     }
 }

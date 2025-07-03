@@ -10,9 +10,11 @@ import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostManagementCommandService {
@@ -30,11 +32,14 @@ public class PostManagementCommandService {
      */
     @Transactional
     public PostDto.Response createPost(Long userId, PostDto.Request request) {
+        log.info("[ADMIN 공지 생성 요청] title: {}", request.title());
+
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
         Long postId = postService.save(request.toEntity(user));
 
+        log.info("[ADMIN] 게시글 생성 완료 postId: {}", postId);
         return PostDto.Response.of(postId);
     }
 
@@ -47,6 +52,8 @@ public class PostManagementCommandService {
      */
     @Transactional
     public void updatePost(Long userId, Long postId, PostDto.Request request) {
+        log.info("[ADMIN 공지 수정 요청] postId: {}, newTitle: {}", postId, request.title());
+
         Post post = postService.readById(postId)
                 .orElseThrow(() -> new CustomException(PostErrorType.NOT_FOUND));
 
@@ -55,6 +62,7 @@ public class PostManagementCommandService {
         }
 
         post.updateInfo(request.title(), request.content());
+        log.info("[ADMIN 게시글 수정 완료] postId: {}", postId);
     }
 
     /**
@@ -66,5 +74,6 @@ public class PostManagementCommandService {
     public void deletePost(Long postId) {
         postLikeService.deleteAllByPostId(postId);
         postService.deleteById(postId);
+        log.info("[ADMIN 게시글 삭제 완료] postId: {}", postId);
     }
 }
