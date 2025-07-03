@@ -12,12 +12,14 @@ import kr.co.yournews.domain.user.service.UserService;
 import kr.co.yournews.infra.fcm.constant.FcmConstant;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DailyNotificationProcessor {
@@ -50,12 +52,16 @@ public class DailyNotificationProcessor {
         List<DailyNewsDto> newsListDtos = dailyNotificationService.getAllNewsInfo(newsName);
         if (newsListDtos.isEmpty()) return;
 
+        log.info("[소식 처리 시작] 소식명: {}", newsName);
+
         String publicId = UUID.randomUUID().toString();
         List<Long> userIds = userService.readAllUserIdsByNewsNameAndDailySubStatusTrue(newsName);
         List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
 
         saveNotifications(userIds, newsName, newsListDtos, publicId);
         sendFcmMessages(tokens, newsName, publicId);
+
+        log.info("[소식 처리 완료] 소식명: {}, 사용자 수: {}, 토큰 수: {}", newsName, userIds.size(), tokens.size());
     }
 
     /**
@@ -83,6 +89,9 @@ public class DailyNotificationProcessor {
                 .toList();
 
         notificationCommandService.createNotifications(notifications);
+
+        log.info("[알림 저장 완료] 소식명: {}, 사용자 수: {}, 게시글 수: {}, publicId: {}",
+                newsName, userIds.size(), titles.size(), publicId);
     }
 
     /**
@@ -111,8 +120,16 @@ public class DailyNotificationProcessor {
     private void sendFcmMessages(List<FcmToken> tokens, String newsName, String publicId) {
         String title = FcmConstant.getDailyNewsNotificationTitle(newsName);
 
-        for (FcmToken token : tokens) {
-            rabbitMessagePublisher.send(FcmMessageDto.of(token.getToken(), title, publicId));
+        log.info("[알림 메시지 큐 전송 시작] 소식명: {}, 토큰 수: {}", newsName, tokens.size());
+
+        for (int idx = 0; idx < tokens.size(); idx++) {
+            FcmToken token = tokens.get(idx);
+            boolean isLast = (idx == tokens.size() - 1); // 마지막 토큰 여부 판단
+            rabbitMessagePublisher.send(
+                    FcmMessageDto.of(token.getToken(), title, publicId, isLast)
+            );
         }
+
+        log.info("[알림 메시지 큐 전송 완료] 소식명: {}, publicId: {}", newsName, publicId);
     }
 }

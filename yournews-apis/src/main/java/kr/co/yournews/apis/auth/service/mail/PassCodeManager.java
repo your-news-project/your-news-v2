@@ -10,9 +10,11 @@ import kr.co.yournews.infra.mail.MailSenderAdapter;
 import kr.co.yournews.infra.mail.strategy.MailStrategyFactory;
 import kr.co.yournews.infra.mail.type.MailType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PassCodeManager {
@@ -30,6 +32,7 @@ public class PassCodeManager {
      */
     @Transactional(readOnly = true)
     public void initiatePasswordReset(PassResetDto.VerifyUser verifyUserDto) {
+        log.info("[비밀번호 재설정 요청] username={}, email={}", verifyUserDto.username(), verifyUserDto.email());
 
         if (!userService.existsByUsernameAndEmail(verifyUserDto.username(), verifyUserDto.email())) {
             throw new CustomException(UserErrorType.INVALID_USER_INFO);
@@ -40,6 +43,8 @@ public class PassCodeManager {
                 uuid,
                 mailStrategyFactory.getStrategy(MailType.PASS)
         );
+
+        log.info("[비밀번호 재설정 메일 발송 완료] username={}, email={}, uuid={}", verifyUserDto.username(), verifyUserDto.email(), uuid);
     }
 
     /**
@@ -50,11 +55,15 @@ public class PassCodeManager {
      */
     @Transactional
     public void applyNewPassword(PassResetDto.ResetPassword resetPasswordDto) {
+        log.info("[비밀번호 재설정 변경 시도] username={}, uuid={}", resetPasswordDto.username(), resetPasswordDto.uuid());
+
         passCodeService.validateResetUuid(resetPasswordDto.username(), resetPasswordDto.uuid());
 
         User user = userService.readByUsername(resetPasswordDto.username())
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
         user.updatePassword(passwordEncodeService.encode(resetPasswordDto.password()));
+
+        log.info("[비밀번호 재설정 변경 완료] userId={}", user.getId());
     }
 }

@@ -5,8 +5,10 @@ import kr.co.yournews.infra.mail.MailSenderAdapter;
 import kr.co.yournews.infra.mail.strategy.MailStrategyFactory;
 import kr.co.yournews.infra.mail.type.MailType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthCodeManager {
@@ -20,12 +22,16 @@ public class AuthCodeManager {
      * @param authCodeReq : 인증 코드 요청 객체 (이메일)
      */
     public void sendAuthCode(AuthCodeDto.Request authCodeReq) {
+        log.info("[인증코드 요청] email={}", authCodeReq.email());
+
         String code = authCodeService.generateAndSave(authCodeReq.email());
         mailSenderAdapter.sendMail(
                 authCodeReq.email(),
                 code,
                 mailStrategyFactory.getStrategy(MailType.CODE)
         );
+
+        log.info("[인증코드 전송 완료] email={}", authCodeReq.email());
     }
 
     /**

@@ -13,11 +13,13 @@ import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubNewsCommandService {
@@ -38,6 +40,10 @@ public class SubNewsCommandService {
     public void subscribeToNews(User user, List<Long> newsIds, List<String> keywords) {
         if (newsIds == null || newsIds.isEmpty()) return;
 
+        log.info("[소식 구독 요청] userId={}, 소식 개수={}, 키워드 개수={}",
+                user.getId(), newsIds.size(), keywords.size()
+        );
+
         List<News> newsList = newsService.readAllByIds(newsIds);
 
         List<SubNews> subNewsList = createSubNewsList(user, newsList);
@@ -46,6 +52,8 @@ public class SubNewsCommandService {
         if (!keywords.isEmpty()) {
             saveKeywordsIfYuNewsExists(subNewsList, keywords);
         }
+
+        log.info("[소식 구독 저장 완료] userId={}, 저장된 구독 수={}", user.getId(), subNewsList.size());
     }
 
     /**
@@ -75,7 +83,12 @@ public class SubNewsCommandService {
         SubNews yuNews = subNewsList.stream()
                 .filter(sub -> sub.getNews().isYuNews())
                 .findFirst()
-                .get();
+                .orElse(null);
+
+        if (yuNews == null) {
+            log.info("[영대소식 키워드 저장 실패] '영대소식' 구독하지 않음");
+            return;
+        }
 
         List<Keyword> keywordEntities = keywords.stream()
                 .map(label -> Keyword.builder()
@@ -85,6 +98,8 @@ public class SubNewsCommandService {
                 .toList();
 
         keywordService.saveAll(keywordEntities);
+
+        log.info("[영대소식 키워드 저장 완료] 키워드 수={}", keywordEntities.size());
     }
 
     /**
@@ -96,8 +111,11 @@ public class SubNewsCommandService {
      */
     @Transactional
     public void updateSubscribeNews(Long userId, SubNewsDto.Request subNewsDto) {
+        log.info("[소식 구독 갱신 요청] userId={}", userId);
+
         keywordService.deleteAllByUserId(userId);
         subNewsService.deleteAllByUserId(userId);
+        log.info("[기존 구독/키워드 삭제 완료] userId={}", userId);
 
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));

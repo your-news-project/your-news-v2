@@ -8,10 +8,12 @@ import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.infra.fcm.constant.FcmConstant;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 public abstract class PostProcessor {
     private final RabbitMessagePublisher rabbitMessagePublisher;
@@ -57,10 +59,18 @@ public abstract class PostProcessor {
      * FCM 메시지 전송 (RabbitMQ 이용)
      */
     protected void sendFcmMessages(List<FcmToken> tokens, String newsName, String publicId) {
+        log.info("[알림 메시지 큐 전송 시작] 소식명: {}, 토큰 수: {}, publicId: {}", newsName, tokens.size(), publicId);
+
         String title = FcmConstant.getNewsNotificationTitle(newsName);
 
-        for (FcmToken token : tokens) {
-            rabbitMessagePublisher.send(FcmMessageDto.of(token.getToken(), title, publicId));
+        for (int idx = 0; idx < tokens.size(); idx++) {
+            FcmToken token = tokens.get(idx);
+            boolean isLast = (idx == tokens.size() - 1); // 마지막 토큰 여부 판단
+            rabbitMessagePublisher.send(
+                    FcmMessageDto.of(token.getToken(), title, publicId, isLast)
+            );
         }
+
+        log.info("[알림 메시지 큐 전송 완료] 토큰 수: {}, newsName: {}, publicId: {}", tokens.size(), newsName, publicId);
     }
 }

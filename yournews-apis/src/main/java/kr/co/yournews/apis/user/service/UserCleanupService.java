@@ -31,14 +31,17 @@ public class UserCleanupService {
         List<Long> userIds = userService.readSoftDeleteUsersBefore(deletedBeforeDate);
 
         if (userIds.isEmpty()) {
+            log.info("[사용자 정리] 삭제 대상 없음 - 기준일: {}", deletedBeforeDate);
             return;
         }
+
+        log.info("[사용자 정리] 삭제 대상 수: {}명 - 기준일: {}", userIds.size(), deletedBeforeDate);
 
         keywordService.deleteAllByUserIds(userIds);
         subNewsService.deleteAllByUserIds(userIds);
         postLikeService.deleteAllByUserIds(userIds);
         userService.deleteAllByIds(userIds);
 
-        log.info("Soft deleted user cleanup completed for users deleted before {}", deletedBeforeDate);
+        log.info("[사용자 정리 완료] 삭제된 사용자 수: {}명", userIds.size());
     }
 }

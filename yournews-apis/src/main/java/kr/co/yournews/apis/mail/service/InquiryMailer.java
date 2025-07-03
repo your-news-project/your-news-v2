@@ -5,9 +5,11 @@ import kr.co.yournews.infra.mail.MailSenderAdapter;
 import kr.co.yournews.infra.mail.strategy.MailStrategyFactory;
 import kr.co.yournews.infra.mail.type.MailType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InquiryMailer {
@@ -23,6 +25,8 @@ public class InquiryMailer {
      * @param inquiryMailReq : 문의자의 이메일과 메시지를 포함한 요청 객체
      */
     public void sendInquiryMail(InquiryMailReq inquiryMailReq) {
+        log.info("[문의 메일 요청] from={}", inquiryMailReq.email());
+
         String content = inquiryMailReq.email() + "<br>" + inquiryMailReq.message();
 
         mailSenderAdapter.sendMail(
@@ -30,5 +34,7 @@ public class InquiryMailer {
                 content,
                 mailStrategyFactory.getStrategy(MailType.INQUIRY)
         );
+
+        log.info("[문의 메일 전송 완료] from={}", inquiryMailReq.email());
     }
 }

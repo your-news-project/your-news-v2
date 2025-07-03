@@ -3,9 +3,11 @@ package kr.co.yournews.apis.notification.scheduler;
 import kr.co.yournews.apis.notification.service.DailyNotificationProcessor;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationScheduler {
@@ -18,6 +20,7 @@ public class NotificationScheduler {
      */
     @Scheduled(cron = "0 0 0 * * *")
     public void deleteOldNotifications() {
+        log.info("[알림 삭제 스케줄 시작] 오래된 알림 삭제");
         notificationCommandService.deleteOldNotification();
     }
 
@@ -27,6 +30,7 @@ public class NotificationScheduler {
      */
     @Scheduled(cron = "0 0 20 * * *")
     public void runDailyNewsNotificationJob() {
+        log.info("[일간 소식 전송 스케줄 시작] 일간 소식 전송");
         dailyNotificationProcessor.sendDailyNotification();
     }
 }

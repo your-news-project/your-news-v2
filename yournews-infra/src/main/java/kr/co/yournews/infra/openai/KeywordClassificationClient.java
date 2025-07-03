@@ -3,10 +3,12 @@ package kr.co.yournews.infra.openai;
 import kr.co.yournews.infra.openai.dto.ChatDto;
 import kr.co.yournews.infra.openai.dto.Message;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class KeywordClassificationClient {
@@ -26,6 +28,7 @@ public class KeywordClassificationClient {
      * @return : GPT가 분류한 키워드 문자열
      */
     public String requestKeyword(String title) {
+        log.info("[GPT 키워드 분류 요청] title: {}", title);
         String prompt = MESSAGE_PREFIX + title;
 
         Message system = new Message("system", SYSTEM_ROLE_MESSAGE);
@@ -34,6 +37,9 @@ public class KeywordClassificationClient {
         ChatDto.Response response = openAIChatClient.askQuestion(List.of(system, user));
 
         String keyword = response.choices().get(0).message().content();
-        return keyword.replaceAll("^[\"']|[\"']$|\\.$", "").trim();
+        keyword = keyword.replaceAll("^[\"']|[\"']$|\\.$", "").trim();
+
+        log.info("[GPT 키워드 분류 완료] title: {}, keyword: {}", title, keyword);
+        return keyword;
     }
 }

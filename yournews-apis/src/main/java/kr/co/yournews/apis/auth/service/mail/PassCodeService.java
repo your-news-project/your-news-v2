@@ -4,6 +4,7 @@ import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.user.exception.UserErrorType;
 import kr.co.yournews.infra.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 import static kr.co.yournews.infra.redis.util.RedisConstants.PASS_KEY_PREFIX;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PassCodeService {
@@ -25,10 +27,11 @@ public class PassCodeService {
      * @return : 생성된 UUID 문자열
      */
     public String generateResetUuidAndStore(String username) {
-
         String randomUUID = generateUuid();
         String key = PASS_KEY_PREFIX + username;
         redisRepository.set(key, randomUUID, TTL);
+
+        log.info("[비밀전호 재설정 UUID 생성 및 저장 완료] username={}, uuid={}", username, randomUUID);
         return randomUUID;
     }
 
@@ -55,5 +58,7 @@ public class PassCodeService {
         }
 
         redisRepository.del(key);
+
+        log.info("[UUID 검증 성공] username={}", username);
     }
 }

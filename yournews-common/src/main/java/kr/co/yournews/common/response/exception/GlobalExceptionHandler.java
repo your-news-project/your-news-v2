@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomException.class)
     protected ResponseEntity<?> handleCustomException(final CustomException e) {
         BaseErrorType error = e.getErrorType();
-        log.error("[Error Occurred] {}", error.getMessage());
+        log.warn("[Business Warning] {}", error.getMessage());
 
         if (e.getData() != null) {
             return ResponseEntity
@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
         for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
             errors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
-        log.error("[Error Occurred] {}", errors);
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder()
                 .code(GlobalErrorType.VALIDATION_ERROR.getCode())
                 .errors(errors)
