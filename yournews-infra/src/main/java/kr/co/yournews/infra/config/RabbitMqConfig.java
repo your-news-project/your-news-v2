@@ -91,9 +91,9 @@ public class RabbitMqConfig {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(jackson2JsonMessageConverter());
-        factory.setConcurrentConsumers(2);
-        factory.setMaxConcurrentConsumers(4);
-        factory.setPrefetchCount(5);
+        factory.setConcurrentConsumers(5);
+        factory.setMaxConcurrentConsumers(10);
+        factory.setPrefetchCount(10);
         factory.setAdviceChain(retryInterceptor());
         factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
         return factory;
@@ -105,7 +105,7 @@ public class RabbitMqConfig {
     public RetryOperationsInterceptor retryInterceptor() {
         return RetryInterceptorBuilder.stateless()
                 .maxAttempts(3)
-                .backOffOptions(2000, 2.0, 8000)  // 초기 2초, 배수 2.0, 최대 8초
+                .backOffOptions(500, 2.0, 3000)  // 초기 0.5초, 배수 2.0, 최대 3초
                 .recoverer((message, cause) -> {
                     log.error("Message failed after retries: {}. Cause: {}", message, cause.getMessage(), cause);
                     new RejectAndDontRequeueRecoverer().recover(message, cause);
