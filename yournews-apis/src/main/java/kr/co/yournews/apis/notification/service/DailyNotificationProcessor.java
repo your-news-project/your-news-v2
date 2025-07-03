@@ -111,8 +111,14 @@ public class DailyNotificationProcessor {
     private void sendFcmMessages(List<FcmToken> tokens, String newsName, String publicId) {
         String title = FcmConstant.getDailyNewsNotificationTitle(newsName);
 
-        for (FcmToken token : tokens) {
-            rabbitMessagePublisher.send(FcmMessageDto.of(token.getToken(), title, publicId));
+        log.info("[알림 메시지 큐 전송 시작] 소식명: {}, 토큰 수: {}", newsName, tokens.size());
+
+        for (int idx = 0; idx < tokens.size(); idx++) {
+            FcmToken token = tokens.get(idx);
+            boolean isLast = (idx == tokens.size() - 1); // 마지막 토큰 여부 판단
+            rabbitMessagePublisher.send(
+                    FcmMessageDto.of(token.getToken(), title, publicId, isLast)
+            );
         }
     }
 }
