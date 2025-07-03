@@ -8,12 +8,10 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.Notification;
 import kr.co.yournews.infra.fcm.response.FcmSendResult;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Slf4j
 @Component
 public class FcmNotificationSender {
 
@@ -35,11 +33,9 @@ public class FcmNotificationSender {
             MessagingErrorCode code = e.getMessagingErrorCode();
 
             if (code == MessagingErrorCode.UNREGISTERED || code == MessagingErrorCode.INVALID_ARGUMENT) {
-                log.warn("[FCM] Detected invalid token to be removed: {}", token);
                 return FcmSendResult.invalidToken(e.getMessage());
             }
 
-            log.error("[FCM] Failed to send push notification: {}", e.getMessage(), e);
             return FcmSendResult.failure(e.getMessage());
         }
     }
