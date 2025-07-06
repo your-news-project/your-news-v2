@@ -42,7 +42,7 @@ public class AuthCommandService {
      */
     @Transactional
     public TokenDto signUp(SignUpDto.Auth signUpDto) {
-        log.info("[일반 회원가입 요청] username={}, email={}", signUpDto.username(), signUpDto.email());
+        log.info("[일반 회원가입 요청] username: {}, email: {}", signUpDto.username(), signUpDto.email());
 
         authCodeService.ensureVerifiedAndConsume(signUpDto.email());
 
@@ -52,7 +52,7 @@ public class AuthCommandService {
 
         subNewsCommandService.subscribeToNews(user, signUpDto.newsIds(), signUpDto.keywords());
 
-        log.info("[일반 회원가입 완료] userId={}", user.getId());
+        log.info("[일반 회원가입 완료] userId: {}", user.getId());
         return jwtHelper.createToken(user, TokenMode.FULL);
     }
 
@@ -67,7 +67,7 @@ public class AuthCommandService {
      */
     @Transactional(readOnly = true)
     public TokenDto signIn(SignInDto signInDto) {
-        log.info("[일반 로그인 요청] username={}", signInDto.username());
+        log.info("[일반 로그인 요청] username: {}", signInDto.username());
 
         User user = userService.readByUsernameIncludeDeleted(signInDto.username())
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
@@ -87,7 +87,7 @@ public class AuthCommandService {
             );
         }
 
-        log.info("[일반 로그인 성공] userId={}", user.getId());
+        log.info("[일반 로그인 성공] userId: {}", user.getId());
         return jwtHelper.createToken(user, TokenMode.FULL);
     }
 
@@ -103,7 +103,7 @@ public class AuthCommandService {
      */
     @Transactional
     public TokenDto restoreUser(RestoreUserDto.Request restoreRequest) {
-        log.info("[계정 복구 시도] username={}", restoreRequest.username());
+        log.info("[계정 복구 시도] username: {}", restoreRequest.username());
 
         User user = userService.readByUsernameIncludeDeleted(restoreRequest.username())
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
@@ -114,7 +114,7 @@ public class AuthCommandService {
 
         user.restore();
 
-        log.info("[계정 복구 성공] userId={}", user.getId());
+        log.info("[계정 복구 성공] userId: {}", user.getId());
         return jwtHelper.createToken(user, TokenMode.FULL);
     }
 
@@ -140,12 +140,12 @@ public class AuthCommandService {
             Long userId,
             SignOutDto signOutDto
     ) {
-        log.info("[로그아웃 요청] userId={}, device={}", userId, signOutDto.deviceInfo());
+        log.info("[로그아웃 요청] userId: {}, device: {}", userId, signOutDto.deviceInfo());
 
         fcmTokenCommandService.deleteTokenByUserAndDevice(userId, signOutDto.deviceInfo());
         String accessToken = accessTokenInHeader.substring(TOKEN_TYPE.length()).trim();
         jwtHelper.removeToken(accessToken, refreshToken);
 
-        log.info("[로그아웃 성공] userId={}", userId);
+        log.info("[로그아웃 성공] userId: {}", userId);
     }
 }

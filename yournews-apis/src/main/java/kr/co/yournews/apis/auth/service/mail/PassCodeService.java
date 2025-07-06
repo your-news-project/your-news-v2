@@ -31,7 +31,7 @@ public class PassCodeService {
         String key = PASS_KEY_PREFIX + username;
         redisRepository.set(key, randomUUID, TTL);
 
-        log.info("[비밀전호 재설정 UUID 생성 및 저장 완료] username={}, uuid={}", username, randomUUID);
+        log.info("[비밀전호 재설정 UUID 생성 및 저장 완료] username: {}, uuid: {}", username, randomUUID);
         return randomUUID;
     }
 
@@ -59,6 +59,6 @@ public class PassCodeService {
 
         redisRepository.del(key);
 
-        log.info("[UUID 검증 성공] username={}", username);
+        log.info("[UUID 검증 성공] username: {}", username);
     }
 }

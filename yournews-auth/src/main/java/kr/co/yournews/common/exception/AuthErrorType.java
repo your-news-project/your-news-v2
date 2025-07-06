@@ -3,7 +3,6 @@ package kr.co.yournews.common.exception;
 import kr.co.yournews.common.response.StatusCode;
 import kr.co.yournews.common.response.error.type.BaseErrorType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum AuthErrorType implements BaseErrorType {

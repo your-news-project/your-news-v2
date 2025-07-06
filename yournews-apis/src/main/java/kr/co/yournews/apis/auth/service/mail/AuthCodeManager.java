@@ -22,7 +22,7 @@ public class AuthCodeManager {
      * @param authCodeReq : 인증 코드 요청 객체 (이메일)
      */
     public void sendAuthCode(AuthCodeDto.Request authCodeReq) {
-        log.info("[인증코드 요청] email={}", authCodeReq.email());
+        log.info("[인증코드 요청] email: {}", authCodeReq.email());
 
         String code = authCodeService.generateAndSave(authCodeReq.email());
         mailSenderAdapter.sendMail(
@@ -31,7 +31,7 @@ public class AuthCodeManager {
                 mailStrategyFactory.getStrategy(MailType.CODE)
         );
 
-        log.info("[인증코드 전송 완료] email={}", authCodeReq.email());
+        log.info("[인증코드 전송 완료] email: {}", authCodeReq.email());
     }
 
     /**

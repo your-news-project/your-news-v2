@@ -43,7 +43,7 @@ public class OAuthCommandService {
     @Transactional
     @CacheEvict(value = "users", key = "#userId")
     public OAuthTokenDto signUp(Long userId, SignUpDto.OAuth signUpDto) {
-        log.info("[OAuth 회원가입 요청] userId={}, nickname={}", userId, signUpDto.nickname());
+        log.info("[OAuth 회원가입 요청] userId: {}, nickname: {}", userId, signUpDto.nickname());
 
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
@@ -51,7 +51,7 @@ public class OAuthCommandService {
         user.updateInfo(signUpDto.nickname(), signUpDto.subStatus(), signUpDto.dailySubStatus());
         subNewsCommandService.subscribeToNews(user, signUpDto.newsIds(), signUpDto.keywords());
 
-        log.info("[OAuth 회원가입 완료] userId={}, signedUp={}", userId, user.isSignedUp());
+        log.info("[OAuth 회원가입 완료] userId: {}, signedUp: {}", userId, user.isSignedUp());
         return OAuthTokenDto.of(jwtHelper.createToken(user, TokenMode.FULL), user.isSignedUp());
     }
 
@@ -64,17 +64,17 @@ public class OAuthCommandService {
      */
     @Transactional
     public OAuthTokenDto signIn(OAuthPlatform platform, OAuthCode oAuthCode) {
-        log.info("[OAuth 로그인 요청] platform={}, code={}", platform.name(), oAuthCode.code());
+        log.info("[OAuth 로그인 요청] platform: {}, code: {}", platform.name(), oAuthCode.code());
 
         OAuthClient oAuthClient = oAuthClientFactory.getPlatformService(platform);
         OAuthUserInfoRes userInfoRes = oAuthClient.authenticate(oAuthCode.code());
 
-        log.info("[OAuth 인증 완료] platform={}, email={}", platform.name(), userInfoRes.email());
+        log.info("[OAuth 인증 완료] platform: {}, email: {}", platform.name(), userInfoRes.email());
 
         UserStatusDto userStatusDto = findOrRegisterUser(platform, userInfoRes);
         TokenDto tokenDto = jwtHelper.createToken(userStatusDto.user(), TokenMode.FULL);
 
-        log.info("[OAuth 로그인 완료] userId={}, signedUp={}", userStatusDto.user().getId(), userStatusDto.isSignUp());
+        log.info("[OAuth 로그인 완료] userId: {}, signedUp: {}", userStatusDto.user().getId(), userStatusDto.isSignUp());
         return OAuthTokenDto.of(tokenDto, userStatusDto.isSignUp());
     }
 
@@ -130,7 +130,7 @@ public class OAuthCommandService {
                         .build()
         );
 
-        log.info("[OAuth 신규 사용자 등록 완료] userId={}, username={}", user.getId(), username);
+        log.info("[OAuth 신규 사용자 등록 완료] userId: {}, username: {}", user.getId(), username);
         return UserStatusDto.of(user, false);
     }
 }
