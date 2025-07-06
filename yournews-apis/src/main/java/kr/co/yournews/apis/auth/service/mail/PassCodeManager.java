@@ -32,7 +32,7 @@ public class PassCodeManager {
      */
     @Transactional(readOnly = true)
     public void initiatePasswordReset(PassResetDto.VerifyUser verifyUserDto) {
-        log.info("[비밀번호 재설정 요청] username={}, email={}", verifyUserDto.username(), verifyUserDto.email());
+        log.info("[비밀번호 재설정 요청] username: {}, email: {}", verifyUserDto.username(), verifyUserDto.email());
 
         if (!userService.existsByUsernameAndEmail(verifyUserDto.username(), verifyUserDto.email())) {
             throw new CustomException(UserErrorType.INVALID_USER_INFO);
@@ -44,7 +44,7 @@ public class PassCodeManager {
                 mailStrategyFactory.getStrategy(MailType.PASS)
         );
 
-        log.info("[비밀번호 재설정 메일 발송 완료] username={}, email={}, uuid={}", verifyUserDto.username(), verifyUserDto.email(), uuid);
+        log.info("[비밀번호 재설정 메일 발송 완료] username: {}, email: {}, uuid: {}", verifyUserDto.username(), verifyUserDto.email(), uuid);
     }
 
     /**
@@ -55,7 +55,7 @@ public class PassCodeManager {
      */
     @Transactional
     public void applyNewPassword(PassResetDto.ResetPassword resetPasswordDto) {
-        log.info("[비밀번호 재설정 변경 시도] username={}, uuid={}", resetPasswordDto.username(), resetPasswordDto.uuid());
+        log.info("[비밀번호 재설정 변경 시도] username: {}, uuid: {}", resetPasswordDto.username(), resetPasswordDto.uuid());
 
         passCodeService.validateResetUuid(resetPasswordDto.username(), resetPasswordDto.uuid());
 
@@ -64,6 +64,6 @@ public class PassCodeManager {
 
         user.updatePassword(passwordEncodeService.encode(resetPasswordDto.password()));
 
-        log.info("[비밀번호 재설정 변경 완료] userId={}", user.getId());
+        log.info("[비밀번호 재설정 변경 완료] userId: {}", user.getId());
     }
 }

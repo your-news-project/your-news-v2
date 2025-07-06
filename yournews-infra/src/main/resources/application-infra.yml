@@ -6,23 +6,16 @@ spring:
       password: ${REDIS_PASS:}
 
   mail:
-    host: smtp.naver.com
-    port: 465
+    host: smtp.gmail.com
+    port: 587
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
       mail:
-        transport:
-          protocol: smtp
         smtp:
           auth: true
           starttls:
             enable: true
-            required: true
-          ssl:
-            enable: true
-            trust: smtp.naver.com
-
 
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}

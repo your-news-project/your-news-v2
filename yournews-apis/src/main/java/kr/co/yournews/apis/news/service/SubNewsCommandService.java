@@ -40,7 +40,7 @@ public class SubNewsCommandService {
     public void subscribeToNews(User user, List<Long> newsIds, List<String> keywords) {
         if (newsIds == null || newsIds.isEmpty()) return;
 
-        log.info("[소식 구독 요청] userId={}, 소식 개수={}, 키워드 개수={}",
+        log.info("[소식 구독 요청] userId: {}, 소식 개수: {}, 키워드 개수: {}",
                 user.getId(), newsIds.size(), keywords.size()
         );
 
@@ -53,7 +53,7 @@ public class SubNewsCommandService {
             saveKeywordsIfYuNewsExists(subNewsList, keywords);
         }
 
-        log.info("[소식 구독 저장 완료] userId={}, 저장된 구독 수={}", user.getId(), subNewsList.size());
+        log.info("[소식 구독 저장 완료] userId: {}, 저장된 구독 수: {}", user.getId(), subNewsList.size());
     }
 
     /**

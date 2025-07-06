@@ -25,7 +25,7 @@ public class InquiryMailer {
      * @param inquiryMailReq : 문의자의 이메일과 메시지를 포함한 요청 객체
      */
     public void sendInquiryMail(InquiryMailReq inquiryMailReq) {
-        log.info("[문의 메일 요청] from={}", inquiryMailReq.email());
+        log.info("[문의 메일 요청] from: {}", inquiryMailReq.email());
 
         String content = inquiryMailReq.email() + "<br>" + inquiryMailReq.message();
 
@@ -35,6 +35,6 @@ public class InquiryMailer {
                 mailStrategyFactory.getStrategy(MailType.INQUIRY)
         );
 
-        log.info("[문의 메일 전송 완료] from={}", inquiryMailReq.email());
+        log.info("[문의 메일 전송 완료] from: {}", inquiryMailReq.email());
     }
 }
