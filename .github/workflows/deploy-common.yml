@@ -1,0 +1,27 @@
+name: Deploy - common Change Trigger
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'yournews-auth/**'
+      - 'yournews-common/**'
+      - 'yournews-domain/**'
+      - 'yournews-infra/**'
+
+jobs:
+  trigger-apis-admin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger APIS Workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: deploy-apis.yml
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger ADMIN Workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: deploy-admin.yml
+          token: ${{ secrets.GITHUB_TOKEN }}
