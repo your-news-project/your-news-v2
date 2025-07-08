@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -120,6 +120,6 @@ public class NotificationCommandServiceTest {
         notificationCommandService.deleteOldNotification();
 
         // then
-        verify(notificationService, times(1)).deleteByDateTime(any(LocalDate.class));
+        verify(notificationService, times(1)).deleteByDateTime(any(LocalDateTime.class));
     }
 }
