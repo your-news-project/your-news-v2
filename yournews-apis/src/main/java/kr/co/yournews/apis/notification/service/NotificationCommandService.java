@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -52,7 +53,7 @@ public class NotificationCommandService {
      */
     @Transactional
     public void deleteOldNotification() {
-        LocalDate dateTime = LocalDate.now().minusDays(10);
+        LocalDateTime dateTime = LocalDate.now().minusDays(10).atStartOfDay();
         log.info("[오래된 알림 삭제 요청] 기준일: {}", dateTime);
 
         notificationService.deleteByDateTime(dateTime);
