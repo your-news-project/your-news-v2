@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long>, CustomNotificationRepository {
@@ -19,5 +19,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     @Modifying
     @Query("DELETE FROM notification n WHERE n.createdAt < :dateTime")
-    void deleteByDateTimeBefore(@Param("dateTime") LocalDate dateTime);
+    void deleteByDateTimeBefore(@Param("dateTime") LocalDateTime dateTime);
 }
