@@ -1,6 +1,8 @@
 package kr.co.yournews.domain.post.repository;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.co.yournews.domain.post.dto.PostQueryDto;
@@ -58,6 +60,17 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
     @Override
     public Optional<PostQueryDto.Details> findDetailsById(Long postId, Long userId) {
+        // 좋아요 여부 조건: userId가 null이면 false로 고정
+        Expression<Boolean> likedExpression = (userId != null)
+                ? JPAExpressions
+                .selectOne()
+                .from(postLike)
+                .where(
+                        postLike.post.id.eq(post.id),
+                        postLike.user.id.eq(userId)
+                ).exists()
+                : Expressions.constant(false);
+
         PostQueryDto.Details details = jpaQueryFactory
                 .select(Projections.constructor(
                         PostQueryDto.Details.class,
@@ -71,13 +84,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                                 .select(postLike.count())
                                 .from(postLike)
                                 .where(postLike.post.id.eq(post.id)),
-                        JPAExpressions
-                                .selectOne()
-                                .from(postLike)
-                                .where(
-                                        postLike.post.id.eq(post.id)
-                                                .and(postLike.user.id.eq(userId))
-                                ).exists()
+                        likedExpression
                 ))
                 .from(post)
                 .leftJoin(post.user, user)
