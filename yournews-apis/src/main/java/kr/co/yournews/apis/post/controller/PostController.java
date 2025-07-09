@@ -43,9 +43,11 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPostById(@AuthenticationPrincipal CustomUserDetails userDetails,
                                          @PathVariable Long postId) {
+        Long userId = (userDetails != null) ? userDetails.getUserId() : null;
+
         return ResponseEntity.ok(
                 SuccessResponse.from(
-                        postQueryService.getPostById(postId, userDetails.getUserId())
+                        postQueryService.getPostById(postId, userId)
                 )
         );
     }
