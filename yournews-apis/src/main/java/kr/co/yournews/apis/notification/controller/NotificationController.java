@@ -3,6 +3,7 @@ package kr.co.yournews.apis.notification.controller;
 import kr.co.yournews.apis.notification.dto.NotificationDto;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
 import kr.co.yournews.apis.notification.service.NotificationQueryService;
+import kr.co.yournews.apis.notification.service.NotificationRankingService;
 import kr.co.yournews.auth.authentication.CustomUserDetails;
 import kr.co.yournews.common.response.success.SuccessResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController {
     private final NotificationCommandService notificationCommandService;
     private final NotificationQueryService notificationQueryService;
+    private final NotificationRankingService notificationRankingService;
 
     @GetMapping("/id/{notificationId}")
     public ResponseEntity<?> getNotificationById(@PathVariable Long notificationId) {
@@ -62,6 +64,15 @@ public class NotificationController {
         return ResponseEntity.ok(
                 SuccessResponse.from(
                         notificationQueryService.getUnreadCount(userDetails.getUserId())
+                )
+        );
+    }
+
+    @GetMapping("/rank")
+    public ResponseEntity<?> getTopNewsRanking() {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        notificationRankingService.getTopNewsRanking()
                 )
         );
     }

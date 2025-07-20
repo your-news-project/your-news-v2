@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class DailyNotificationService {
     private final RedisRepository redisRepository;
+    private final NotificationRankingService notificationRankingService;
 
     /**
      * 일간 알림을 위한 소식 이름을 기반으로 제목과 URL 정보를 Redis에 저장하는 메서드
@@ -30,6 +31,8 @@ public class DailyNotificationService {
                 .toList();
 
         redisRepository.setListAll(key, dailyNewsDtos);
+        // 소식의 알림 수를 기준으로 ZSet에서 점수 갱신 (랭킹 업데이트)
+        notificationRankingService.incrementNewsRanking(newsName, dailyNewsDtos.size());
 
         log.info("[새로운 소식 저장 완료] newsName: {}, 저장 개수: {}, key: {}", newsName, dailyNewsDtos.size(), key);
     }
