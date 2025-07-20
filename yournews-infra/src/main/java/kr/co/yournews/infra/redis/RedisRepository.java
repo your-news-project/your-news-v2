@@ -2,6 +2,7 @@ package kr.co.yournews.infra.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
@@ -9,13 +10,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
 public class RedisRepository {
-
     private final RedisTemplate<String, Object> redisTemplate;
 
     /* Redis 저장 */
@@ -60,4 +62,24 @@ public class RedisRepository {
         return redisTemplate.getExpire(key, timeUnit);
     }
 
+    /* ZSET: 소식 랭킹 점수 증가 */
+    public void incrementZSetScore(String key, String member, int score, Duration duration) {
+        redisTemplate.opsForZSet().incrementScore(key, member, score);
+        redisTemplate.expire(key, duration);
+    }
+
+    /* ZSET: 상위 랭킹 뉴스 조회 */
+    public <T> List<T> getTopZSetWithScore(String key, int topN, BiFunction<String, Integer, T> mapper) {
+        Set<ZSetOperations.TypedTuple<Object>> results =
+                redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, topN - 1);
+        if (results == null) return Collections.emptyList();
+
+        return results.stream()
+                .map(tuple -> {
+                    String name = String.valueOf(tuple.getValue());
+                    int score = (tuple.getScore() != null) ? tuple.getScore().intValue() : 0;
+                    return mapper.apply(name, score);
+                })
+                .collect(Collectors.toList());
+    }
 }
