@@ -1,11 +1,9 @@
 name: Deploy - admin
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'yournews-admin/**'
   workflow_dispatch:
+  # 다른 워크플로에서 호출 가능하게 하기 위한 트리거
+  workflow_call:
 
 jobs:
   deploy-admin:
