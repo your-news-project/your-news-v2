@@ -1,27 +1,67 @@
-name: Deploy - common Change Trigger
+name: Deploy - Combined
 
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'yournews-auth/**'
-      - 'yournews-common/**'
-      - 'yournews-domain/**'
-      - 'yournews-infra/**'
 
 jobs:
-  trigger-apis-admin:
+  determine-modules:
     runs-on: ubuntu-latest
+    outputs:
+      deployApis: ${{ steps.set.outputs.deployApis }}
+      deployAdmin: ${{ steps.set.outputs.deployAdmin }}
 
     steps:
-      - name: Trigger APIS Workflow
-        uses: benc-uk/workflow-dispatch@v1
+      # 1. push된 커밋 기준 코드 내려 받기
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
-          workflow: deploy-apis.yml
-          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Trigger ADMIN Workflow
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: deploy-admin.yml
-          token: ${{ secrets.GITHUB_TOKEN }}
+      # 2. 이전 커밋과 현재 커밋 사이의 변경된 파일 목록 추출
+      - name: Get list of changed files
+        id: changes
+        run: |
+          CHANGED=$(git diff --name-only HEAD^ HEAD)
+          echo "$CHANGED" > changed.txt
+
+      # 3. 변경된 파일을 기준으로 어떤 모듈을 배포할지 판단
+      - name: Decide what to deploy
+        id: set
+        run: |
+          CHANGED=$(cat changed.txt)
+
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          DEPLOY_APIS=false
+          DEPLOY_ADMIN=false
+
+          for file in $CHANGED; do
+            if [[ "$file" == yournews-apis/* ]]; then
+              DEPLOY_APIS=true
+            elif [[ "$file" == yournews-admin/* ]]; then
+              DEPLOY_ADMIN=true
+            elif [[ "$file" == yournews-auth/* || "$file" == yournews-common/* || "$file" == yournews-domain/* || "$file" == yournews-infra/* ]]; then
+              DEPLOY_APIS=true
+              DEPLOY_ADMIN=true
+              break
+            fi
+          done
+
+          echo "deployApis=$DEPLOY_APIS" >> $GITHUB_OUTPUT
+          echo "deployAdmin=$DEPLOY_ADMIN" >> $GITHUB_OUTPUT
+
+  # yournews-apis 배포 트리거
+  deploy-apis:
+    needs: determine-modules
+    if: needs.determine-modules.outputs.deployApis == 'true'
+    uses: ./.github/workflows/deploy-apis.yml
+    secrets: inherit
+
+  # yournews-admin 배포 트리거
+  deploy-admin:
+    needs: determine-modules
+    if: needs.determine-modules.outputs.deployAdmin == 'true'
+    uses: ./.github/workflows/deploy-admin.yml
+    secrets: inherit
