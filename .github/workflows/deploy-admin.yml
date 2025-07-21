@@ -1,10 +1,6 @@
 name: Deploy - admin
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'yournews-admin/**'
   workflow_dispatch:
 
 jobs:
@@ -42,25 +38,3 @@ jobs:
         run: |
           echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      # 6. Docker 이미지 build 및 push
-      - name: Docker Build & Push
-        run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/yournews-admin:$VERSION ./yournews-admin
-          docker tag ${{ secrets.DOCKER_USERNAME }}/yournews-admin:$VERSION ${{ secrets.DOCKER_USERNAME }}/yournews-admin:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/yournews-admin:$VERSION
-          docker push ${{ secrets.DOCKER_USERNAME }}/yournews-admin:latest
-
-      # 7. ec2 pull
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_KEY }}
-          script: |
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker system prune -a -f
-            docker pull ${{ secrets.DOCKER_USERNAME }}/yournews-admin:latest
-            docker-compose up -d yournews-admin
