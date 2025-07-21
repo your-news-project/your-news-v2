@@ -4,7 +4,7 @@
 
 ## ✨ Features
 ### 권한별
- - 관리자 (진행 예정)
+ - 관리자
      - 사용자 관리
      - 소식 관리
      - 게시글 관리
@@ -18,10 +18,15 @@
  - Frameworks & Libraries: JDK 17, Spring Boot, Spring Data JPA, Spring Security, Lombok, jjwt 0.12.3, jsoup 1.17.2
  - Databases & Caching: MySQL, Redis
  - Messaging: RabbitMQ
- - DevOps & Cloud: GitHub Actions, Docker, AWS (예정)
+ - Notification: FCM
+ - DevOps & Cloud: GitHub Actions, Docker, AWS
 
 ## 🔄 System Flow
 ![your-news-v2-system-flow](https://github.com/user-attachments/assets/c9836b7f-3f91-42e7-97ac-a92411d8892e)
+
+## ⚙️ Infra Architecture
+<img width="1341" height="732" alt="yournewsv2" src="https://github.com/user-attachments/assets/7a5d5312-19bf-43a7-9a80-1f43cd7605df" />
+
 
 ## 🏗️ Multi Module Architecture
 ![image](https://github.com/user-attachments/assets/cc0e5376-d95a-49be-bdaa-ba678f1e8cc0)
