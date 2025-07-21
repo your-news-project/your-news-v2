@@ -10,5 +10,4 @@ public class YourNewsApisApplication {
 		SpringApplication.run(YourNewsApisApplication.class, args);
 	}
 
-	// gd
 }
