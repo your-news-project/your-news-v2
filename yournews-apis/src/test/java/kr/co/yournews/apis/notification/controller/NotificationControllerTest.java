@@ -1,8 +1,10 @@
 package kr.co.yournews.apis.notification.controller;
 
 import kr.co.yournews.apis.notification.dto.NotificationDto;
+import kr.co.yournews.apis.notification.dto.NotificationRankingDto;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
 import kr.co.yournews.apis.notification.service.NotificationQueryService;
+import kr.co.yournews.apis.notification.service.NotificationRankingService;
 import kr.co.yournews.auth.authentication.CustomUserDetails;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.notification.exception.NotificationErrorType;
@@ -54,6 +56,9 @@ public class NotificationControllerTest {
 
     @MockBean
     private NotificationQueryService notificationQueryService;
+
+    @MockBean
+    private NotificationRankingService notificationRankingService;
 
     private User user;
     private UserDetails userDetails;
@@ -270,5 +275,29 @@ public class NotificationControllerTest {
                     .andExpect(jsonPath("$.code").value(NotificationErrorType.FORBIDDEN.getCode()))
                     .andExpect(jsonPath("$.message").value(NotificationErrorType.FORBIDDEN.getMessage()));
         }
+    }
+
+    @Test
+    @DisplayName("일간 소식 랭킹 조회")
+    void getTopNewsRankingTest() throws Exception {
+        // given
+        List<NotificationRankingDto> rankingList = List.of(
+                new NotificationRankingDto("소식1", 10),
+                new NotificationRankingDto("소식2", 5),
+                new NotificationRankingDto("소식3", 3)
+        );
+
+        given(notificationRankingService.getTopNewsRanking()).willReturn(rankingList);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                get("/api/v1/notifies/rank")
+                        .with(user(userDetails))
+        );
+
+        // then
+        resultActions
+                .andDo(print())
+                .andExpect(jsonPath("$.data.size()").value(rankingList.size()));
     }
 }
