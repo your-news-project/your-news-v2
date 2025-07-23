@@ -15,7 +15,7 @@ import java.util.List;
 public class NotificationRankingService {
     private final RedisRepository redisRepository;
 
-    private static final int TOP_N = 3;
+    private static final int TOP_N = 10;
 
     /**
      * 소식 이름(newsName)을 기준으로 Redis ZSet 내 점수를 증가시키는 메서드
