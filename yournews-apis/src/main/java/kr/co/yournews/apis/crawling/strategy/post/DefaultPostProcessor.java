@@ -25,10 +25,12 @@ public class DefaultPostProcessor extends PostProcessor {
     private final FcmTokenService fcmTokenService;
     private final DailyNotificationService dailyNotificationService;
 
-    public DefaultPostProcessor(NotificationCommandService notificationCommandService,
-                                FcmTokenService fcmTokenService,
-                                RabbitMessagePublisher rabbitMessagePublisher,
-                                DailyNotificationService dailyNotificationService) {
+    public DefaultPostProcessor(
+            NotificationCommandService notificationCommandService,
+            FcmTokenService fcmTokenService,
+            RabbitMessagePublisher rabbitMessagePublisher,
+            DailyNotificationService dailyNotificationService
+    ) {
         super(rabbitMessagePublisher);
         this.notificationCommandService = notificationCommandService;
         this.fcmTokenService = fcmTokenService;
@@ -95,7 +97,10 @@ public class DefaultPostProcessor extends PostProcessor {
      * @param strategy : 크롤링 처리 전략
      * @return : 분류된 새 게시글 정보 dto (titles, urls)
      */
-    private CrawlingPostInfo extractNewPosts(Elements elements, CrawlingStrategy strategy) {
+    private CrawlingPostInfo extractNewPosts(
+            Elements elements,
+            CrawlingStrategy strategy
+    ) {
         List<String> titles = new ArrayList<>();
         List<String> urls = new ArrayList<>();
 
@@ -124,9 +129,12 @@ public class DefaultPostProcessor extends PostProcessor {
      * @param urls     : 게시글 URL 리스트
      * @param publicId : 모든 알림에 공통으로 사용할 Public ID (묶음 식별용)
      */
-    private void saveNotifications(List<Long> userIds, String newsName,
-                                   List<String> titles, List<String> urls,
-                                   String publicId) {
+    private void saveNotifications(
+            List<Long> userIds, String newsName,
+            List<String> titles,
+            List<String> urls,
+            String publicId
+    ) {
         List<Notification> notifications = userIds.stream()
                 .map(userId -> buildNotification(newsName, titles, urls, publicId, userId))
                 .toList();
