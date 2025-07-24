@@ -32,11 +32,13 @@ public class YUNewsPostProcessor extends PostProcessor {
     private final SubNewsService subNewsService;
     private final DailyNotificationService dailyNotificationService;
 
-    public YUNewsPostProcessor(NotificationCommandService notificationCommandService,
-                               FcmTokenService fcmTokenService,
-                               SubNewsService subNewsService,
-                               RabbitMessagePublisher rabbitMessagePublisher,
-                               DailyNotificationService dailyNotificationService) {
+    public YUNewsPostProcessor(
+            NotificationCommandService notificationCommandService,
+            FcmTokenService fcmTokenService,
+            SubNewsService subNewsService,
+            RabbitMessagePublisher rabbitMessagePublisher,
+            DailyNotificationService dailyNotificationService
+    ) {
         super(rabbitMessagePublisher);
         this.notificationCommandService = notificationCommandService;
         this.fcmTokenService = fcmTokenService;
@@ -89,10 +91,11 @@ public class YUNewsPostProcessor extends PostProcessor {
 
         // 모든 알림에 공통으로 사용될 public_id (알림 페이지 이동을 위해)
         String publicId = UUID.randomUUID().toString();
-        saveNotifications(userIds, userToKeywords, keywordToPosts, newsName, publicId);
+        List<Long> notifiedUserIds =
+                saveNotifications(userIds, userToKeywords, keywordToPosts, newsName, publicId);
         log.info("[YUNews 알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}", userIds.size(), newsName, publicId);
 
-        List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
+        List<FcmToken> tokens = fcmTokenService.readAllByUserIds(notifiedUserIds);
         sendFcmMessages(tokens, newsName, publicId);
     }
 
@@ -103,7 +106,10 @@ public class YUNewsPostProcessor extends PostProcessor {
      * @param strategy : 크롤링 처리 전략
      * @return : 키워드별로 분류된 새 게시글 정보 Map
      */
-    private Map<KeywordType, CrawlingPostInfo> extractNewPostsByKeyword(Elements elements, YUNewsCrawlingStrategy strategy) {
+    private Map<KeywordType, CrawlingPostInfo> extractNewPostsByKeyword(
+            Elements elements,
+            YUNewsCrawlingStrategy strategy
+    ) {
         Map<KeywordType, CrawlingPostInfo> keywordToPosts = new HashMap<>();
 
         for (Element element : elements) {
@@ -138,7 +144,10 @@ public class YUNewsPostProcessor extends PostProcessor {
      * @param newsName       : 소식 이름
      * @param keywordToPosts : 새로운 소식 정보 (키워드별)
      */
-    private void saveDailyNewsInfo(String newsName, Map<KeywordType, CrawlingPostInfo> keywordToPosts) {
+    private void saveDailyNewsInfo(
+            String newsName,
+            Map<KeywordType, CrawlingPostInfo> keywordToPosts
+    ) {
         List<String> titles = new ArrayList<>();
         List<String> urls = new ArrayList<>();
 
@@ -175,13 +184,16 @@ public class YUNewsPostProcessor extends PostProcessor {
      * @param newsName       : 소식(뉴스) 이름
      * @param publicId       : 모든 알림에 공통으로 사용할 Public ID (묶음 식별용)
      */
-    private void saveNotifications(List<Long> userIds,
-                                   Map<Long, List<KeywordType>> userToKeywords,
-                                   Map<KeywordType, CrawlingPostInfo> keywordToPosts,
-                                   String newsName,
-                                   String publicId) {
+    private List<Long> saveNotifications(
+            List<Long> userIds,
+            Map<Long, List<KeywordType>> userToKeywords,
+            Map<KeywordType, CrawlingPostInfo> keywordToPosts,
+            String newsName,
+            String publicId
+    ) {
 
         List<Notification> notifications = new ArrayList<>();
+        List<Long> notifiedUserIds = new ArrayList<>();
 
         for (Long userId : userIds) {
             List<KeywordType> keywords = userToKeywords.getOrDefault(userId, List.of());
@@ -200,11 +212,14 @@ public class YUNewsPostProcessor extends PostProcessor {
 
             if (!titles.isEmpty()) {
                 notifications.add(buildNotification(newsName, titles, urls, publicId, userId));
+                notifiedUserIds.add(userId);
             }
         }
 
         if (!notifications.isEmpty()) {
             notificationCommandService.createNotifications(notifications);
         }
+
+        return notifiedUserIds;
     }
 }
