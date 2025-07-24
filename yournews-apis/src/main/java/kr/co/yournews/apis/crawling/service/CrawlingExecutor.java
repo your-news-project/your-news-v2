@@ -9,10 +9,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -21,6 +22,7 @@ public class CrawlingExecutor {
     private final NewsService newsService;
     private final NewsProcessor newsProcessor;
     private final List<PostProcessor> postProcessors;
+    private final @Qualifier("notificationExecutor") Executor notificationExecutor;
 
     /**
      * 주어진 CrawlingStrategy에 따라 크롤링을 실행하는 메서드
@@ -28,23 +30,20 @@ public class CrawlingExecutor {
      *
      * @param strategy : 크롤링 전략
      */
-    @Async
     public void executeStrategy(CrawlingStrategy strategy) {
-        String strategyName = strategy.getClass().getSimpleName();
-        log.info("[크롤링 시작] strategy: {}", strategyName);
+        log.info("[크롤링 시작] strategy: {}", strategy.getClass().getSimpleName());
 
         newsService.readAll().stream()
                 .filter(news -> strategy.canHandle(news.getName()))
                 .forEach(news -> {
-                    if (strategy instanceof YutopiaCrawlingStrategy yuStrategy) {
-                        yuStrategy.getUrlsForYuTopiaNews(news.getUrl()).forEach(url ->
-                                crawlAndProcess(news.getName(), url, strategy)
-                        );
-                    } else {
-                        crawlAndProcess(news.getName(), news.getUrl(), strategy);
-                    }
+                    List<String> urls = (strategy instanceof YutopiaCrawlingStrategy yuStrategy)
+                            ? yuStrategy.getUrlsForYuTopiaNews(news.getUrl())
+                            : List.of(news.getUrl());
+
+                    urls.forEach(url -> notificationExecutor.execute(() ->
+                            crawlAndProcess(news.getName(), url, strategy)
+                    ));
                 });
-        log.info("[크롤링 완료] strategy: {}", strategyName);
     }
 
     /**
@@ -76,5 +75,7 @@ public class CrawlingExecutor {
                 .filter(processor -> processor.supports(strategy))
                 .findFirst()
                 .ifPresent(processor -> processor.process(newsName, elements, strategy));
+
+        log.info("[크롤링 완료] strategy: {}", strategy.getClass().getSimpleName());
     }
 }

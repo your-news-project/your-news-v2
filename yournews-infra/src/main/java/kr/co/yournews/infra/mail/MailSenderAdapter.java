@@ -26,7 +26,7 @@ public class MailSenderAdapter {
     private String mailSender;
 
     /* 메일 보내기 */
-    @Async
+    @Async(value = "notificationExecutor")
     public void sendMail(String email, String content, MailStrategy strategy) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
