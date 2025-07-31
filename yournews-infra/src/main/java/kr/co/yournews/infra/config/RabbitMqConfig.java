@@ -88,11 +88,13 @@ public class RabbitMqConfig {
      */
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
+        int processors = Runtime.getRuntime().availableProcessors();
+
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(jackson2JsonMessageConverter());
-        factory.setConcurrentConsumers(5);
-        factory.setMaxConcurrentConsumers(10);
+        factory.setConcurrentConsumers(processors * 2);
+        factory.setMaxConcurrentConsumers(processors * 3);
         factory.setPrefetchCount(10);
         factory.setAdviceChain(retryInterceptor());
         factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
