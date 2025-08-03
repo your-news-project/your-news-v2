@@ -1,6 +1,11 @@
 # Your-News (v2)
 
-학교 공지 알림 서비스 서버입니다.
+학교 공지 알림 서비스입니다.
+
+ [IOS 다운로드](https://apps.apple.com/kr/app/yu-yournews/id6748317204)
+ 
+ [Android 다운로드](https://play.google.com/store/apps/details?id=com.daeyoung.yournews)
+ 
 
 ## ✨ Features
 ### 권한별
