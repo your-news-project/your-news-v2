@@ -287,7 +287,7 @@ public class NotificationControllerTest {
                 new NotificationRankingDto("소식3", 3)
         );
 
-        given(notificationRankingService.getTopNewsRanking()).willReturn(rankingList);
+        given(notificationRankingService.getNewsRanking()).willReturn(rankingList);
 
         // when
         ResultActions resultActions = mockMvc.perform(

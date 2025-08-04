@@ -15,8 +15,6 @@ import java.util.List;
 public class NotificationRankingService {
     private final RedisRepository redisRepository;
 
-    private static final int TOP_N = 10;
-
     /**
      * 소식 이름(newsName)을 기준으로 Redis ZSet 내 점수를 증가시키는 메서드
      * - ZSet 구조를 사용하여 금일 소식별 알림 수를 랭킹 형태로 저장
@@ -47,14 +45,12 @@ public class NotificationRankingService {
 
     /**
      * Redis에 저장된 일간 소식 랭킹 정보를 조회하는 메서드
-     * - 가장 많이 등록된 소식 순서대로 상위 N개 반환
      *
      * @return 소식 이름과 점수를 포함한 랭킹 DTO 리스트
      */
-    public List<NotificationRankingDto> getTopNewsRanking() {
-        return redisRepository.getTopZSetWithScore(
+    public List<NotificationRankingDto> getNewsRanking() {
+        return redisRepository.getZSetWithScore(
                 RedisConstants.NEWS_RANKING_KEY_PREFIX,
-                TOP_N,
                 NotificationRankingDto::new
         );
     }

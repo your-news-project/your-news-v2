@@ -62,16 +62,16 @@ public class RedisRepository {
         return redisTemplate.getExpire(key, timeUnit);
     }
 
-    /* ZSET: 소식 랭킹 점수 증가 */
+    /* ZSET: 랭킹 점수 증가 */
     public void incrementZSetScore(String key, String member, int score, Duration duration) {
         redisTemplate.opsForZSet().incrementScore(key, member, score);
         redisTemplate.expire(key, duration);
     }
 
-    /* ZSET: 상위 랭킹 뉴스 조회 */
-    public <T> List<T> getTopZSetWithScore(String key, int topN, BiFunction<String, Integer, T> mapper) {
+    /* ZSET: 랭킹 조회 */
+    public <T> List<T> getZSetWithScore(String key, BiFunction<String, Integer, T> mapper) {
         Set<ZSetOperations.TypedTuple<Object>> results =
-                redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, topN - 1);
+                redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, -1);
         if (results == null) return Collections.emptyList();
 
         return results.stream()

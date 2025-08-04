@@ -72,7 +72,7 @@ public class NotificationController {
     public ResponseEntity<?> getTopNewsRanking() {
         return ResponseEntity.ok(
                 SuccessResponse.from(
-                        notificationRankingService.getTopNewsRanking()
+                        notificationRankingService.getNewsRanking()
                 )
         );
     }
