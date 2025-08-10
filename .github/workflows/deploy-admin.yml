@@ -21,26 +21,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. Firebase를 위한 JSON 파일 생성
-      - name: Create Json
-        uses: jsdaniell/create-json@v1.2.2
-        with:
-          name: "./yournews-admin/src/main/resources/your-news-735fe-firebase-adminsdk-fbsvc-bfc443350c.json"
-          json: ${{ secrets.FIREBASE_PRODUCTION_JSON }}
-
-      # 4. Build Gradle
+      # 3. Build Gradle
       - name: Build admin
         run: |
           chmod +x ./gradlew
           ./gradlew :yournews-admin:build -x test
 
-      # 5. 현재 커밋의 짧은 SHA 값을 가져와 VERSION 환경변수로 등록
+      # 4. 현재 커밋의 짧은 SHA 값을 가져와 VERSION 환경변수로 등록
       - name: Set VERSION from short SHA
         id: version
         run: |
           echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      # 6. Docker 이미지 build 및 push
+      # 5. Docker 이미지 build 및 push
       - name: Docker Build & Push
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -49,7 +42,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/yournews-admin:$VERSION
           docker push ${{ secrets.DOCKER_USERNAME }}/yournews-admin:latest
 
-      # 7. ec2 pull
+      # 6. ec2 pull
       - name: Deploy to server
         uses: appleboy/ssh-action@master
         with:
