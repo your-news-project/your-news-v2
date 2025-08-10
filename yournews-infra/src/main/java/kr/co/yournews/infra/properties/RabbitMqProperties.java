@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "rabbitmq")
 @Getter @Setter
 public class RabbitMqProperties {
-    private String queueName;
     private String exchangeName;
     private String routingKey;
 }
