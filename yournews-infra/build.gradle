@@ -20,9 +20,6 @@ dependencies {
     /* Jsoup */
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.17.2'
 
-    /* FCM (Firebase Cloud Messaging) */
-    implementation 'com.google.firebase:firebase-admin:9.1.1'
-
     /* RabbitMQ */
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
