@@ -1,11 +1,11 @@
 package kr.co.yournews.apis.crawling.strategy.post;
 
 import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
-import kr.co.yournews.apis.fcm.dto.FcmMessageDto;
+import kr.co.yournews.apis.notification.dto.FcmMessageDto;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.type.NotificationType;
 import kr.co.yournews.domain.user.entity.FcmToken;
-import kr.co.yournews.infra.fcm.constant.FcmConstant;
+import kr.co.yournews.apis.notification.constant.NotificationConstant;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,13 +61,14 @@ public abstract class PostProcessor {
     protected void sendFcmMessages(List<FcmToken> tokens, String newsName, String publicId) {
         log.info("[알림 메시지 큐 전송 시작] 소식명: {}, 토큰 수: {}, publicId: {}", newsName, tokens.size(), publicId);
 
-        String title = FcmConstant.getNewsNotificationTitle(newsName);
+        String title = NotificationConstant.getNewsNotificationTitle(newsName);
 
         for (int idx = 0; idx < tokens.size(); idx++) {
             FcmToken token = tokens.get(idx);
+            boolean isFirst = (idx == 0); // 첫번째 토큰 여부 판단
             boolean isLast = (idx == tokens.size() - 1); // 마지막 토큰 여부 판단
             rabbitMessagePublisher.send(
-                    FcmMessageDto.of(token.getToken(), title, publicId, isLast)
+                    FcmMessageDto.of(token.getToken(), title, publicId, isFirst, isLast)
             );
         }
 
