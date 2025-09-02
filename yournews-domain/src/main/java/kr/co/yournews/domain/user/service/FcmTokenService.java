@@ -18,21 +18,12 @@ public class FcmTokenService {
         fcmTokenRepository.save(fcmToken);
     }
 
-    public List<FcmToken> readAllByUserId(Long userId) {
-        return fcmTokenRepository.findAllByUser_Id(userId);
-    }
-
     public List<FcmToken> readAllByUserIds(List<Long> userIds) {
         return fcmTokenRepository.findAllByUserIdIn(userIds);
     }
 
     public Optional<FcmToken> readByUserIdAndDeviceInfo(Long userId, String deviceInfo) {
         return fcmTokenRepository.findByUser_IdAndDeviceInfo(userId, deviceInfo);
-    }
-
-    @Transactional
-    public void deleteByToken(String token) {
-        fcmTokenRepository.deleteByToken(token);
     }
 
     public void deleteAllByUserId(Long userId) {
