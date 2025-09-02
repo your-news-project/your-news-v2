@@ -62,7 +62,7 @@ jobs:
         run: |
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
-            --comment "Deploy yournews-notify via GitHub Actions" \
+            --comment "Deploy yournews-admin via GitHub Actions" \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --region ap-northeast-2 \
             --parameters commands='bash /home/ubuntu/script/admin_deploy.sh' \
