@@ -1,4 +1,4 @@
-package kr.co.yournews.apis.crawling.strategy.post;
+package kr.co.yournews.apis.crawling.processing;
 
 import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.board.YUNewsBoardStrategy;

@@ -2,7 +2,7 @@ package kr.co.yournews.apis.crawling.service;
 
 import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.board.YutopiaBoardStrategy;
-import kr.co.yournews.apis.crawling.strategy.post.PostProcessor;
+import kr.co.yournews.apis.crawling.processing.PostProcessor;
 import kr.co.yournews.domain.news.service.NewsService;
 import kr.co.yournews.infra.crawling.NewsProcessor;
 import lombok.RequiredArgsConstructor;
