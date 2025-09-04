@@ -1,6 +1,7 @@
 package kr.co.yournews.apis.noticesummary.controller;
 
 import kr.co.yournews.apis.noticesummary.service.NoticeSummaryQueryService;
+import kr.co.yournews.common.response.success.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,10 @@ public class NoticeSummaryController {
 
     @GetMapping("/summary")
     public ResponseEntity<?> getNoticeSummaryByUrl(@RequestParam String url) {
-        return ResponseEntity.ok(noticeSummaryQueryService.getNoticeSummaryByUrl(url));
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        noticeSummaryQueryService.getNoticeSummaryByUrl(url)
+                )
+        );
     }
 }
