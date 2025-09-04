@@ -1,12 +1,13 @@
 package kr.co.yournews.apis.noticesummary.dto;
 
 import kr.co.yournews.domain.notification.entity.NoticeSummary;
+import kr.co.yournews.domain.notification.type.SummaryStatus;
 
 public record NoticeSummaryDto(
-        String urlHash,
+        SummaryStatus status,
         String summary
 ) {
     public static NoticeSummaryDto from(NoticeSummary noticeSummary) {
-        return new NoticeSummaryDto(noticeSummary.getUrlHash(), noticeSummary.getSummary());
+        return new NoticeSummaryDto(noticeSummary.getStatus(), noticeSummary.getSummary());
     }
 }
