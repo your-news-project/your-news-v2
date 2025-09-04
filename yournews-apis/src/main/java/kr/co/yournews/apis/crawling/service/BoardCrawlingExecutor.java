@@ -18,7 +18,7 @@ import java.util.concurrent.Executor;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CrawlingExecutor {
+public class BoardCrawlingExecutor {
     private final NewsService newsService;
     private final CrawlingProcessor crawlingProcessor;
     private final List<PostProcessor> postProcessors;
