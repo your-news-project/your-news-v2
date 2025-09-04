@@ -1,7 +1,8 @@
-package kr.co.yournews.apis.crawling.strategy.post;
+package kr.co.yournews.apis.crawling.processing;
 
-import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
-import kr.co.yournews.apis.crawling.strategy.crawling.YUNewsCrawlingStrategy;
+import kr.co.yournews.apis.crawling.service.NoticeDetailCrawlingExecutor;
+import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
+import kr.co.yournews.apis.crawling.strategy.board.YUNewsBoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.dto.CrawlingPostInfo;
 import kr.co.yournews.apis.notification.service.DailyNotificationService;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
@@ -9,6 +10,7 @@ import kr.co.yournews.domain.news.dto.UserKeywordDto;
 import kr.co.yournews.domain.news.service.SubNewsService;
 import kr.co.yournews.domain.news.type.KeywordType;
 import kr.co.yournews.domain.notification.entity.Notification;
+import kr.co.yournews.domain.notification.service.NoticeSummaryService;
 import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
@@ -36,10 +38,12 @@ public class YUNewsPostProcessor extends PostProcessor {
             NotificationCommandService notificationCommandService,
             FcmTokenService fcmTokenService,
             SubNewsService subNewsService,
+            DailyNotificationService dailyNotificationService,
             RabbitMessagePublisher rabbitMessagePublisher,
-            DailyNotificationService dailyNotificationService
+            NoticeSummaryService noticeSummaryService,
+            NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor
     ) {
-        super(rabbitMessagePublisher);
+        super(rabbitMessagePublisher, noticeSummaryService, noticeDetailCrawlingExecutor);
         this.notificationCommandService = notificationCommandService;
         this.fcmTokenService = fcmTokenService;
         this.subNewsService = subNewsService;
@@ -53,8 +57,8 @@ public class YUNewsPostProcessor extends PostProcessor {
      * @return YUNewsCrawlingStrategy일 경우 true, 그 외 false
      */
     @Override
-    public boolean supports(CrawlingStrategy strategy) {
-        return strategy instanceof YUNewsCrawlingStrategy;
+    public boolean supports(BoardStrategy strategy) {
+        return strategy instanceof YUNewsBoardStrategy;
     }
 
     /**
@@ -69,9 +73,9 @@ public class YUNewsPostProcessor extends PostProcessor {
      * @param strategy : 크롤링 처리 전략
      */
     @Override
-    public void process(String newsName, Elements elements, CrawlingStrategy strategy) {
+    public void process(String newsName, Elements elements, BoardStrategy strategy) {
         log.info("[YUNews 크롤링 처리 시작] newsName: {}, strategy: {}", newsName, strategy.getClass().getSimpleName());
-        YUNewsCrawlingStrategy yuNewsStrategy = (YUNewsCrawlingStrategy) strategy;
+        YUNewsBoardStrategy yuNewsStrategy = (YUNewsBoardStrategy) strategy;
 
         Map<KeywordType, CrawlingPostInfo> keywordToPosts = extractNewPostsByKeyword(elements, yuNewsStrategy);
         if (keywordToPosts.isEmpty()) {
@@ -79,7 +83,7 @@ public class YUNewsPostProcessor extends PostProcessor {
             return;
         }
 
-        saveDailyNewsInfo(newsName, keywordToPosts);
+        saveDailyNewsInfoAndNewsSummary(newsName, keywordToPosts);
 
         List<Long> userIds = yuNewsStrategy.getSubscribedUsers(newsName);
         if (userIds.isEmpty()) {
@@ -108,7 +112,7 @@ public class YUNewsPostProcessor extends PostProcessor {
      */
     private Map<KeywordType, CrawlingPostInfo> extractNewPostsByKeyword(
             Elements elements,
-            YUNewsCrawlingStrategy strategy
+            YUNewsBoardStrategy strategy
     ) {
         Map<KeywordType, CrawlingPostInfo> keywordToPosts = new HashMap<>();
 
@@ -138,13 +142,14 @@ public class YUNewsPostProcessor extends PostProcessor {
     }
 
     /**
-     * 일간 알림 발송을 위한 새로운 소식 정보 저장 메서드
+     * 일간 알림 발송을 위한 새로운 소식 정보 저장 및 뉴스 요약 메서드
      * - 새로운 전체 소식들을 리스트로 묶은 후 저장
+     * - 해당 소식들을 요약하기 위한 요약 메서드 호출
      *
      * @param newsName       : 소식 이름
      * @param keywordToPosts : 새로운 소식 정보 (키워드별)
      */
-    private void saveDailyNewsInfo(
+    private void saveDailyNewsInfoAndNewsSummary(
             String newsName,
             Map<KeywordType, CrawlingPostInfo> keywordToPosts
     ) {
@@ -158,7 +163,10 @@ public class YUNewsPostProcessor extends PostProcessor {
             }
         }
 
+        // 일간 소식 정보 저장
         dailyNotificationService.saveNewsInfo(newsName, titles, urls);
+        // 소식 요약 및 저장
+        summarizeNewsAndSave(newsName, urls);
     }
 
     /**

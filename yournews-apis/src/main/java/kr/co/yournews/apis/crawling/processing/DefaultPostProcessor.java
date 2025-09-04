@@ -1,11 +1,13 @@
-package kr.co.yournews.apis.crawling.strategy.post;
+package kr.co.yournews.apis.crawling.processing;
 
-import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
-import kr.co.yournews.apis.crawling.strategy.crawling.YUNewsCrawlingStrategy;
+import kr.co.yournews.apis.crawling.service.NoticeDetailCrawlingExecutor;
+import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
+import kr.co.yournews.apis.crawling.strategy.board.YUNewsBoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.dto.CrawlingPostInfo;
 import kr.co.yournews.apis.notification.service.DailyNotificationService;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
 import kr.co.yournews.domain.notification.entity.Notification;
+import kr.co.yournews.domain.notification.service.NoticeSummaryService;
 import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
@@ -28,10 +30,12 @@ public class DefaultPostProcessor extends PostProcessor {
     public DefaultPostProcessor(
             NotificationCommandService notificationCommandService,
             FcmTokenService fcmTokenService,
+            DailyNotificationService dailyNotificationService,
             RabbitMessagePublisher rabbitMessagePublisher,
-            DailyNotificationService dailyNotificationService
+            NoticeSummaryService noticeSummaryService,
+            NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor
     ) {
-        super(rabbitMessagePublisher);
+        super(rabbitMessagePublisher, noticeSummaryService, noticeDetailCrawlingExecutor);
         this.notificationCommandService = notificationCommandService;
         this.fcmTokenService = fcmTokenService;
         this.dailyNotificationService = dailyNotificationService;
@@ -45,8 +49,8 @@ public class DefaultPostProcessor extends PostProcessor {
      * @return : YUNewsCrawlingStrategy일 경우 false, 그 외 true
      */
     @Override
-    public boolean supports(CrawlingStrategy strategy) {
-        return !(strategy instanceof YUNewsCrawlingStrategy);
+    public boolean supports(BoardStrategy strategy) {
+        return !(strategy instanceof YUNewsBoardStrategy);
     }
 
     /**
@@ -61,7 +65,7 @@ public class DefaultPostProcessor extends PostProcessor {
      * @param strategy : 크롤링 처리 전략
      */
     @Override
-    public void process(String newsName, Elements elements, CrawlingStrategy strategy) {
+    public void process(String newsName, Elements elements, BoardStrategy strategy) {
         log.info("[크롤링 처리 시작] newsName: {}, strategy: {}", newsName, strategy.getClass().getSimpleName());
 
         CrawlingPostInfo postInfo = extractNewPosts(elements, strategy);
@@ -72,6 +76,9 @@ public class DefaultPostProcessor extends PostProcessor {
 
         // 일간 소식 정보 저장
         dailyNotificationService.saveNewsInfo(newsName, postInfo.titles(), postInfo.urls());
+
+        // 소식 요약 및 저장
+        summarizeNewsAndSave(newsName, postInfo.urls());
 
         List<Long> userIds = strategy.getSubscribedUsers(newsName);
         if (userIds.isEmpty()) {
@@ -99,7 +106,7 @@ public class DefaultPostProcessor extends PostProcessor {
      */
     private CrawlingPostInfo extractNewPosts(
             Elements elements,
-            CrawlingStrategy strategy
+            BoardStrategy strategy
     ) {
         List<String> titles = new ArrayList<>();
         List<String> urls = new ArrayList<>();

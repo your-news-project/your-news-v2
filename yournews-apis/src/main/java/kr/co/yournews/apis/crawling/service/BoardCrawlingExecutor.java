@@ -1,10 +1,10 @@
 package kr.co.yournews.apis.crawling.service;
 
-import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
-import kr.co.yournews.apis.crawling.strategy.crawling.YutopiaCrawlingStrategy;
-import kr.co.yournews.apis.crawling.strategy.post.PostProcessor;
+import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
+import kr.co.yournews.apis.crawling.strategy.board.YutopiaBoardStrategy;
+import kr.co.yournews.apis.crawling.processing.PostProcessor;
 import kr.co.yournews.domain.news.service.NewsService;
-import kr.co.yournews.infra.crawling.NewsProcessor;
+import kr.co.yournews.infra.crawling.CrawlingProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
@@ -18,9 +18,9 @@ import java.util.concurrent.Executor;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CrawlingExecutor {
+public class BoardCrawlingExecutor {
     private final NewsService newsService;
-    private final NewsProcessor newsProcessor;
+    private final CrawlingProcessor crawlingProcessor;
     private final List<PostProcessor> postProcessors;
     private final @Qualifier("notificationExecutor") Executor notificationExecutor;
 
@@ -30,13 +30,13 @@ public class CrawlingExecutor {
      *
      * @param strategy : 크롤링 전략
      */
-    public void executeStrategy(CrawlingStrategy strategy) {
+    public void executeStrategy(BoardStrategy strategy) {
         log.info("[크롤링 시작] strategy: {}", strategy.getClass().getSimpleName());
 
         newsService.readAll().stream()
                 .filter(news -> strategy.canHandle(news.getName()))
                 .forEach(news -> {
-                    List<String> urls = (strategy instanceof YutopiaCrawlingStrategy yuStrategy)
+                    List<String> urls = (strategy instanceof YutopiaBoardStrategy yuStrategy)
                             ? yuStrategy.getUrlsForYuTopiaNews(news.getUrl())
                             : List.of(news.getUrl());
 
@@ -54,10 +54,10 @@ public class CrawlingExecutor {
      * @param url      : 크롤링할 url
      * @param strategy : 크롤링 전략
      */
-    private void crawlAndProcess(String newsName, String url, CrawlingStrategy strategy) {
+    private void crawlAndProcess(String newsName, String url, BoardStrategy strategy) {
         log.info("[크롤링 요청] newsName: {}, url: {}", newsName, url);
 
-        Document doc = newsProcessor.fetch(url);
+        Document doc = crawlingProcessor.fetch(url);
 
         if (doc == null) {
             log.warn("[크롤링 실패] Document null - newsName: {}, url: {}", newsName, url);

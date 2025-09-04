@@ -1,7 +1,9 @@
-package kr.co.yournews.apis.crawling.strategy.crawling;
+package kr.co.yournews.apis.crawling.strategy.board;
 
+import kr.co.yournews.domain.news.type.KeywordType;
 import kr.co.yournews.domain.processedurl.service.ProcessedUrlService;
 import kr.co.yournews.domain.user.service.UserService;
+import kr.co.yournews.infra.openai.KeywordClassificationClient;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,12 +16,12 @@ import static kr.co.yournews.infra.redis.util.RedisConstants.DEFAULT_URL_TTL_SEC
 
 @Component
 @RequiredArgsConstructor
-public class DefaultCrawlingStrategy implements CrawlingStrategy {
+public class YUNewsBoardStrategy implements BoardStrategy {
     private final ProcessedUrlService processedUrlService;
+    private final KeywordClassificationClient keywordClassificationClient;
     private final UserService userService;
 
-    private static final List<String> EXCLUDED_NEWS_NAME =
-            List.of("YuTopia(비교과)", "영대소식", "반도체특성화대학", "AI/SW트랙", "취업처");
+    private static final String NEWS_NAME = "영대소식";
 
     @Override
     public String getScheduledTime() {
@@ -28,7 +30,7 @@ public class DefaultCrawlingStrategy implements CrawlingStrategy {
 
     @Override
     public boolean canHandle(String newsName) {
-        return !EXCLUDED_NEWS_NAME.contains(newsName);
+        return NEWS_NAME.equals(newsName);
     }
 
     @Override
@@ -59,6 +61,11 @@ public class DefaultCrawlingStrategy implements CrawlingStrategy {
     @Override
     public List<Long> getSubscribedUsers(String newsName) {
         return userService.readAllUserIdsByNewsNameAndSubStatusTrue(newsName);
+    }
+
+    public KeywordType getKeyword(String postTitle) {
+        String keyword = keywordClassificationClient.requestKeyword(postTitle);
+        return KeywordType.fromLabel(keyword);
     }
 
     @Override

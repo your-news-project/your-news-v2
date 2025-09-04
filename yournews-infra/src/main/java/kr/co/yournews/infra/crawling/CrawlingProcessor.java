@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class NewsProcessor {
+public class CrawlingProcessor {
 
     private static final int MAX_RETRIES = 2;
 

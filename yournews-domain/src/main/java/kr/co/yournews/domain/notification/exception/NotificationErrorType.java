@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 public enum NotificationErrorType implements BaseErrorType {
 
     NOT_FOUND(StatusCode.NOT_FOUND, "NT001", "존재하지 않는 알림입니다."),
-    FORBIDDEN(StatusCode.FORBIDDEN, "NT002", "접근 권한이 없습니다.")
+    FORBIDDEN(StatusCode.FORBIDDEN, "NT002", "접근 권한이 없습니다."),
+    SUMMARY_NOT_FOUND(StatusCode.NOT_FOUND, "NT003", "요약본이 존재하지 않습니다.")
     ;
 
     private final StatusCode status;

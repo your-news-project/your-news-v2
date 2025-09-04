@@ -1,7 +1,7 @@
 package kr.co.yournews.apis.crawling.service;
 
 import jakarta.annotation.PostConstruct;
-import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
+import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -14,10 +14,10 @@ import java.util.TimeZone;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CrawlingScheduler {
-    private final List<CrawlingStrategy> strategies;
+public class BoardCrawlingScheduler {
+    private final List<BoardStrategy> strategies;
     private final ThreadPoolTaskScheduler taskScheduler;
-    private final CrawlingExecutor crawlingExecutor;
+    private final BoardCrawlingExecutor boardCrawlingExecutor;
 
     /**
      * 각 CrawlingStrategy의 주기에 따라 크롤링 작업을 스케줄링하는 메서드
@@ -28,7 +28,7 @@ public class CrawlingScheduler {
         log.info("[크롤링 스케줄링 등록 시작] 등록된 전략 수: {}", strategies.size());
 
         strategies.forEach(strategy -> taskScheduler.schedule(
-                () -> crawlingExecutor.executeStrategy(strategy),
+                () -> boardCrawlingExecutor.executeStrategy(strategy),
                 new CronTrigger(strategy.getScheduledTime(), TimeZone.getTimeZone("Asia/Seoul"))
         ));
 

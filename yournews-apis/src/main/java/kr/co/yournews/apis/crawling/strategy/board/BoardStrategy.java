@@ -1,4 +1,4 @@
-package kr.co.yournews.apis.crawling.strategy.crawling;
+package kr.co.yournews.apis.crawling.strategy.board;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -6,7 +6,7 @@ import org.jsoup.select.Elements;
 
 import java.util.List;
 
-public interface CrawlingStrategy {
+public interface BoardStrategy {
     /**
      * 이 전략의 크롤링 스케줄 주기를 반환
      * Spring Cron 표현식 형태
