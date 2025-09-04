@@ -23,4 +23,17 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean(name = "detailExecutor")
+    public Executor detailExecutor() {
+        int processors = Runtime.getRuntime().availableProcessors();
+
+        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
+        ex.setCorePoolSize(processors * 2);        // 코어 수 x 2 (IO 작업)
+        ex.setMaxPoolSize(processors * 3);
+        ex.setQueueCapacity(200);
+        ex.setThreadNamePrefix("detail-");
+        ex.initialize();
+        return ex;
+    }
 }
