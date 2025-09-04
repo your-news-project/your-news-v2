@@ -1,7 +1,7 @@
 package kr.co.yournews.apis.crawling.service;
 
 import jakarta.annotation.PostConstruct;
-import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
+import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -15,7 +15,7 @@ import java.util.TimeZone;
 @Service
 @RequiredArgsConstructor
 public class CrawlingScheduler {
-    private final List<CrawlingStrategy> strategies;
+    private final List<BoardStrategy> strategies;
     private final ThreadPoolTaskScheduler taskScheduler;
     private final CrawlingExecutor crawlingExecutor;
 

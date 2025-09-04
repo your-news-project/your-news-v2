@@ -1,6 +1,6 @@
 package kr.co.yournews.apis.crawling.strategy.post;
 
-import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
+import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.notification.dto.FcmMessageDto;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.type.NotificationType;
@@ -24,7 +24,7 @@ public abstract class PostProcessor {
      * @param strategy : 크롤링 전략
      * @return : 지원 여부
      */
-    public abstract boolean supports(CrawlingStrategy strategy);
+    public abstract boolean supports(BoardStrategy strategy);
 
     /**
      * 주어진 게시글 요소들을 처리 (DB 저장, 알림 전송 등)
@@ -33,7 +33,7 @@ public abstract class PostProcessor {
      * @param elements : 크롤링된 게시글 요소들
      * @param strategy : 사용된 크롤링 전략
      */
-    public abstract void process(String newsName, Elements elements, CrawlingStrategy strategy);
+    public abstract void process(String newsName, Elements elements, BoardStrategy strategy);
 
     /**
      * Notification 엔티티 생성

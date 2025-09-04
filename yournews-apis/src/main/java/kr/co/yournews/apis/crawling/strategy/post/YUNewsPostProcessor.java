@@ -1,7 +1,7 @@
 package kr.co.yournews.apis.crawling.strategy.post;
 
-import kr.co.yournews.apis.crawling.strategy.crawling.CrawlingStrategy;
-import kr.co.yournews.apis.crawling.strategy.crawling.YUNewsCrawlingStrategy;
+import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
+import kr.co.yournews.apis.crawling.strategy.board.YUNewsBoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.dto.CrawlingPostInfo;
 import kr.co.yournews.apis.notification.service.DailyNotificationService;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
@@ -53,8 +53,8 @@ public class YUNewsPostProcessor extends PostProcessor {
      * @return YUNewsCrawlingStrategy일 경우 true, 그 외 false
      */
     @Override
-    public boolean supports(CrawlingStrategy strategy) {
-        return strategy instanceof YUNewsCrawlingStrategy;
+    public boolean supports(BoardStrategy strategy) {
+        return strategy instanceof YUNewsBoardStrategy;
     }
 
     /**
@@ -69,9 +69,9 @@ public class YUNewsPostProcessor extends PostProcessor {
      * @param strategy : 크롤링 처리 전략
      */
     @Override
-    public void process(String newsName, Elements elements, CrawlingStrategy strategy) {
+    public void process(String newsName, Elements elements, BoardStrategy strategy) {
         log.info("[YUNews 크롤링 처리 시작] newsName: {}, strategy: {}", newsName, strategy.getClass().getSimpleName());
-        YUNewsCrawlingStrategy yuNewsStrategy = (YUNewsCrawlingStrategy) strategy;
+        YUNewsBoardStrategy yuNewsStrategy = (YUNewsBoardStrategy) strategy;
 
         Map<KeywordType, CrawlingPostInfo> keywordToPosts = extractNewPostsByKeyword(elements, yuNewsStrategy);
         if (keywordToPosts.isEmpty()) {
@@ -108,7 +108,7 @@ public class YUNewsPostProcessor extends PostProcessor {
      */
     private Map<KeywordType, CrawlingPostInfo> extractNewPostsByKeyword(
             Elements elements,
-            YUNewsCrawlingStrategy strategy
+            YUNewsBoardStrategy strategy
     ) {
         Map<KeywordType, CrawlingPostInfo> keywordToPosts = new HashMap<>();
 

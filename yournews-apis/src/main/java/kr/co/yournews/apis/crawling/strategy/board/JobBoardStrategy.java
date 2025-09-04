@@ -1,4 +1,4 @@
-package kr.co.yournews.apis.crawling.strategy.crawling;
+package kr.co.yournews.apis.crawling.strategy.board;
 
 import kr.co.yournews.common.util.DateTimeFormatterUtil;
 import kr.co.yournews.domain.processedurl.service.ProcessedUrlService;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class JobCrawlingStrategy implements CrawlingStrategy {
+public class JobBoardStrategy implements BoardStrategy {
     private final ProcessedUrlService processedUrlService;
     private final UserService userService;
 

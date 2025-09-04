@@ -1,4 +1,4 @@
-package kr.co.yournews.apis.crawling.strategy.crawling;
+package kr.co.yournews.apis.crawling.strategy.board;
 
 import kr.co.yournews.domain.processedurl.service.ProcessedUrlService;
 import kr.co.yournews.domain.user.service.UserService;
@@ -15,7 +15,7 @@ import static kr.co.yournews.infra.redis.util.RedisConstants.YUTOPIA_URL_TTL_SEC
 
 @Component
 @RequiredArgsConstructor
-public class YutopiaCrawlingStrategy implements CrawlingStrategy {
+public class YutopiaBoardStrategy implements BoardStrategy {
     private final ProcessedUrlService processedUrlService;
     private final UserService userService;
 
