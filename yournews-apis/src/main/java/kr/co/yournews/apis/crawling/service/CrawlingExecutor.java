@@ -4,7 +4,7 @@ import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.board.YutopiaBoardStrategy;
 import kr.co.yournews.apis.crawling.processing.PostProcessor;
 import kr.co.yournews.domain.news.service.NewsService;
-import kr.co.yournews.infra.crawling.NewsProcessor;
+import kr.co.yournews.infra.crawling.CrawlingProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
@@ -20,7 +20,7 @@ import java.util.concurrent.Executor;
 @RequiredArgsConstructor
 public class CrawlingExecutor {
     private final NewsService newsService;
-    private final NewsProcessor newsProcessor;
+    private final CrawlingProcessor crawlingProcessor;
     private final List<PostProcessor> postProcessors;
     private final @Qualifier("notificationExecutor") Executor notificationExecutor;
 
@@ -57,7 +57,7 @@ public class CrawlingExecutor {
     private void crawlAndProcess(String newsName, String url, BoardStrategy strategy) {
         log.info("[크롤링 요청] newsName: {}, url: {}", newsName, url);
 
-        Document doc = newsProcessor.fetch(url);
+        Document doc = crawlingProcessor.fetch(url);
 
         if (doc == null) {
             log.warn("[크롤링 실패] Document null - newsName: {}, url: {}", newsName, url);
