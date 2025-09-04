@@ -3,6 +3,7 @@ package kr.co.yournews.apis.notification.service;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.exception.NotificationErrorType;
+import kr.co.yournews.domain.notification.service.NoticeSummaryService;
 import kr.co.yournews.domain.notification.service.NotificationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,6 +31,9 @@ public class NotificationCommandServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private NoticeSummaryService noticeSummaryService;
 
     @InjectMocks
     private NotificationCommandService notificationCommandService;
@@ -121,5 +125,6 @@ public class NotificationCommandServiceTest {
 
         // then
         verify(notificationService, times(1)).deleteByDateTime(any(LocalDateTime.class));
+        verify(noticeSummaryService, times(1)).deleteByDateTime(any(LocalDateTime.class));
     }
 }
