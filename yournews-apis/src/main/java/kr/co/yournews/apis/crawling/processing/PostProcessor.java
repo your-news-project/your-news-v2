@@ -1,22 +1,33 @@
 package kr.co.yournews.apis.crawling.processing;
 
+import kr.co.yournews.apis.crawling.service.NoticeDetailCrawlingExecutor;
 import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
-import kr.co.yournews.apis.notification.dto.FcmMessageDto;
-import kr.co.yournews.domain.notification.entity.Notification;
-import kr.co.yournews.domain.notification.type.NotificationType;
-import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.apis.notification.constant.NotificationConstant;
+import kr.co.yournews.apis.notification.dto.FcmMessageDto;
+import kr.co.yournews.common.util.HashUtil;
+import kr.co.yournews.domain.notification.entity.NoticeSummary;
+import kr.co.yournews.domain.notification.entity.Notification;
+import kr.co.yournews.domain.notification.service.NoticeSummaryService;
+import kr.co.yournews.domain.notification.type.NotificationType;
+import kr.co.yournews.domain.notification.type.SummaryStatus;
+import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
 public abstract class PostProcessor {
     private final RabbitMessagePublisher rabbitMessagePublisher;
+    private final NoticeSummaryService noticeSummaryService;
+    private final NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor;
+
+    private static final Set<String> SKIP = Set.of("YuTopia(비교과)", "취업처");
 
     /**
      * 해당 PostProcessor가 주어진 CrawlingStrategy를 지원하는지 여부를 반환
@@ -73,5 +84,36 @@ public abstract class PostProcessor {
         }
 
         log.info("[알림 메시지 큐 전송 완료] 토큰 수: {}, newsName: {}, publicId: {}", tokens.size(), newsName, publicId);
+    }
+
+    /**
+     * 소식의 내용을 요약하는 및 저장하는 메서드
+     */
+    protected void summarizeNewsAndSave(String newsName, List<String> urls) {
+        // 내용 요약을 진행하지 않는 공지
+        if (SKIP.contains(newsName)) {
+            return;
+        }
+
+        List<NoticeSummary> summaries = new ArrayList<>();
+        List<String> urlHashes = new ArrayList<>();
+
+        for (String url : urls) {
+            String urlHash = HashUtil.hash(url);
+            urlHashes.add(urlHash);
+
+            NoticeSummary summary = NoticeSummary.builder()
+                    .url(url)
+                    .urlHash(urlHash)
+                    .status(SummaryStatus.PENDING)
+                    .build();
+
+            summaries.add(summary);
+        }
+
+        // 소식 요약 정보를 담기위한 데이터 저장
+        noticeSummaryService.saveAll(summaries);
+        // 소식 요약 진행 및 요약 정보 업데이트
+        noticeDetailCrawlingExecutor.execute(newsName, urls, urlHashes);
     }
 }
