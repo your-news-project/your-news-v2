@@ -5,6 +5,7 @@ import kr.co.yournews.domain.notification.repository.NoticeSummaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,15 @@ public class NoticeSummaryService {
         noticeSummaryRepository.saveAllInBatch(noticeSummaries);
     }
 
-    public Optional<NoticeSummary> readByUrlHash(String urlHash) {
-        return noticeSummaryRepository.findByUrlHash(urlHash);
+    public List<NoticeSummary> readAllByUrlHash(String urlHash) {
+        return noticeSummaryRepository.findAllByUrlHash(urlHash);
+    }
+
+    public Optional<NoticeSummary> readByUrl(String url) {
+        return noticeSummaryRepository.findByUrl(url);
+    }
+
+    public void deleteByDateTime(LocalDateTime dateTime) {
+        noticeSummaryRepository.deleteByDateTimeBefore(dateTime);
     }
 }

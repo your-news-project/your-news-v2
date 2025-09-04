@@ -3,6 +3,7 @@ package kr.co.yournews.apis.notification.service;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.exception.NotificationErrorType;
+import kr.co.yournews.domain.notification.service.NoticeSummaryService;
 import kr.co.yournews.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationCommandService {
     private final NotificationService notificationService;
+    private final NoticeSummaryService noticeSummaryService;
 
     /**
      * 알림 리스트를 모두 저장하는 메서드
@@ -57,6 +59,7 @@ public class NotificationCommandService {
         log.info("[오래된 알림 삭제 요청] 기준일: {}", dateTime);
 
         notificationService.deleteByDateTime(dateTime);
+        noticeSummaryService.deleteByDateTime(dateTime);
 
         log.info("[오래된 알림 삭제 완료] 기준일 이전 데이터 삭제 완료");
     }

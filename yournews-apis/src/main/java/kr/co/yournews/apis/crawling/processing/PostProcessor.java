@@ -96,11 +96,9 @@ public abstract class PostProcessor {
         }
 
         List<NoticeSummary> summaries = new ArrayList<>();
-        List<String> urlHashes = new ArrayList<>();
 
         for (String url : urls) {
             String urlHash = HashUtil.hash(url);
-            urlHashes.add(urlHash);
 
             NoticeSummary summary = NoticeSummary.builder()
                     .url(url)
@@ -114,6 +112,6 @@ public abstract class PostProcessor {
         // 소식 요약 정보를 담기위한 데이터 저장
         noticeSummaryService.saveAll(summaries);
         // 소식 요약 진행 및 요약 정보 업데이트
-        noticeDetailCrawlingExecutor.execute(newsName, urls, urlHashes);
+        noticeDetailCrawlingExecutor.execute(newsName, urls);
     }
 }
