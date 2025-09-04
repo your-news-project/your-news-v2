@@ -30,13 +30,12 @@ public class NoticeDetailCrawlingExecutor {
      *
      * @param newsName  : 뉴스/공지 출처 이름
      * @param urls      : 상세 게시글 URL 목록
-     * @param urlHashes : 각 URL의 해시 (DB 매핑 키로 사용)
      */
-    public void execute(String newsName, List<String> urls, List<String> urlHashes) {
+    public void execute(String newsName, List<String> urls) {
         IntStream.range(0, urls.size())
                 .forEach(i -> {
                     detailExecutor.execute(() -> {
-                        process(newsName, urls.get(i), urlHashes.get(i)); // URL별 트랜잭션 커밋
+                        process(newsName, urls.get(i)); // URL별 트랜잭션 커밋
                     });
                 });
     }
@@ -48,7 +47,7 @@ public class NoticeDetailCrawlingExecutor {
      * - GPT를 통한 요약 생성
      * - DB에 요약본 저장
      */
-    private void process(String newsName, String url, String urlHash) {
+    private void process(String newsName, String url) {
         log.info("[게시글 상세 크롤링 요청] newsName: {}, url: {}", newsName, url);
         Document doc = crawlingProcessor.fetch(url);
 
@@ -71,7 +70,7 @@ public class NoticeDetailCrawlingExecutor {
                 newsDetail.title(), newsDetail.content());
 
         // 요약본 저장
-        noticeSummaryCommandService.saveSummaryInfo(urlHash, summary);
+        noticeSummaryCommandService.saveSummaryInfo(url, summary);
 
         log.info("[게시글 상세 크롤링 완료] newsName: {}, url: {}", newsName, url);
     }
