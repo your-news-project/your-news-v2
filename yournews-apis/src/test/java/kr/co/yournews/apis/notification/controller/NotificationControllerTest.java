@@ -181,35 +181,9 @@ public class NotificationControllerTest {
     class GetAllNotificationTest {
 
         @Test
-        @DisplayName("알림 목록 조회 - 전체 조회 (isRead 파라미터 없음)")
-        void getNotificationsSuccess() throws Exception {
-            // given
-            Page<NotificationDto.Summary> page = new PageImpl<>(List.of(
-                    new NotificationDto.Summary(1L, "공지", false, NotificationType.IMMEDIATE, LocalDateTime.now())
-            ));
-
-            given(notificationQueryService.getNotificationsByUserId(eq(userId), any(Pageable.class)))
-                    .willReturn(page);
-
-            // when
-            ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/notifies")
-                            .with(user(userDetails))
-            );
-
-            // then
-            resultActions
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.content[0].newsName").value("공지"))
-                    .andExpect(jsonPath("$.data.content.length()").value(1));
-        }
-
-        @Test
         @DisplayName("알림 목록 조회 - 읽음 여부 필터 (isRead=true)")
         void getNotificationsByIsReadSuccess() throws Exception {
             // given
-
             Page<NotificationDto.Summary> page = new PageImpl<>(List.of(
                     new NotificationDto.Summary(2L, "공지", true, NotificationType.IMMEDIATE, LocalDateTime.now())
             ));
@@ -221,6 +195,62 @@ public class NotificationControllerTest {
             ResultActions resultActions = mockMvc.perform(
                     get("/api/v1/notifies")
                             .param("isRead", "true")
+                            .with(user(userDetails))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.content[0].isRead").value(true))
+                    .andExpect(jsonPath("$.data.content.length()").value(1));
+        }
+
+        @Test
+        @DisplayName("알림 목록 조회 - 특정 소식 필터링")
+        void getNotificationByNewsNameSuccess() throws Exception {
+            // given
+            String newsName = "특정 소식";
+            Page<NotificationDto.Summary> page = new PageImpl<>(List.of(
+                    new NotificationDto.Summary(2L, newsName, true, NotificationType.IMMEDIATE, LocalDateTime.now())
+            ));
+
+            given(notificationQueryService.getNotificationsByUserIdAndNewsNameAndIsRead(eq(userId), eq(newsName), eq(true), any(Pageable.class)))
+                    .willReturn(page);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/notifies")
+                            .param("isRead", "true")
+                            .param("newsName", newsName)
+                            .with(user(userDetails))
+            );
+
+            // then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.content[0].isRead").value(true))
+                    .andExpect(jsonPath("$.data.content.length()").value(1));
+        }
+
+        @Test
+        @DisplayName("알림 목록 조회 - 현재 구독 중이지 않는 소식 알림 조회")
+        void getNotificationByNewsNameNotInSuccess() throws Exception {
+            // given
+            String newsName = "구독 중이지 않은 소식";
+            Page<NotificationDto.Summary> page = new PageImpl<>(List.of(
+                    new NotificationDto.Summary(2L, newsName, true, NotificationType.IMMEDIATE, LocalDateTime.now())
+            ));
+
+            given(notificationQueryService.getNotificationsByUserIdAndNewsNameNotInAndIsRead(eq(userId), eq(true), any(Pageable.class)))
+                    .willReturn(page);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/notifies")
+                            .param("isRead", "true")
+                            .param("others", "true")
                             .with(user(userDetails))
             );
 
