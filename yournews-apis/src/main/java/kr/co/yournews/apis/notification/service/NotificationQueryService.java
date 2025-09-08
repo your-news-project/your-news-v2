@@ -2,6 +2,8 @@ package kr.co.yournews.apis.notification.service;
 
 import kr.co.yournews.apis.notification.dto.NotificationDto;
 import kr.co.yournews.common.response.exception.CustomException;
+import kr.co.yournews.domain.news.entity.SubNews;
+import kr.co.yournews.domain.news.service.SubNewsService;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.exception.NotificationErrorType;
 import kr.co.yournews.domain.notification.service.NotificationService;
@@ -11,10 +13,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class NotificationQueryService {
     private final NotificationService notificationService;
+    private final SubNewsService subNewsService;
 
     /**
      * 특정 알림 조회 메서드 - 알림의 pk 값을 통해 읽음
@@ -58,19 +63,6 @@ public class NotificationQueryService {
     }
 
     /**
-     * 사용자 ID를 기반으로 전체 알림 목록을 페이징하여 조회
-     *
-     * @param userId   : 사용자 ID
-     * @param pageable : 페이징 및 정렬 정보
-     * @return : 알림 요약 정보가 담긴 Page 객체
-     */
-    @Transactional(readOnly = true)
-    public Page<NotificationDto.Summary> getNotificationsByUserId(Long userId, Pageable pageable) {
-        return notificationService.readAllByUserId(userId, pageable)
-                .map(NotificationDto.Summary::from);
-    }
-
-    /**
      * 사용자 ID 및 읽음 여부를 기준으로 알림 목록을 페이징하여 조회
      *
      * @param userId   : 사용자 ID
@@ -80,8 +72,52 @@ public class NotificationQueryService {
      */
     @Transactional(readOnly = true)
     public Page<NotificationDto.Summary> getNotificationsByUserIdAndIsRead(
-            Long userId, boolean isRead, Pageable pageable) {
+            Long userId, boolean isRead, Pageable pageable
+    ) {
         return notificationService.readAllByUserIdAndIsRead(userId, isRead, pageable)
+                .map(NotificationDto.Summary::from);
+    }
+
+    /**
+     * 사용자 ID 및 소식 이름, 읽음 여부를 기준으로 알림 목록을 페이징하여 조회
+     *
+     * @param userId   : 사용자 ID
+     * @param newsName :
+     * @param isRead   : 읽음 여부 필터
+     * @param pageable : 페이징 및 정렬 정보
+     * @return : 알림 요약 정보가 담긴 Page 객체
+     */
+    @Transactional(readOnly = true)
+    public Page<NotificationDto.Summary> getNotificationsByUserIdAndNewsNameAndIsRead(
+            Long userId, String newsName, boolean isRead, Pageable pageable
+    ) {
+        return notificationService.readAllByUserIdAndNewsNameAndIsRead(userId, newsName, isRead, pageable)
+                .map(NotificationDto.Summary::from);
+    }
+
+    /**
+     * 사용자 ID 및 소식 이름, 읽음 여부를 기준으로 알림 목록을 페이징하여 조회
+     *
+     * @param userId   : 사용자 ID
+     * @param isRead   : 읽음 여부 필터
+     * @param pageable : 페이징 및 정렬 정보
+     * @return : 알림 요약 정보가 담긴 Page 객체
+     */
+    @Transactional(readOnly = true)
+    public Page<NotificationDto.Summary> getNotificationsByUserIdAndNewsNameNotInAndIsRead(
+            Long userId, boolean isRead, Pageable pageable
+    ) {
+        List<String> subscription = subNewsService.readByUserId(userId)
+                .stream()
+                .map(SubNews::getNewsName)
+                .toList();
+
+        if (subscription.isEmpty()) {
+            return notificationService.readAllByUserIdAndIsRead(userId, isRead, pageable)
+                    .map(NotificationDto.Summary::from);
+        }
+
+        return notificationService.readByUserIdAndNewsNameNotInAndIsRead(userId, subscription, isRead, pageable)
                 .map(NotificationDto.Summary::from);
     }
 

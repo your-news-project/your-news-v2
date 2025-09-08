@@ -2,6 +2,8 @@ package kr.co.yournews.apis.notification.service;
 
 import kr.co.yournews.apis.notification.dto.NotificationDto;
 import kr.co.yournews.common.response.exception.CustomException;
+import kr.co.yournews.domain.news.entity.SubNews;
+import kr.co.yournews.domain.news.service.SubNewsService;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.exception.NotificationErrorType;
 import kr.co.yournews.domain.notification.service.NotificationService;
@@ -32,6 +34,9 @@ public class NotificationQueryServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private SubNewsService subNewsService;
 
     @InjectMocks
     private NotificationQueryService notificationQueryService;
@@ -124,30 +129,6 @@ public class NotificationQueryServiceTest {
     }
 
     @Test
-    @DisplayName("사용자 알림 전체 조회")
-    void getNotificationsByUserIdSuccess() {
-        // given
-        Long userId = 1L;
-        Pageable pageable = PageRequest.of(0, 10);
-        Notification mockNotification = Notification.builder()
-                .newsName("공지")
-                .postTitle(List.of("제목"))
-                .postUrl(List.of("url"))
-                .isRead(false)
-                .build();
-
-        Page<Notification> page = new PageImpl<>(List.of(mockNotification));
-        given(notificationService.readAllByUserId(userId, pageable)).willReturn(page);
-
-        // when
-        Page<NotificationDto.Summary> result = notificationQueryService.getNotificationsByUserId(userId, pageable);
-
-        // then
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).newsName()).isEqualTo("공지");
-    }
-
-    @Test
     @DisplayName("사용자 알림 조회 - 읽음 여부 필터")
     void getNotificationsByUserIdAndIsReadSuccess() {
         // given
@@ -166,6 +147,69 @@ public class NotificationQueryServiceTest {
 
         // when
         Page<NotificationDto.Summary> result = notificationQueryService.getNotificationsByUserIdAndIsRead(userId, isRead, pageable);
+
+        // then
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).newsName()).isEqualTo("테스트");
+    }
+
+    @Test
+    @DisplayName("사용자 알림 조회 - 특정 소식 필터")
+    void getNotificationsByUserIdAndNewsNameAndIsReadSuccess() {
+        // given
+        Long userId = 1L;
+        String newsName = "특정 소식";
+        boolean isRead = false;
+        Pageable pageable = PageRequest.of(0, 10);
+        Notification mockNotification = Notification.builder()
+                .newsName(newsName)
+                .postTitle(List.of("알림제목"))
+                .postUrl(List.of("url"))
+                .isRead(isRead)
+                .build();
+
+        Page<Notification> page = new PageImpl<>(List.of(mockNotification));
+        given(notificationService.readAllByUserIdAndNewsNameAndIsRead(userId, newsName, isRead, pageable)).willReturn(page);
+
+        // when
+        Page<NotificationDto.Summary> result =
+                notificationQueryService.getNotificationsByUserIdAndNewsNameAndIsRead(userId, newsName, isRead, pageable);
+
+        // then
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).newsName()).isEqualTo(newsName);
+    }
+
+    @Test
+    @DisplayName("사용자 알림 조회 - 현재 구독 중이지 않는 소식 알림 조회")
+    void getNotificationsByUserIdAndNewsNameNotInAndIsReadSuccess() {
+        // given
+        Long userId = 1L;
+        boolean isRead = false;
+        Pageable pageable = PageRequest.of(0, 10);
+        Notification mockNotification = Notification.builder()
+                .newsName("테스트")
+                .postTitle(List.of("알림제목"))
+                .postUrl(List.of("url"))
+                .isRead(isRead)
+                .build();
+
+        Page<Notification> page = new PageImpl<>(List.of(mockNotification));
+        List<SubNews> subNewsList = List.of(
+                SubNews.builder().newsName("소식1").build(), SubNews.builder().newsName("소식2").build()
+        );
+
+        List<String> subscription = subNewsList
+                .stream()
+                .map(SubNews::getNewsName)
+                .toList();
+
+        given(subNewsService.readByUserId(userId)).willReturn(subNewsList);
+        given(notificationService.readByUserIdAndNewsNameNotInAndIsRead(userId, subscription, isRead, pageable)).willReturn(page);
+
+        // when
+        Page<NotificationDto.Summary> result =
+                notificationQueryService.getNotificationsByUserIdAndNewsNameNotInAndIsRead(userId, isRead, pageable);
 
         // then
         assertThat(result.getContent()).hasSize(1);

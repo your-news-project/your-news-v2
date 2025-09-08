@@ -48,13 +48,24 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getNotifications(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                              @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-                                              @RequestParam(required = false) Boolean isRead) {
+    public ResponseEntity<?> getNotifications(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam boolean isRead,
+            @RequestParam(required = false) String newsName,
+            @RequestParam(required = false, defaultValue = "false") boolean others
+    ) {
 
-        Page<NotificationDto.Summary> result = (isRead == null)
-                ? notificationQueryService.getNotificationsByUserId(userDetails.getUserId(), pageable)
-                : notificationQueryService.getNotificationsByUserIdAndIsRead(userDetails.getUserId(), isRead, pageable);
+        Long userId = userDetails.getUserId();
+        Page<NotificationDto.Summary> result;
+
+        if (others) {
+            result = notificationQueryService.getNotificationsByUserIdAndNewsNameNotInAndIsRead(userId, isRead, pageable);
+        } else if (newsName != null && !newsName.isBlank()) {
+            result = notificationQueryService.getNotificationsByUserIdAndNewsNameAndIsRead(userId, newsName, isRead, pageable);
+        } else {
+            result = notificationQueryService.getNotificationsByUserIdAndIsRead(userId, isRead, pageable);
+        }
 
         return ResponseEntity.ok(SuccessResponse.from(result));
     }

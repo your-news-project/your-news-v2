@@ -28,12 +28,16 @@ public class NotificationService {
         return notificationRepository.findByUserIdAndPublicId(userId, publicId);
     }
 
-    public Page<Notification> readAllByUserId(Long userId, Pageable pageable) {
-        return notificationRepository.findAllByUserId(userId, pageable);
-    }
-
     public Page<Notification> readAllByUserIdAndIsRead(Long userId, boolean isRead, Pageable pageable) {
         return notificationRepository.findAllByUserIdAndIsRead(userId, isRead, pageable);
+    }
+
+    public Page<Notification> readAllByUserIdAndNewsNameAndIsRead(Long userId, String newsName, boolean isRead, Pageable pageable) {
+        return notificationRepository.findAllByUserIdAndNewsNameAndIsRead(userId, newsName, isRead, pageable);
+    }
+
+    public Page<Notification> readByUserIdAndNewsNameNotInAndIsRead(Long userId, List<String> newsName, boolean isRead, Pageable pageable) {
+        return notificationRepository.findByUserIdAndNewsNameNotInAndIsRead(userId, newsName, isRead, pageable);
     }
 
     public Long readUnreadCountByUserId(Long userId) {
