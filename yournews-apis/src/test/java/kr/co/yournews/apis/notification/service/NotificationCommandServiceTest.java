@@ -1,5 +1,6 @@
 package kr.co.yournews.apis.notification.service;
 
+import kr.co.yournews.apis.notification.dto.NotificationDto;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.exception.NotificationErrorType;
@@ -128,8 +129,23 @@ public class NotificationCommandServiceTest {
     }
 
     @Test
-    @DisplayName("오래된 알림 삭제 성공")
-    void deleteOldNotification() {
+    @DisplayName("선택 알림 삭제 테스트")
+    void deleteAllByUserIdAndIdInTest() {
+        // given
+        Long userId = 1L;
+        List<Long> notificationIds = List.of(1L, 2L, 3L);
+        NotificationDto.DeleteRequest request = new NotificationDto.DeleteRequest(notificationIds);
+
+        // when
+        notificationCommandService.deleteAllByUserIdAndIdIn(userId, request);
+
+        // then
+        verify(notificationService, times(1)).deleteAllByUserIdAndIdIn(userId, notificationIds);
+    }
+
+    @Test
+    @DisplayName("오래된 알림 삭제 테스트")
+    void deleteOldNotificationTest() {
         // given
 
         // when
