@@ -20,6 +20,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Long countByUserIdAndIsReadFalse(Long userId);
 
     @Modifying
+    @Query("UPDATE notification n SET n.isRead = true WHERE n.userId = :userId AND n.isRead = false")
+    void markAllAsReadByUserId(@Param("userId") Long userId);
+
+    @Modifying
     @Query("DELETE FROM notification n WHERE n.createdAt < :dateTime")
     void deleteByDateTimeBefore(@Param("dateTime") LocalDateTime dateTime);
 }

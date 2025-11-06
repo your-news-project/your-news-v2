@@ -44,6 +44,10 @@ public class NotificationService {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
 
+    public void markAllAsRead(Long userId) {
+        notificationRepository.markAllAsReadByUserId(userId);
+    }
+
     public void deleteById(Long id) {
         notificationRepository.deleteById(id);
     }
