@@ -1,5 +1,6 @@
 package kr.co.yournews.apis.notification.service;
 
+import kr.co.yournews.apis.notification.dto.NotificationDto;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.exception.NotificationErrorType;
@@ -58,6 +59,17 @@ public class NotificationCommandService {
         }
 
         notificationService.deleteById(notificationId);
+    }
+
+    /**
+     * 선택 알림 id를 기반으로 알림을 삭제
+     *
+     * @param userId  : 사용자 pk
+     * @param request : 삭제할 알림들의 pk dto
+     */
+    @Transactional
+    public void deleteAllByUserIdAndIdIn(Long userId, NotificationDto.DeleteRequest request) {
+        notificationService.deleteAllByUserIdAndIdIn(userId, request.notificationIds());
     }
 
     /**
