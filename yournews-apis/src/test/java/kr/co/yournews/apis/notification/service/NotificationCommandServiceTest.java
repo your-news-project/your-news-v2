@@ -55,6 +55,19 @@ public class NotificationCommandServiceTest {
         verify(notificationService, times(1)).saveAll(notifications);
     }
 
+    @Test
+    @DisplayName("모든 알림 읽음 테스트")
+    void markAllNotificationsAsReadTest() {
+        // given
+        Long userId = 1L;
+
+        // when
+        notificationCommandService.markAllNotificationsAsRead(userId);
+
+        // then
+        verify(notificationService, times(1)).markAllAsRead(userId);
+    }
+
     @Nested
     @DisplayName("알림 삭제 테스트")
     class DeleteNotificationTest {
@@ -66,7 +79,6 @@ public class NotificationCommandServiceTest {
         @DisplayName("성공")
         void deleteNotificationSuccess() {
             // given
-
             Notification notification = mock(Notification.class);
 
             given(notificationService.readById(notificationId)).willReturn(Optional.of(notification));
