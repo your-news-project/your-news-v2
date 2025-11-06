@@ -263,6 +263,25 @@ public class NotificationControllerTest {
         }
     }
 
+    @Test
+    @DisplayName("모든 알림 읽음 테스트")
+    void markAllNotificationsAsReadTest() throws Exception {
+        // given
+        doNothing().when(notificationCommandService).markAllNotificationsAsRead(userId);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                patch("/api/v1/notifies/read-all")
+                        .with(user(userDetails))
+        );
+
+        // then
+        resultActions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+    }
+
     @Nested
     @DisplayName("알림 삭제 테스트")
     class DeleteNotificationTest {
