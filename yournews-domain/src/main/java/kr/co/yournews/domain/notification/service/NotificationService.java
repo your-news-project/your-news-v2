@@ -55,4 +55,8 @@ public class NotificationService {
     public void deleteByDateTime(LocalDateTime dateTime) {
         notificationRepository.deleteByDateTimeBefore(dateTime);
     }
+
+    public void deleteAllByUserIdAndIdIn(Long userId, List<Long> ids) {
+        notificationRepository.deleteAllByUserIdAndIdIn(userId, ids);
+    }
 }
