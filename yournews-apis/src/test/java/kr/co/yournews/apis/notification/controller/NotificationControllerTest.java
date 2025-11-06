@@ -1,5 +1,6 @@
 package kr.co.yournews.apis.notification.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.yournews.apis.notification.dto.NotificationDto;
 import kr.co.yournews.apis.notification.dto.NotificationRankingDto;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -41,6 +43,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,6 +53,9 @@ public class NotificationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private NotificationCommandService notificationCommandService;
@@ -324,6 +330,28 @@ public class NotificationControllerTest {
                     .andExpect(jsonPath("$.code").value(NotificationErrorType.FORBIDDEN.getCode()))
                     .andExpect(jsonPath("$.message").value(NotificationErrorType.FORBIDDEN.getMessage()));
         }
+    }
+
+    @Test
+    @DisplayName("선택 알림 삭제 테스트")
+    void deleteAllByUserIdAndIdInTest() throws Exception {
+        // given
+        List<Long> notificationIds = List.of(1L, 2L, 3L);
+        NotificationDto.DeleteRequest request = new NotificationDto.DeleteRequest(notificationIds);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                delete("/api/v1/notifies/selected")
+                        .with(user(userDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+        );
+
+        // then
+        resultActions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
     }
 
     @Test
