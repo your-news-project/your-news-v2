@@ -44,11 +44,19 @@ public class NotificationService {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
 
+    public void markAllAsRead(Long userId) {
+        notificationRepository.markAllAsReadByUserId(userId);
+    }
+
     public void deleteById(Long id) {
         notificationRepository.deleteById(id);
     }
 
     public void deleteByDateTime(LocalDateTime dateTime) {
         notificationRepository.deleteByDateTimeBefore(dateTime);
+    }
+
+    public void deleteAllByUserIdAndIdIn(Long userId, List<Long> ids) {
+        notificationRepository.deleteAllByUserIdAndIdIn(userId, ids);
     }
 }

@@ -1,5 +1,6 @@
 package kr.co.yournews.apis.notification.service;
 
+import kr.co.yournews.apis.notification.dto.NotificationDto;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.exception.NotificationErrorType;
@@ -55,6 +56,19 @@ public class NotificationCommandServiceTest {
         verify(notificationService, times(1)).saveAll(notifications);
     }
 
+    @Test
+    @DisplayName("모든 알림 읽음 테스트")
+    void markAllNotificationsAsReadTest() {
+        // given
+        Long userId = 1L;
+
+        // when
+        notificationCommandService.markAllNotificationsAsRead(userId);
+
+        // then
+        verify(notificationService, times(1)).markAllAsRead(userId);
+    }
+
     @Nested
     @DisplayName("알림 삭제 테스트")
     class DeleteNotificationTest {
@@ -66,7 +80,6 @@ public class NotificationCommandServiceTest {
         @DisplayName("성공")
         void deleteNotificationSuccess() {
             // given
-
             Notification notification = mock(Notification.class);
 
             given(notificationService.readById(notificationId)).willReturn(Optional.of(notification));
@@ -116,8 +129,23 @@ public class NotificationCommandServiceTest {
     }
 
     @Test
-    @DisplayName("오래된 알림 삭제 성공")
-    void deleteOldNotification() {
+    @DisplayName("선택 알림 삭제 테스트")
+    void deleteAllByUserIdAndIdInTest() {
+        // given
+        Long userId = 1L;
+        List<Long> notificationIds = List.of(1L, 2L, 3L);
+        NotificationDto.DeleteRequest request = new NotificationDto.DeleteRequest(notificationIds);
+
+        // when
+        notificationCommandService.deleteAllByUserIdAndIdIn(userId, request);
+
+        // then
+        verify(notificationService, times(1)).deleteAllByUserIdAndIdIn(userId, notificationIds);
+    }
+
+    @Test
+    @DisplayName("오래된 알림 삭제 테스트")
+    void deleteOldNotificationTest() {
         // given
 
         // when
