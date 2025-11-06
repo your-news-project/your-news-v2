@@ -33,6 +33,16 @@ public class NotificationCommandService {
     }
 
     /**
+     * 사용자 전체 알림을 읽음(isRead=true) 처리 하는 메서드
+     *
+     * @param userId : 사용자 pk
+     */
+    @Transactional
+    public void markAllNotificationsAsRead(Long userId) {
+        notificationService.markAllAsRead(userId);
+    }
+
+    /**
      * 특정 알림 id를 기반으로 알림을 삭제
      *
      * @param userId         : 사용자 pk
