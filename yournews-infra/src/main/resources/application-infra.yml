@@ -69,3 +69,7 @@ openai:
     key: ${OPENAI_API_KEY}
     url: ${OPENAI_API_URL}
     model: ${OPENAI_API_MODEL}
+
+menu:
+  storage:
+    base-path: ${user.home}/menu-images
