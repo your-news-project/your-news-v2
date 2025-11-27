@@ -29,7 +29,7 @@ public class DormitoryMenuStrategy implements MenuFileStrategy {
 
     @Override
     public String getScheduledTime() {
-        return "0 0 7 * * SAT,SUN,MON";
+        return "0 0 20 * * SUN,MON";
     }
 
     @Override
