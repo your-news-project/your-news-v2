@@ -97,6 +97,19 @@ public class NotificationController {
         return ResponseEntity.ok(SuccessResponse.ok());
     }
 
+    @PatchMapping("/{notificationId}/bookmark")
+    public ResponseEntity<?> changeNotificationBookmark(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody NotificationDto.BookmarkRequest request,
+            @PathVariable Long notificationId
+    ) {
+        notificationCommandService.changeNotificationBookmark(
+                userDetails.getUserId(), notificationId, request
+        );
+
+        return ResponseEntity.ok(SuccessResponse.ok());
+    }
+
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<?> deleteNotification(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                 @PathVariable Long notificationId) {
