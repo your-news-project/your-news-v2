@@ -72,6 +72,17 @@ public class NotificationController {
         return ResponseEntity.ok(SuccessResponse.from(result));
     }
 
+    @GetMapping("/bookmark")
+    public ResponseEntity<?> getNotificationsByUserIdAndIsBookmarkedTrue(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        notificationQueryService.getNotificationsByUserIdAndIsBookmarkedTrue(userDetails.getUserId())
+                )
+        );
+    }
+
     @GetMapping("/unread/count")
     public ResponseEntity<?> getUnreadCount(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(
