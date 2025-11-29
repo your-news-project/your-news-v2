@@ -44,6 +44,10 @@ public class Notification extends BaseTimeEntity {
     @Column(name = "is_read")
     private boolean isRead;
 
+    @ColumnDefault("false")
+    @Column(name = "is_bookmarked")
+    private boolean isBookmarked;
+
     @Column(name = "public_id")
     private String publicId;
 
@@ -54,12 +58,17 @@ public class Notification extends BaseTimeEntity {
     private Long userId;
 
     @Builder
-    public Notification(String newsName, List<String> postTitle, List<String> postUrl,
-                        boolean isRead, String publicId, NotificationType type, Long userId) {
+    public Notification(
+            String newsName, List<String> postTitle,
+            List<String> postUrl, boolean isRead,
+            boolean isBookmarked, String publicId,
+            NotificationType type, Long userId
+    ) {
         this.newsName = newsName;
         this.postTitle = postTitle;
         this.postUrl = postUrl;
         this.isRead = isRead;
+        this.isBookmarked = isBookmarked;
         this.publicId = publicId;
         this.type = type;
         this.userId = userId;
@@ -67,6 +76,10 @@ public class Notification extends BaseTimeEntity {
 
     public void markAsRead() {
         this.isRead = true;
+    }
+
+    public void updateBookmark(boolean bookmarked) {
+        this.isBookmarked = bookmarked;
     }
 
     public boolean isReceiver(Long userId) {
