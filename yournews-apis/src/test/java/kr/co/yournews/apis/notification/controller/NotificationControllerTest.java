@@ -270,6 +270,31 @@ public class NotificationControllerTest {
     }
 
     @Test
+    @DisplayName("북마크 표시된 알림 조회 테스트")
+    void getNotificationsByUserIdAndIsBookmarkedTrueTest() throws Exception {
+        // given
+        List<NotificationDto.Summary> notifications = List.of(
+                new NotificationDto.Summary(2L, "소식1", true, true, NotificationType.IMMEDIATE, LocalDateTime.now())
+        );
+
+        given(notificationQueryService.getNotificationsByUserIdAndIsBookmarkedTrue(userId))
+                .willReturn(notifications);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                get("/api/v1/notifies/bookmark")
+                        .with(user(userDetails))
+        );
+
+        // then
+        resultActions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].isBookmarked").value(true))
+                .andExpect(jsonPath("$.data.length()").value(1));
+    }
+
+    @Test
     @DisplayName("모든 알림 읽음 테스트")
     void markAllNotificationsAsReadTest() throws Exception {
         // given
