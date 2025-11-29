@@ -24,7 +24,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     void markAllAsReadByUserId(@Param("userId") Long userId);
 
     @Modifying
-    @Query("DELETE FROM notification n WHERE n.createdAt < :dateTime")
+    @Query("DELETE FROM notification n WHERE n.createdAt < :dateTime AND n.isBookmarked = false")
     void deleteByDateTimeBefore(@Param("dateTime") LocalDateTime dateTime);
 
     @Modifying
