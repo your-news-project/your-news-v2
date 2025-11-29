@@ -96,7 +96,7 @@ public class NotificationControllerTest {
 
         private final String publicId = "public-id";
         private final NotificationDto.Details details = new NotificationDto.Details(
-                notificationId, "공지", List.of("제목"), List.of("url"), false, NotificationType.IMMEDIATE, LocalDateTime.now()
+                notificationId, "공지", List.of("제목"), List.of("url"), false, false, NotificationType.IMMEDIATE, LocalDateTime.now()
         );
 
         @Test
@@ -191,7 +191,7 @@ public class NotificationControllerTest {
         void getNotificationsByIsReadSuccess() throws Exception {
             // given
             Page<NotificationDto.Summary> page = new PageImpl<>(List.of(
-                    new NotificationDto.Summary(2L, "공지", true, NotificationType.IMMEDIATE, LocalDateTime.now())
+                    new NotificationDto.Summary(2L, "공지", true, false, NotificationType.IMMEDIATE, LocalDateTime.now())
             ));
 
             given(notificationQueryService.getNotificationsByUserIdAndIsRead(eq(userId), eq(true), any(Pageable.class)))
@@ -218,7 +218,7 @@ public class NotificationControllerTest {
             // given
             String newsName = "특정 소식";
             Page<NotificationDto.Summary> page = new PageImpl<>(List.of(
-                    new NotificationDto.Summary(2L, newsName, true, NotificationType.IMMEDIATE, LocalDateTime.now())
+                    new NotificationDto.Summary(2L, newsName, true, false, NotificationType.IMMEDIATE, LocalDateTime.now())
             ));
 
             given(notificationQueryService.getNotificationsByUserIdAndNewsNameAndIsRead(eq(userId), eq(newsName), eq(true), any(Pageable.class)))
@@ -246,7 +246,7 @@ public class NotificationControllerTest {
             // given
             String newsName = "구독 중이지 않은 소식";
             Page<NotificationDto.Summary> page = new PageImpl<>(List.of(
-                    new NotificationDto.Summary(2L, newsName, true, NotificationType.IMMEDIATE, LocalDateTime.now())
+                    new NotificationDto.Summary(2L, newsName, true, false, NotificationType.IMMEDIATE, LocalDateTime.now())
             ));
 
             given(notificationQueryService.getNotificationsByUserIdAndNewsNameNotInAndIsRead(eq(userId), eq(true), any(Pageable.class)))
@@ -279,6 +279,30 @@ public class NotificationControllerTest {
         ResultActions resultActions = mockMvc.perform(
                 patch("/api/v1/notifies/read-all")
                         .with(user(userDetails))
+        );
+
+        // then
+        resultActions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("요청이 성공하였습니다."));
+    }
+
+    @Test
+    @DisplayName("알림 북마크 설정 테스트")
+    void ChangeNotificationBookmarkTest() throws Exception {
+        // given
+        NotificationDto.BookmarkRequest request =
+                new NotificationDto.BookmarkRequest(true);
+
+        doNothing().when(notificationCommandService).changeNotificationBookmark(userId, notificationId, request);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                patch("/api/v1/notifies/{notificationId}/bookmark", notificationId)
+                        .with(user(userDetails))
+                        .content(objectMapper.writeValueAsBytes(request))
+                        .contentType(MediaType.APPLICATION_JSON)
         );
 
         // then
