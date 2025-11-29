@@ -40,6 +40,10 @@ public class NotificationService {
         return notificationRepository.findByUserIdAndNewsNameNotInAndIsRead(userId, newsName, isRead, pageable);
     }
 
+    public List<Notification> readAllByUserIdAndIsBookmarkedTrue(Long userId) {
+        return notificationRepository.findAllByUserIdAndIsBookmarkedTrue(userId);
+    }
+
     public Long readUnreadCountByUserId(Long userId) {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
