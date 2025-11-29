@@ -12,6 +12,7 @@ public class NotificationDto {
             Long id,
             String newsName,
             boolean isRead,
+            boolean isBookmarked,
             NotificationType type,
             LocalDateTime createdAt
     ) {
@@ -20,6 +21,7 @@ public class NotificationDto {
                     notification.getId(),
                     notification.getNewsName(),
                     notification.isRead(),
+                    notification.isBookmarked(),
                     notification.getType(),
                     notification.getCreatedAt()
             );
@@ -32,6 +34,7 @@ public class NotificationDto {
             List<String> postTitle,
             List<String> postUrl,
             boolean isRead,
+            boolean isBookmarked,
             NotificationType type,
             LocalDateTime createdAt
     ) {
@@ -42,6 +45,7 @@ public class NotificationDto {
                     notification.getPostTitle(),
                     notification.getPostUrl(),
                     notification.isRead(),
+                    notification.isBookmarked(),
                     notification.getType(),
                     notification.getCreatedAt()
             );
@@ -50,5 +54,9 @@ public class NotificationDto {
 
     public record DeleteRequest(
             List<Long> notificationIds
+    ) { }
+
+    public record BookmarkRequest(
+            boolean bookmarked
     ) { }
 }

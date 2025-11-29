@@ -21,7 +21,7 @@ public class FcmToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "token", nullable = false, unique = true)
+    @Column(name = "token", nullable = false)
     private String token;
 
     @Column(name = "device_info", nullable = false)

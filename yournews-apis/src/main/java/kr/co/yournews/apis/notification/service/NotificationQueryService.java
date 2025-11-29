@@ -121,6 +121,26 @@ public class NotificationQueryService {
                 .map(NotificationDto.Summary::from);
     }
 
+    /**
+     * 북마크 표시된 알림 조회 메서드
+     *
+     * @param userId : 사용자 ID
+     * @return : 북마크 표시된 알림 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<NotificationDto.Summary> getNotificationsByUserIdAndIsBookmarkedTrue(
+            Long userId
+    ) {
+        return notificationService.readAllByUserIdAndIsBookmarkedTrue(userId)
+                .stream().map(NotificationDto.Summary::from).toList();
+    }
+
+    /**
+     * 읽지 않은 알림 개수 조회 메서드
+     *
+     * @param userId : 사용자 ID
+     * @return : 읽지 않은 알림 개수
+     */
     @Transactional(readOnly = true)
     public Long getUnreadCount(Long userId) {
         return notificationService.readUnreadCountByUserId(userId);

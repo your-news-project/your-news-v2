@@ -110,6 +110,7 @@ public class DailyNotificationProcessor {
                 .publicId(publicId)
                 .type(NotificationType.DAILY)
                 .isRead(false)
+                .isBookmarked(false)
                 .userId(userId)
                 .build();
     }

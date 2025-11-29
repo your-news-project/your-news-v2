@@ -44,6 +44,29 @@ public class NotificationCommandService {
     }
 
     /**
+     * 알림 북마크 설정 메서드
+     *
+     * @param userId         : 사용자 pk
+     * @param notificationId : 알림 id
+     * @param request        : 북마크 상태 DTO
+     */
+    @Transactional
+    public void changeNotificationBookmark(
+            Long userId,
+            Long notificationId,
+            NotificationDto.BookmarkRequest request
+    ) {
+        Notification notification = notificationService.readById(notificationId)
+                .orElseThrow(() -> new CustomException(NotificationErrorType.NOT_FOUND));
+
+        if (!notification.isReceiver(userId)) {
+            throw new CustomException(NotificationErrorType.FORBIDDEN);
+        }
+
+        notification.updateBookmark(request.bookmarked());
+    }
+
+    /**
      * 특정 알림 id를 기반으로 알림을 삭제
      *
      * @param userId         : 사용자 pk

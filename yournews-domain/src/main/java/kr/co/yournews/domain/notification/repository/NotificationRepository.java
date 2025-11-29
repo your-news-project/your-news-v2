@@ -17,6 +17,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Page<Notification> findAllByUserIdAndIsRead(Long userId, boolean isRead, Pageable pageable);
     Page<Notification> findAllByUserIdAndNewsNameAndIsRead(Long userId, String newsName, boolean isRead, Pageable pageable);
     Page<Notification> findByUserIdAndNewsNameNotInAndIsRead(Long userId, List<String> newsNames, boolean isRead, Pageable pageable);
+    List<Notification> findAllByUserIdAndIsBookmarkedTrue(Long userId);
     Long countByUserIdAndIsReadFalse(Long userId);
 
     @Modifying
@@ -24,7 +25,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     void markAllAsReadByUserId(@Param("userId") Long userId);
 
     @Modifying
-    @Query("DELETE FROM notification n WHERE n.createdAt < :dateTime")
+    @Query("DELETE FROM notification n WHERE n.createdAt < :dateTime AND n.isBookmarked = false")
     void deleteByDateTimeBefore(@Param("dateTime") LocalDateTime dateTime);
 
     @Modifying

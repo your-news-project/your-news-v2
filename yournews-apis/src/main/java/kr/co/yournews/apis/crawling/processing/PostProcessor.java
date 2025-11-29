@@ -62,6 +62,7 @@ public abstract class PostProcessor {
                 .publicId(publicId)
                 .type(NotificationType.IMMEDIATE)
                 .isRead(false)
+                .isBookmarked(false)
                 .userId(userId)
                 .build();
     }

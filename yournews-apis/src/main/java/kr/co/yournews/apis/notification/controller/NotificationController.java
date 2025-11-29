@@ -72,6 +72,17 @@ public class NotificationController {
         return ResponseEntity.ok(SuccessResponse.from(result));
     }
 
+    @GetMapping("/bookmark")
+    public ResponseEntity<?> getNotificationsByUserIdAndIsBookmarkedTrue(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        notificationQueryService.getNotificationsByUserIdAndIsBookmarkedTrue(userDetails.getUserId())
+                )
+        );
+    }
+
     @GetMapping("/unread/count")
     public ResponseEntity<?> getUnreadCount(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(
@@ -93,6 +104,19 @@ public class NotificationController {
     @PatchMapping("/read-all")
     public ResponseEntity<?> markAllNotificationsAsRead(@AuthenticationPrincipal CustomUserDetails userDetails) {
         notificationCommandService.markAllNotificationsAsRead(userDetails.getUserId());
+
+        return ResponseEntity.ok(SuccessResponse.ok());
+    }
+
+    @PatchMapping("/{notificationId}/bookmark")
+    public ResponseEntity<?> changeNotificationBookmark(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody NotificationDto.BookmarkRequest request,
+            @PathVariable Long notificationId
+    ) {
+        notificationCommandService.changeNotificationBookmark(
+                userDetails.getUserId(), notificationId, request
+        );
 
         return ResponseEntity.ok(SuccessResponse.ok());
     }
