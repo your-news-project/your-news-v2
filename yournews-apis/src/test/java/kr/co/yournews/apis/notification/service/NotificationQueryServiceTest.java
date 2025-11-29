@@ -215,4 +215,33 @@ public class NotificationQueryServiceTest {
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).newsName()).isEqualTo("테스트");
     }
+
+    @Test
+    @DisplayName("북마크 표시된 알림 조회 테스트")
+    void getNotificationsByUserIdAndIsBookmarkedTrueTest() {
+        // given
+        Long userId = 1L;
+
+        Notification notification1 = Notification.builder()
+                .newsName("소식1")
+                .isBookmarked(true)
+                .build();
+
+        Notification notification2 = Notification.builder()
+                .newsName("소식2")
+                .isBookmarked(true)
+                .build();
+
+        List<Notification> notifications = List.of(notification1, notification2);
+
+        given(notificationService.readAllByUserIdAndIsBookmarkedTrue(userId)).willReturn(notifications);
+
+        // when
+        List<NotificationDto.Summary> result =
+                notificationQueryService.getNotificationsByUserIdAndIsBookmarkedTrue(userId);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).newsName()).isEqualTo("소식1");
+    }
 }
