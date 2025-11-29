@@ -51,4 +51,8 @@ public class NotificationDto {
     public record DeleteRequest(
             List<Long> notificationIds
     ) { }
+
+    public record BookmarkRequest(
+            boolean bookmarked
+    ) { }
 }
