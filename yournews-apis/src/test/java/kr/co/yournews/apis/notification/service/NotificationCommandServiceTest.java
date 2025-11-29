@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,6 +70,32 @@ public class NotificationCommandServiceTest {
         verify(notificationService, times(1)).markAllAsRead(userId);
     }
 
+
+    @Test
+    @DisplayName("알림 북마크 설정 테스트")
+    void ChangeNotificationBookmarkTest() {
+        // given
+        Long userId = 1L;
+        Long notificationId = 1L;
+
+        Notification notification = Notification.builder()
+                .isBookmarked(false)
+                .userId(userId)
+                .build();
+
+        NotificationDto.BookmarkRequest request =
+                new NotificationDto.BookmarkRequest(true);
+
+        given(notificationService.readById(notificationId)).willReturn(Optional.of(notification));
+
+        // when
+        notificationCommandService.changeNotificationBookmark(userId, notificationId, request);
+
+        // then
+        assertThat(notification.isBookmarked()).isTrue();
+    }
+
+
     @Nested
     @DisplayName("알림 삭제 테스트")
     class DeleteNotificationTest {
@@ -78,7 +105,7 @@ public class NotificationCommandServiceTest {
 
         @Test
         @DisplayName("성공")
-        void deleteNotificationSuccess() {
+        void success() {
             // given
             Notification notification = mock(Notification.class);
 
