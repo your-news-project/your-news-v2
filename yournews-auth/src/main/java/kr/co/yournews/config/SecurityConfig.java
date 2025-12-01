@@ -31,7 +31,7 @@ public class SecurityConfig {
             "/api/v1/auth/**", "/api/v1/admin/auth/sign-in",
             "/api/v1/oauth/sign-in/**", "/api/v1/news/**",
             "/admin/**", "/favicon.ico", "/pass-reset/**",
-            "/api/v1/menus/**"
+            "/api/v1/menus/**", "/api/v1/places/**"
     };
     private static final String[] ADMIN_ENDPOINTS = {"/api/v1/admin/**"};
     private static final String[] GUEST_ENDPOINTS = {"/api/v1/oauth/sign-up"};
