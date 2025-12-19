@@ -66,7 +66,6 @@ apple-iap:
   privateKey: ${APPLE_IAP_PRIVATE_KEY}
   appleId : ${APPLE_IAP_APPLE_ID}
   productId : ${APPLE_IAP_PRODUCT_ID}
-  environment: ${APPLE_IAP_ENVIRONMENT}
 
 google-iap:
   productId: ${GOOGLE_IAP_PRODUCT_ID}
