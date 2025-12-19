@@ -24,4 +24,8 @@ dependencies {
 	/* RabbitMQ */
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	testImplementation 'org.springframework.amqp:spring-rabbit-test'
+
+	/* jwt */
+	implementation 'com.auth0:java-jwt:4.4.0'
+	implementation 'com.auth0:jwks-rsa:0.22.1'
 }
