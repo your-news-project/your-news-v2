@@ -9,9 +9,12 @@ import java.security.NoSuchAlgorithmException;
  * - 입력 문자열을 고정 길이 해시 문자열로 변환
  * - 해시 알고리즘: MD5 (32자 고정)
  */
-public class HashUtil {
+public final class HashUtil {
 
     private static final String DEFAULT_ALGORITHM = "MD5";
+
+    private HashUtil() {
+    }
 
     /**
      * URL → MD5 해시(32자 hex)

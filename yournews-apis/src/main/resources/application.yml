@@ -6,3 +6,9 @@ spring:
     active: local
     group:
       local: common, domain, auth, infra
+
+google:
+  rtdn:
+    email: ${GOOGLE_RTDN_EMAIL}
+    audience: ${GOOGLE_RTDN_AUDIENCE}
+    jwks-uri: ${GOOGLE_RTDN_JWKS_URI}
