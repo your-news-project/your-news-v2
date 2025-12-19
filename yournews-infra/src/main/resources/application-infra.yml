@@ -59,6 +59,20 @@ oauth2:
     keyId: ${APPLE_KEY_ID}
     privateKey: ${APPLE_KEY}
 
+apple-iap:
+  issuerId: ${APPLE_IAP_ISSUER_ID}
+  keyId: ${APPLE_IAP_KEY_ID}
+  bundleId: ${APPLE_IAP_BUNDLE_ID}
+  privateKey: ${APPLE_IAP_PRIVATE_KEY}
+  appleId : ${APPLE_IAP_APPLE_ID}
+  productId : ${APPLE_IAP_PRODUCT_ID}
+  environment: ${APPLE_IAP_ENVIRONMENT}
+
+google-iap:
+  productId: ${GOOGLE_IAP_PRODUCT_ID}
+  packageName: ${GOOGLE_IAP_PACKAGE_NAME}
+  service-account-key: ${GOOGLE_IAP_ACCOUNT_KEY}
+
 cache:
   ttl:
     default: ${CACHE_TTL:30}
