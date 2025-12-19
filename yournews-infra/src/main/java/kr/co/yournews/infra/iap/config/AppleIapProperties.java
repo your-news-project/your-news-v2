@@ -14,5 +14,4 @@ public class AppleIapProperties {
     private String bundleId;
     private String privateKey;
     private Long appleId;
-    private String environment;
 }

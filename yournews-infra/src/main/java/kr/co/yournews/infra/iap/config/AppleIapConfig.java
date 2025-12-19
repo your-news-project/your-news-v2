@@ -14,27 +14,39 @@ import java.util.Set;
 @Configuration
 public class AppleIapConfig {
 
-    @Bean
-    public AppStoreServerAPIClient appStoreServerAPIClient(AppleIapProperties properties) {
-        Environment environment = "PRODUCTION".equalsIgnoreCase(properties.getEnvironment())
-                ? Environment.PRODUCTION
-                : Environment.SANDBOX;
-
+    @Bean("appStoreClientProd")
+    public AppStoreServerAPIClient appStoreClientProd(AppleIapProperties properties) {
         return new AppStoreServerAPIClient(
                 properties.getPrivateKey(),
                 properties.getKeyId(),
                 properties.getIssuerId(),
                 properties.getBundleId(),
-                environment
+                Environment.PRODUCTION
         );
     }
 
-    @Bean
-    public SignedDataVerifier signedDataVerifier(AppleIapProperties properties) throws IOException {
-        Environment environment = "PRODUCTION".equalsIgnoreCase(properties.getEnvironment())
-                ? Environment.PRODUCTION
-                : Environment.SANDBOX;
+    @Bean("appStoreClientSandbox")
+    public AppStoreServerAPIClient appStoreClientSandbox(AppleIapProperties properties) {
+        return new AppStoreServerAPIClient(
+                properties.getPrivateKey(),
+                properties.getKeyId(),
+                properties.getIssuerId(),
+                properties.getBundleId(),
+                Environment.SANDBOX
+        );
+    }
 
+    @Bean("signedVerifierProd")
+    public SignedDataVerifier signedVerifierProd(AppleIapProperties properties) throws IOException {
+        return buildVerifier(properties, Environment.PRODUCTION);
+    }
+
+    @Bean("signedVerifierSandbox")
+    public SignedDataVerifier signedVerifierSandbox(AppleIapProperties properties) throws IOException {
+        return buildVerifier(properties, Environment.SANDBOX);
+    }
+
+    private SignedDataVerifier buildVerifier(AppleIapProperties properties, Environment env) throws IOException {
         InputStream rootCaInputStream =
                 new ClassPathResource("cert/AppleRootCA-G3.cer").getInputStream();
 
@@ -44,7 +56,7 @@ public class AppleIapConfig {
                 rootCAs,
                 properties.getBundleId(),
                 properties.getAppleId(),
-                environment,
+                env,
                 true
         );
     }
