@@ -7,9 +7,12 @@ import java.time.format.DateTimeFormatter;
  * 날짜 포맷 변환 유틸리티 클래스
  * - 문자열을 LocalDate로 변환하는 기능 제공
  */
-public class DateTimeFormatterUtil {
+public final class DateTimeFormatterUtil {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private DateTimeFormatterUtil() {
+    }
 
     /**
      * 주어진 문자열을 LocalDate로 파싱
@@ -20,4 +23,5 @@ public class DateTimeFormatterUtil {
     public static LocalDate parseToLocalDateTime(String date) {
         return LocalDate.parse(date, formatter);
     }
+
 }
