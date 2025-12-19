@@ -21,19 +21,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. Build Gradle
+      # 3. Google key JSON 파일 생성
+      - name: Create Json
+        uses: jsdaniell/create-json@v1.2.2
+        with:
+          name: "./yournews-apis/src/main/resources/your-news-735fe-a77934fccf06.json"
+          json: ${{ secrets.GOOGLE_PRODUCTION_JSON }}
+
+      # 4. Build Gradle
       - name: Build apis
         run: |
           chmod +x ./gradlew
           ./gradlew :yournews-apis:build -x test
 
-      # 4. 현재 커밋의 짧은 SHA 값을 가져와 VERSION 환경변수로 등록
+      # 5. 현재 커밋의 짧은 SHA 값을 가져와 VERSION 환경변수로 등록
       - name: Set VERSION from short SHA
         id: version
         run: |
           echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      # 5. Docker 이미지 build 및 push
+      # 6. Docker 이미지 build 및 push
       - name: Docker Build & Push
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -42,7 +49,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/yournews-apis:$VERSION
           docker push ${{ secrets.DOCKER_USERNAME }}/yournews-apis:latest
 
-      # 6. AWS 자격 증명 구성
+      # 7. AWS 자격 증명 구성
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -50,14 +57,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
-      # 7. AWS CLI 설치
+      # 8. AWS CLI 설치
       - name: Install AWS CLI
         run: |
           curl -sS https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
           unzip -q awscliv2.zip
           sudo ./aws/install --update
 
-      # 8. SSM Run Command로 EC2 배포 스크립트 실행
+      # 9. SSM Run Command로 EC2 배포 스크립트 실행
       - name: Deploy with SSM
         run: |
           aws ssm send-command \
