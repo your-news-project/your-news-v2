@@ -8,19 +8,34 @@ import com.apple.itunes.storekit.model.TransactionInfoResponse;
 import com.apple.itunes.storekit.verification.SignedDataVerifier;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.co.yournews.infra.iap.dto.AppleTransactionDecoded;
 import kr.co.yournews.infra.iap.dto.AppleServerNotificationDto;
-import lombok.RequiredArgsConstructor;
+import kr.co.yournews.infra.iap.dto.AppleTransactionDecoded;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AppleAppStoreClient {
-    private final AppStoreServerAPIClient client;
-    private final SignedDataVerifier verifier;
+    private final AppStoreServerAPIClient prodClient;
+    private final AppStoreServerAPIClient sandboxClient;
+    private final SignedDataVerifier prodVerifier;
+    private final SignedDataVerifier sandboxVerifier;
     private final ObjectMapper objectMapper;
+
+    public AppleAppStoreClient(
+            @Qualifier("appStoreClientProd") AppStoreServerAPIClient prodClient,
+            @Qualifier("appStoreClientSandbox") AppStoreServerAPIClient sandboxClient,
+            @Qualifier("signedVerifierProd") SignedDataVerifier prodVerifier,
+            @Qualifier("signedVerifierSandbox") SignedDataVerifier sandboxVerifier,
+            ObjectMapper objectMapper
+    ) {
+        this.prodClient = prodClient;
+        this.sandboxClient = sandboxClient;
+        this.prodVerifier = prodVerifier;
+        this.sandboxVerifier = sandboxVerifier;
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * transactionId로 Apple의 signed transaction 정보를 조회하는 메서드.
@@ -29,14 +44,23 @@ public class AppleAppStoreClient {
      * @return : 서명된 transaction 정보
      */
     public String getTransactionInfo(String transactionId) {
+        // PROD 시도
         try {
-            TransactionInfoResponse response = client.getTransactionInfo(transactionId);
+            TransactionInfoResponse response = prodClient.getTransactionInfo(transactionId);
             return response.getSignedTransactionInfo();
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "Failed to get transaction info from Apple. transactionId= " + transactionId,
-                    e
-            );
+        } catch (Exception ex) {
+            log.warn("[IAP][APPLE] PROD getTransactionInfo failed. txId={}", transactionId);
+
+            // SANDBOX 시도
+            try {
+                TransactionInfoResponse response = sandboxClient.getTransactionInfo(transactionId);
+                return response.getSignedTransactionInfo();
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Failed to get transaction info from Apple. transactionId= " + transactionId,
+                        e
+                );
+            }
         }
     }
 
@@ -47,6 +71,25 @@ public class AppleAppStoreClient {
      * @return : 검증 및 디코딩된 Apple 트랜잭션 정보
      */
     public AppleTransactionDecoded decodeTransaction(String signedTransactionInfo) {
+        // PROD 시도
+        try {
+            return decodeTransactionInternal(prodVerifier, signedTransactionInfo);
+        } catch (Exception ex) {
+            log.warn("[IAP][APPLE] PROD verify/decode failed.");
+
+            // SANDBOX 시도
+            try {
+                return decodeTransactionInternal(sandboxVerifier, signedTransactionInfo);
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Failed to verify or decode Apple signed transaction",
+                        e
+                );
+            }
+        }
+    }
+
+    private AppleTransactionDecoded decodeTransactionInternal(SignedDataVerifier verifier, String signedTransactionInfo) {
         try {
             JWSTransactionDecodedPayload decodedPayload =
                     verifier.verifyAndDecodeTransaction(signedTransactionInfo);
@@ -60,10 +103,7 @@ public class AppleAppStoreClient {
                     decodedPayload.getExpiresDate()
             );
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Failed to verify or decode Apple signed transaction",
-                    e
-            );
+            throw new RuntimeException(e);
         }
     }
 
@@ -78,25 +118,44 @@ public class AppleAppStoreClient {
             JsonNode root = objectMapper.readTree(body);
             String signedPayload = root.get("signedPayload").asText();
 
-            ResponseBodyV2DecodedPayload decodedPayload = verifier.verifyAndDecodeNotification(signedPayload);
+            // PROD 시도
+            try {
+                ResponseBodyV2DecodedPayload decodedPayload =
+                        prodVerifier.verifyAndDecodeNotification(signedPayload);
 
-            String notificationType = decodedPayload.getNotificationType().getValue();
-            String subtype = decodedPayload.getSubtype() == null
-                    ? null
-                    : decodedPayload.getSubtype().getValue();
+                return toDto(decodedPayload);
+            } catch (Exception ex) {
+                log.warn("[IAP][APPLE] PROD verify/decode webhook failed.");
 
-            Data data = decodedPayload.getData();
-            String signedTransactionInfo = data.getSignedTransactionInfo();
+                // SANDBOX 시도
+                try {
+                    ResponseBodyV2DecodedPayload decodedPayload =
+                            sandboxVerifier.verifyAndDecodeNotification(signedPayload);
 
-            AppleTransactionDecoded transaction =
-                    decodeTransaction(signedTransactionInfo);
-
-            return AppleServerNotificationDto.of(notificationType, subtype, transaction);
+                    return toDto(decodedPayload);
+                } catch (Exception e) {
+                    throw new RuntimeException(
+                            "Failed to decode Apple server notification payload",
+                            e
+                    );
+                }
+            }
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Failed to decode Apple server notification payload",
-                    e
-            );
+            throw new RuntimeException("Failed to decode Apple server notification payload", e);
         }
+    }
+
+    private AppleServerNotificationDto toDto(ResponseBodyV2DecodedPayload decodedPayload) {
+        String notificationType = decodedPayload.getNotificationType().getValue();
+        String subtype = decodedPayload.getSubtype() == null
+                ? null
+                : decodedPayload.getSubtype().getValue();
+
+        Data data = decodedPayload.getData();
+        String signedTransactionInfo = data.getSignedTransactionInfo();
+
+        AppleTransactionDecoded transaction = decodeTransaction(signedTransactionInfo);
+
+        return AppleServerNotificationDto.of(notificationType, subtype, transaction);
     }
 }
