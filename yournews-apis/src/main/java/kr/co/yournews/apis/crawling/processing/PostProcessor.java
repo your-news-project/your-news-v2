@@ -49,12 +49,13 @@ public abstract class PostProcessor {
     /**
      * Notification 엔티티 생성
      */
-    protected Notification buildNotification(String newsName,
-                                             List<String> titles,
-                                             List<String> urls,
-                                             String publicId,
-                                             Long userId) {
-
+    protected Notification buildNotification(
+            String newsName,
+            List<String> titles,
+            List<String> urls,
+            String publicId,
+            Long userId
+    ) {
         return Notification.builder()
                 .newsName(newsName)
                 .postTitle(titles)

@@ -19,15 +19,19 @@ public class PostLikeController {
     private final PostLikeCommandService postLikeCommandService;
 
     @PostMapping("/{postId}/like")
-    public ResponseEntity<?> likePost(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                      @PathVariable Long postId) {
+    public ResponseEntity<?> likePost(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long postId
+    ) {
         postLikeCommandService.likePost(userDetails.getUserId(), postId);
         return ResponseEntity.ok(SuccessResponse.ok());
     }
 
     @DeleteMapping("/{postId}/like")
-    public ResponseEntity<?> unlikePost(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                        @PathVariable Long postId) {
+    public ResponseEntity<?> unlikePost(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long postId
+    ) {
         postLikeCommandService.unlikePost(userDetails.getUserId(), postId);
         return ResponseEntity.ok(SuccessResponse.ok());
     }

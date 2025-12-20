@@ -31,8 +31,10 @@ public class PostController {
     private final PostQueryService postQueryService;
 
     @PostMapping
-    public ResponseEntity<?> createPost(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                        @RequestBody @Valid PostDto.Request postDto) {
+    public ResponseEntity<?> createPost(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid PostDto.Request postDto
+    ) {
         return ResponseEntity.ok(
                 SuccessResponse.from(
                         postCommandService.createPost(userDetails.getUserId(), postDto)
@@ -41,8 +43,10 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPostById(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                         @PathVariable Long postId) {
+    public ResponseEntity<?> getPostById(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long postId
+    ) {
         Long userId = (userDetails != null) ? userDetails.getUserId() : null;
 
         return ResponseEntity.ok(
@@ -53,8 +57,10 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getPostsByCategory(@RequestParam Category category,
-                                                @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<?> getPostsByCategory(
+            @RequestParam Category category,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
         return ResponseEntity.ok(
                 SuccessResponse.from(
                         postQueryService.getPostsByCategory(category, pageable)
@@ -62,18 +68,31 @@ public class PostController {
         );
     }
 
+    @GetMapping("/notices/latest")
+    public ResponseEntity<?> getLatestNotice() {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        postQueryService.getLatestNotice()
+                )
+        );
+    }
+
     @PutMapping("/{postId}")
-    public ResponseEntity<?> updatePost(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                        @RequestBody @Valid PostDto.Request postDto,
-                                        @PathVariable Long postId) {
+    public ResponseEntity<?> updatePost(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid PostDto.Request postDto,
+            @PathVariable Long postId
+    ) {
         postCommandService.updatePost(userDetails.getUserId(), postId, postDto);
 
         return ResponseEntity.ok(SuccessResponse.ok());
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<?> deletePost(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                        @PathVariable Long postId) {
+    public ResponseEntity<?> deletePost(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long postId
+    ) {
         postCommandService.deletePost(userDetails.getUserId(), postId);
 
         return ResponseEntity.ok(SuccessResponse.ok());

@@ -3,6 +3,7 @@ package kr.co.yournews.apis.post.service;
 import kr.co.yournews.apis.post.dto.PostInfoDto;
 import kr.co.yournews.common.response.exception.CustomException;
 import kr.co.yournews.domain.post.dto.PostQueryDto;
+import kr.co.yournews.domain.post.entity.Post;
 import kr.co.yournews.domain.post.exception.PostErrorType;
 import kr.co.yournews.domain.post.service.PostService;
 import kr.co.yournews.domain.post.type.Category;
@@ -43,5 +44,18 @@ public class PostQueryService {
     public Page<PostInfoDto.Summary> getPostsByCategory(Category category, Pageable pageable) {
         return postService.readByCategory(category, pageable)
                 .map(PostInfoDto.Summary::from);
+    }
+
+    /**
+     * 가장 최근 공지사항 조회 메서드
+     *
+     * @return : 최근 공지사항 게시글 정보 (없을 경우 null 반환)
+     */
+    @Transactional(readOnly = true)
+    public PostInfoDto.Preview getLatestNotice() {
+        Post post = postService.readTopByCategoryOrderByCreatedAtDesc(Category.NOTICE)
+                .orElse(null);
+
+        return (post == null) ? PostInfoDto.Preview.empty() : PostInfoDto.Preview.from(post);
     }
 }

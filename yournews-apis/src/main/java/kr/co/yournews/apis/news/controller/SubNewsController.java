@@ -22,8 +22,9 @@ public class SubNewsController {
     private final SubNewsQueryService subNewsQueryService;
 
     @GetMapping("/subscription")
-    public ResponseEntity<?> getAllSubNews(@AuthenticationPrincipal CustomUserDetails userDetails) {
-
+    public ResponseEntity<?> getAllSubNews(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         return ResponseEntity.ok(
                 SuccessResponse.from(
                         subNewsQueryService.getAllSubNews(userDetails.getUserId())
@@ -32,9 +33,10 @@ public class SubNewsController {
     }
 
     @PutMapping("/subscription")
-    public ResponseEntity<?> updateSubscriptions(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                 @RequestBody SubNewsDto.Request requestDto) {
-
+    public ResponseEntity<?> updateSubscriptions(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody SubNewsDto.Request requestDto
+    ) {
         subNewsCommandService.updateSubscribeNews(userDetails.getUserId(), requestDto);
         return ResponseEntity.ok(SuccessResponse.ok());
     }
