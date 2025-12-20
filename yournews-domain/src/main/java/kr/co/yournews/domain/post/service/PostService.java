@@ -36,6 +36,10 @@ public class PostService {
         return postRepository.findAllByCategory(category, pageable);
     }
 
+    public Optional<Post> readTopByCategoryOrderByCreatedAtDesc(Category category) {
+        return postRepository.findTopByCategoryOrderByCreatedAtDesc(category);
+    }
+
     public void deleteById(Long id) {
         postRepository.deleteById(id);
     }
