@@ -24,15 +24,18 @@ public class OAuthController {
     private final OAuthCommandService oAuthCommandService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<?> signUp(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                    @RequestBody @Valid SignUpDto.OAuth sighUpDto) {
+    public ResponseEntity<?> signUp(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid SignUpDto.OAuth sighUpDto
+    ) {
         return createTokenRes(oAuthCommandService.signUp(userDetails.getUserId(), sighUpDto));
     }
 
     @PostMapping("/sign-in/{platform}")
-    public ResponseEntity<?> signIn(@PathVariable OAuthPlatform platform,
-                                    @RequestBody OAuthCode oAuthCode) {
-
+    public ResponseEntity<?> signIn(
+            @PathVariable OAuthPlatform platform,
+            @RequestBody OAuthCode oAuthCode
+    ) {
         return createTokenRes(oAuthCommandService.signIn(platform, oAuthCode));
     }
 

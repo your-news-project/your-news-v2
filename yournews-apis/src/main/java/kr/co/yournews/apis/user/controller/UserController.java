@@ -33,8 +33,10 @@ public class UserController {
     }
 
     @PatchMapping("/password")
-    public ResponseEntity<?> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                            @RequestBody @Valid UserReq.UpdatePassword updatePasswordDto) {
+    public ResponseEntity<?> updatePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid UserReq.UpdatePassword updatePasswordDto
+    ) {
         userCommandService.updatePassword(userDetails.getUserId(), updatePasswordDto);
 
         return ResponseEntity.ok(SuccessResponse.ok());
@@ -48,15 +50,19 @@ public class UserController {
     }
 
     @PatchMapping
-    public ResponseEntity<?> updateUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                               @RequestBody @Valid UserReq.UpdateProfile updateProfile) {
+    public ResponseEntity<?> updateUserProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid UserReq.UpdateProfile updateProfile
+    ) {
         userCommandService.updateUserProfile(userDetails.getUserId(), updateProfile);
         return ResponseEntity.ok(SuccessResponse.ok());
     }
 
     @PatchMapping("/subscribe")
-    public ResponseEntity<?> updateSubStatus(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                             @RequestBody UserReq.UpdateStatus updateStatus) {
+    public ResponseEntity<?> updateSubStatus(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserReq.UpdateStatus updateStatus
+    ) {
         userCommandService.updateSubStatus(userDetails.getUserId(), updateStatus);
         return ResponseEntity.ok(SuccessResponse.ok());
     }

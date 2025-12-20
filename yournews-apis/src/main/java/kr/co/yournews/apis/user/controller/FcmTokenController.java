@@ -21,15 +21,19 @@ public class FcmTokenController {
     private final FcmTokenCommandService fcmTokenCommandService;
 
     @PostMapping
-    public ResponseEntity<?> registerToken(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                           @RequestBody @Valid FcmTokenReq.Register registerDto) {
+    public ResponseEntity<?> registerToken(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid FcmTokenReq.Register registerDto
+    ) {
         fcmTokenCommandService.registerFcmToken(userDetails.getUserId(), registerDto);
         return ResponseEntity.ok(SuccessResponse.ok());
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteToken(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                         @RequestBody FcmTokenReq.Delete deleteDto) {
+    public ResponseEntity<?> deleteToken(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody FcmTokenReq.Delete deleteDto
+    ) {
         fcmTokenCommandService.deleteTokenByUserAndDevice(userDetails.getUserId(), deleteDto.deviceInfo());
         return ResponseEntity.ok(SuccessResponse.ok());
     }

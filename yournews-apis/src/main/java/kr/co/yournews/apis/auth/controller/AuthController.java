@@ -46,8 +46,8 @@ public class AuthController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestHeader("Authorization") String accessToken,
             @RequestHeader(value = "X-Refresh-Token", required = false) String refreshToken,
-            @RequestBody SignOutDto signOutDto) {
-
+            @RequestBody SignOutDto signOutDto
+    ) {
         authCommandService.signOut(accessToken, refreshToken, userDetails.getUserId(), signOutDto);
 
         return ResponseEntity.ok(SuccessResponse.ok());
@@ -55,8 +55,8 @@ public class AuthController {
 
     @PostMapping("/reissue")
     public ResponseEntity<?> accessTokenReissue(
-            @RequestHeader(value = "X-Refresh-Token", required = false) String refreshToken) {
-
+            @RequestHeader(value = "X-Refresh-Token", required = false) String refreshToken
+    ) {
         if (refreshToken == null) {
             throw new CustomException(AuthErrorType.REFRESH_TOKEN_NOT_FOUND);
         }

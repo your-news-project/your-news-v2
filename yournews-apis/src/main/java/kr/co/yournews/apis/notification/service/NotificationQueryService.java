@@ -89,7 +89,10 @@ public class NotificationQueryService {
      */
     @Transactional(readOnly = true)
     public Page<NotificationDto.Summary> getNotificationsByUserIdAndNewsNameAndIsRead(
-            Long userId, String newsName, boolean isRead, Pageable pageable
+            Long userId,
+            String newsName,
+            boolean isRead,
+            Pageable pageable
     ) {
         return notificationService.readAllByUserIdAndNewsNameAndIsRead(userId, newsName, isRead, pageable)
                 .map(NotificationDto.Summary::from);
@@ -105,7 +108,9 @@ public class NotificationQueryService {
      */
     @Transactional(readOnly = true)
     public Page<NotificationDto.Summary> getNotificationsByUserIdAndNewsNameNotInAndIsRead(
-            Long userId, boolean isRead, Pageable pageable
+            Long userId,
+            boolean isRead,
+            Pageable pageable
     ) {
         List<String> subscription = subNewsService.readByUserId(userId)
                 .stream()
