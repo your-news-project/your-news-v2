@@ -2,9 +2,11 @@ package kr.co.yournews.apis.post.service;
 
 import kr.co.yournews.apis.post.dto.PostInfoDto;
 import kr.co.yournews.domain.post.dto.PostQueryDto;
+import kr.co.yournews.domain.post.entity.Post;
 import kr.co.yournews.domain.post.service.PostService;
 import kr.co.yournews.domain.post.type.Category;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -82,5 +85,44 @@ public class PostQueryServiceTest {
         verify(postService, times(1)).readByCategory(category, pageable);
         assertEquals(postDtos.getSize(), result.getSize());
         assertEquals(postDtos.getTotalElements(), result.getTotalElements());
+    }
+
+    @Nested
+    @DisplayName("최신 공지사항 조회 메서드")
+    class GetLatestNotice {
+
+        @Test
+        @DisplayName("공지사항이 존재 - 정보 반환")
+        void getLatestNoticeExists() {
+            // given
+            Post post = Post.builder()
+                    .title("최신 공지사항")
+                    .build();
+
+            given(postService.readTopByCategoryOrderByCreatedAtDesc(Category.NOTICE))
+                    .willReturn(Optional.of(post));
+
+            // when
+            PostInfoDto.Preview result = postQueryService.getLatestNotice();
+
+            // then
+            assertThat(result).isNotNull();
+            assertEquals(post.getTitle(), result.title());
+        }
+
+        @Test
+        @DisplayName("공지사항이 존재 x - null 값 반환")
+        void getLatestNoticeEmpty() {
+            // given
+            given(postService.readTopByCategoryOrderByCreatedAtDesc(Category.NOTICE))
+                    .willReturn(Optional.empty());
+
+            // when
+            PostInfoDto.Preview result = postQueryService.getLatestNotice();
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.title()).isNull();
+        }
     }
 }
