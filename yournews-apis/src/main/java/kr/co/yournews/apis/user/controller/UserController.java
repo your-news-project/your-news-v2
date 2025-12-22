@@ -66,4 +66,31 @@ public class UserController {
         userCommandService.updateSubStatus(userDetails.getUserId(), updateStatus);
         return ResponseEntity.ok(SuccessResponse.ok());
     }
+
+    @PatchMapping("/calendar-subscribe")
+    public ResponseEntity<?> updateSubStatus(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserReq.UpdateCalendarStatus request
+    ) {
+        userCommandService.updateCalendarSubStatus(userDetails.getUserId(), request);
+        return ResponseEntity.ok(SuccessResponse.ok());
+    }
+
+    @PatchMapping("/notification/sub")
+    public ResponseEntity<?> updateSubStatus(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserReq.UpdateSubStatus request
+    ) {
+        userCommandService.updateSubStatus(userDetails.getUserId(), request);
+        return ResponseEntity.ok(SuccessResponse.ok());
+    }
+
+    @PatchMapping("/notification/daily")
+    public ResponseEntity<?> updateDailySubStatus(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserReq.UpdateDailySubStatus request
+    ) {
+        userCommandService.updateDailySubStatus(userDetails.getUserId(), request);
+        return ResponseEntity.ok(SuccessResponse.ok());
+    }
 }
