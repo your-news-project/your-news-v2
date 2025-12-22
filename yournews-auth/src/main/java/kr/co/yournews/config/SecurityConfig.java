@@ -27,6 +27,11 @@ public class SecurityConfig {
     private final AuthenticationEntryPoint authenticationEntryPoint;
     private final AccessDeniedHandler accessDeniedHandler;
 
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/api/v1/posts/**",
+            "/api/v1/notifies/rank",
+            "/api/v1/calendars/**"
+    };
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/auth/**", "/api/v1/admin/auth/sign-in",
             "/api/v1/oauth/sign-in/**", "/api/v1/news/**",
@@ -51,8 +56,7 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/notifies/rank").permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole(Role.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, GUEST_ENDPOINTS).hasRole(Role.GUEST.name())
