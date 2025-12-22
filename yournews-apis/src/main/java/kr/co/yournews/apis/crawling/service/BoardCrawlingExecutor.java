@@ -1,8 +1,8 @@
 package kr.co.yournews.apis.crawling.service;
 
+import kr.co.yournews.apis.crawling.processing.PostProcessor;
 import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.board.YutopiaBoardStrategy;
-import kr.co.yournews.apis.crawling.processing.PostProcessor;
 import kr.co.yournews.domain.news.service.NewsService;
 import kr.co.yournews.infra.crawling.CrawlingProcessor;
 import lombok.RequiredArgsConstructor;
@@ -10,13 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.Executor;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class BoardCrawlingExecutor {
     private final NewsService newsService;

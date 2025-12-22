@@ -9,12 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class MenuCrawlingExecutor {
     private final CrawlingProcessor crawlingProcessor;
@@ -47,7 +47,7 @@ public class MenuCrawlingExecutor {
 
         processPosts(strategy, elements);
 
-        log.info("[학식 크롤링 완료] menuName={}", strategy.getMenuName());
+        log.info("[학식 크롤링 완료] menuName: {}", strategy.getMenuName());
     }
 
     /**
