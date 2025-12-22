@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface CalendarRepository extends JpaRepository<Calendar, Long>, CustomCalendarRepository {
+    List<Calendar> findAllByStartAt(LocalDate startAt);
 
     @Query("select c from calendar c where year(c.startAt) in :years")
     List<Calendar> findAllByYears(@Param("years") Set<Integer> years);
