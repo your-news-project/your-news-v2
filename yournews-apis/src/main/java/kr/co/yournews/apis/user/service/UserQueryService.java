@@ -26,13 +26,21 @@ public class UserQueryService {
      * @return 사용자의 정보가 담긴 dto
      */
     @Transactional(readOnly = true)
-    public UserRes getUserInfoById(Long userId) {
+    public UserRes.Info getUserInfoById(Long userId) {
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
         List<SubNewsQueryDto> subNewsDtos =
                 subNewsService.readSubNewsWithKeywordsByUserId(userId);
 
-        return UserRes.from(user, subNewsDtos);
+        return UserRes.Info.from(user, subNewsDtos);
+    }
+
+    @Transactional(readOnly = true)
+    public UserRes.NotificationStatus getUserNotificationStatus(Long userId) {
+        User user = userService.readById(userId)
+                .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
+
+        return UserRes.NotificationStatus.from(user);
     }
 }

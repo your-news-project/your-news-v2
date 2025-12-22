@@ -32,12 +32,23 @@ public class UserController {
         );
     }
 
+    @GetMapping("/subscribe")
+    public ResponseEntity<?> getUserNotificationStatus(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        userQueryService.getUserNotificationStatus(userDetails.getUserId())
+                )
+        );
+    }
+
     @PatchMapping("/password")
     public ResponseEntity<?> updatePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody @Valid UserReq.UpdatePassword updatePasswordDto
+            @RequestBody @Valid UserReq.UpdatePassword request
     ) {
-        userCommandService.updatePassword(userDetails.getUserId(), updatePasswordDto);
+        userCommandService.updatePassword(userDetails.getUserId(), request);
 
         return ResponseEntity.ok(SuccessResponse.ok());
     }
@@ -52,18 +63,18 @@ public class UserController {
     @PatchMapping
     public ResponseEntity<?> updateUserProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody @Valid UserReq.UpdateProfile updateProfile
+            @RequestBody @Valid UserReq.UpdateProfile request
     ) {
-        userCommandService.updateUserProfile(userDetails.getUserId(), updateProfile);
+        userCommandService.updateUserProfile(userDetails.getUserId(), request);
         return ResponseEntity.ok(SuccessResponse.ok());
     }
 
     @PatchMapping("/subscribe")
     public ResponseEntity<?> updateSubStatus(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody UserReq.UpdateStatus updateStatus
+            @RequestBody UserReq.UpdateStatus request
     ) {
-        userCommandService.updateSubStatus(userDetails.getUserId(), updateStatus);
+        userCommandService.updateSubStatus(userDetails.getUserId(), request);
         return ResponseEntity.ok(SuccessResponse.ok());
     }
 
