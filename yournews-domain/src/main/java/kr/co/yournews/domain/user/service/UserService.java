@@ -52,6 +52,10 @@ public class UserService {
         return userRepository.findAll(pageable);
     }
 
+    public List<Long> readIdsByCalendarSubStatusTrue() {
+        return userRepository.findIdsByCalendarSubStatusTrue();
+    }
+
     public void deleteById(Long id) {
         userRepository.deleteById(id);
     }
