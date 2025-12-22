@@ -48,7 +48,7 @@ public class UserQueryServiceTest {
         given(userService.readById(userId)).willReturn(Optional.of(mockUser));
 
         // when
-        UserRes result = userQueryService.getUserInfoById(userId);
+        UserRes.Info result = userQueryService.getUserInfoById(userId);
 
         // then
         assertEquals(mockUser.getId(), result.id());

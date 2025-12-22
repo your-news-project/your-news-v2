@@ -34,7 +34,9 @@ public class SignUpDto {
 
             boolean subStatus,
 
-            boolean dailySubStatus
+            boolean dailySubStatus,
+
+            boolean calendarSubStatus
     ) {
         public User toEntity(String encodePassword) {
             return User.builder()
@@ -46,6 +48,7 @@ public class SignUpDto {
                     .status(UserStatus.ACTIVE)
                     .subStatus(subStatus)
                     .dailySubStatus(dailySubStatus)
+                    .calendarSubStatus(calendarSubStatus)
                     .role(Role.USER)
                     .build();
         }
@@ -62,6 +65,8 @@ public class SignUpDto {
 
             boolean subStatus,
 
-            boolean dailySubStatus
+            boolean dailySubStatus,
+
+            boolean calendarSubStatus
     ) { }
 }
