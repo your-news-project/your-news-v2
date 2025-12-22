@@ -23,6 +23,9 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     @Query(value = "SELECT id FROM user WHERE deleted_at IS NOT NULL AND deleted_at <= :dateTime", nativeQuery = true)
     List<Long> findSoftDeletedUserIdsBefore(@Param("dateTime") LocalDate dateTime);
 
+    @Query("select u.id from user u where u.calendarSubStatus = true")
+    List<Long> findIdsByCalendarSubStatusTrue();
+
     @Query(value = "SELECT EXISTS(SELECT 1 FROM user WHERE email = :email)", nativeQuery = true)
     Long existsByEmailIncludeDeleted(@Param("email") String email);
 

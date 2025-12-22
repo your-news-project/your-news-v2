@@ -27,4 +27,19 @@ public class UserReq {
             boolean dailySubStatus
     ) {
     }
+
+    public record UpdateCalendarStatus(
+            boolean calendarSubStatus
+    ) {
+    }
+
+    public record UpdateSubStatus(
+            boolean subStatus
+    ) {
+    }
+
+    public record UpdateDailySubStatus(
+            boolean dailySubStatus
+    ) {
+    }
 }

@@ -82,10 +82,17 @@ public class User extends BaseTimeEntity {
     @Column(name = "daily_sub_status")
     private boolean dailySubStatus;
 
+    @ColumnDefault("false")
+    @Column(name = "calendar_sub_status")
+    private boolean calendarSubStatus;
+
     @Builder
-    public User(String username, String password, String nickname, String email,
-                Role role, OAuthPlatform platform, UserStatus status,
-                boolean signedUp, boolean subStatus, boolean dailySubStatus) {
+    public User(
+            String username, String password, String nickname,
+            String email, Role role, OAuthPlatform platform,
+            UserStatus status, boolean signedUp, boolean subStatus,
+            boolean dailySubStatus, boolean calendarSubStatus
+    ) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
@@ -96,13 +103,18 @@ public class User extends BaseTimeEntity {
         this.signedUp = signedUp;
         this.subStatus = subStatus;
         this.dailySubStatus = dailySubStatus;
+        this.calendarSubStatus = calendarSubStatus;
     }
 
-    public void updateInfo(String nickname, boolean subStatus, boolean dailySubStatus) {
+    public void updateInfo(
+            String nickname, boolean subStatus,
+            boolean dailySubStatus, boolean calendarSubStatus
+    ) {
         this.nickname = nickname;
         this.signedUp = true;
         this.subStatus = subStatus;
         this.dailySubStatus = dailySubStatus;
+        this.calendarSubStatus = calendarSubStatus;
         this.role = Role.USER;
     }
 
@@ -117,6 +129,18 @@ public class User extends BaseTimeEntity {
     public void updateSubStatus(boolean subStatus, boolean dailySubStatus) {
         this.subStatus = subStatus;
         this.dailySubStatus = dailySubStatus;
+    }
+
+    public void updateSubStatus(boolean subStatus) {
+        this.subStatus = subStatus;
+    }
+
+    public void updateDailySubStatus(boolean dailySubStatus) {
+        this.dailySubStatus = dailySubStatus;
+    }
+
+    public void updateCalendarSubStatus(boolean calendarSubStatus) {
+        this.calendarSubStatus = calendarSubStatus;
     }
 
     public boolean isDeleted() {

@@ -20,56 +20,116 @@ public class UserCommandService {
     /**
      * 비밀번호 재설정 메서드
      *
-     * @param userId            : 사용자 PK값
-     * @param updatePasswordDto : (현재 비밀번호, 새 비밀번호) dto
+     * @param userId  : 사용자 PK값
+     * @param request : (현재 비밀번호, 새 비밀번호) dto
      * @throws CustomException NOT_FOUND : 사용자 존재하지 않음
      *                         NOT_MATCHED_PASSWORD : 현재 비밀번호 일치하지 않음
      */
     @Transactional
-    public void updatePassword(Long userId, UserReq.UpdatePassword updatePasswordDto) {
+    public void updatePassword(
+            Long userId,
+            UserReq.UpdatePassword request
+    ) {
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
-        if (!passwordEncodeService.matches(updatePasswordDto.currentPassword(), user.getPassword())) {
+        if (!passwordEncodeService.matches(request.currentPassword(), user.getPassword())) {
             throw new CustomException(UserErrorType.NOT_MATCHED_PASSWORD);
         }
 
-        user.updatePassword(passwordEncodeService.encode(updatePasswordDto.newPassword()));
+        user.updatePassword(passwordEncodeService.encode(request.newPassword()));
     }
 
     /**
      * 닉네임 업데이트 메서드
      *
-     * @param userId        : 사용자 pk
-     * @param updateProfile : 닉네임 변경 요청 DTO
+     * @param userId  : 사용자 pk
+     * @param request : 닉네임 변경 요청 DTO
      * @throws CustomException NOT_FOUND : 사용자 존재하지 않음
      *                         EXIST_NICKNAME : 이미 존재하는 닉네임
      */
     @Transactional
-    public void updateUserProfile(Long userId, UserReq.UpdateProfile updateProfile) {
+    public void updateUserProfile(
+            Long userId,
+            UserReq.UpdateProfile request
+    ) {
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
-        if (userService.existsByNickname(updateProfile.nickname())) {
+        if (userService.existsByNickname(request.nickname())) {
             throw new CustomException(UserErrorType.EXIST_NICKNAME);
         }
 
-        user.updateInfo(updateProfile.nickname());
+        user.updateInfo(request.nickname());
     }
 
     /**
-     * 사용자 구독 상태 변경
+     * 사용자 구독 상태 변경 메서드
      *
-     * @param userId       : 사용자 pk
-     * @param updateStatus : 구독 상태 변경 요청 DTO
+     * @param userId  : 사용자 pk
+     * @param request : 구독 상태 변경 요청 DTO
      * @throws CustomException NOT_FOUND : 사용자 존재하지 않음
      */
     @Transactional
-    public void updateSubStatus(Long userId, UserReq.UpdateStatus updateStatus) {
+    public void updateSubStatus(
+            Long userId,
+            UserReq.UpdateStatus request
+    ) {
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
-        user.updateSubStatus(updateStatus.subStatus(), updateStatus.dailySubStatus());
+        user.updateSubStatus(request.subStatus(), request.dailySubStatus());
+    }
+
+    /**
+     * 사용자 실시간 알림 구독 상태 변경 메서드
+     *
+     * @param userId  : 사용자 pk
+     * @param request : 구독 상태 변경 요청 DTO
+     */
+    @Transactional
+    public void updateSubStatus(
+            Long userId,
+            UserReq.UpdateSubStatus request
+    ) {
+        User user = userService.readById(userId)
+                .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
+
+        user.updateSubStatus(request.subStatus());
+    }
+
+    /**
+     * 사용자 일간 알림 구독 상태 변경 메서드
+     *
+     * @param userId  : 사용자 pk
+     * @param request : 구독 상태 변경 요청 DTO
+     */
+    @Transactional
+    public void updateDailySubStatus(
+            Long userId,
+            UserReq.UpdateDailySubStatus request
+    ) {
+        User user = userService.readById(userId)
+                .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
+
+        user.updateDailySubStatus(request.dailySubStatus());
+    }
+
+    /**
+     * 사용자 캘린더 알림 구독 상태 변경 메서드
+     *
+     * @param userId  : 사용자 pk
+     * @param request : 구독 상태 변경 요청 DTO
+     */
+    @Transactional
+    public void updateCalendarSubStatus(
+            Long userId,
+            UserReq.UpdateCalendarStatus request
+    ) {
+        User user = userService.readById(userId)
+                .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
+
+        user.updateCalendarSubStatus(request.calendarSubStatus());
     }
 
     /**

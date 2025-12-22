@@ -29,6 +29,10 @@ public class CalendarService {
         return calendarRepository.findAllByMonth(startOfMonth, endOfMonth);
     }
 
+    public List<Calendar> readAllByStartAt(LocalDate date) {
+        return calendarRepository.findAllByStartAt(date);
+    }
+
     public void deleteAllByIdInBatch(List<Long> ids) {
         calendarRepository.deleteAllByIdInBatch(ids);
     }

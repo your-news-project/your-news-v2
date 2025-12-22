@@ -48,7 +48,10 @@ public class OAuthCommandService {
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
-        user.updateInfo(signUpDto.nickname(), signUpDto.subStatus(), signUpDto.dailySubStatus());
+        user.updateInfo(
+                signUpDto.nickname(), signUpDto.subStatus(),
+                signUpDto.dailySubStatus(), signUpDto.calendarSubStatus()
+        );
         subNewsCommandService.subscribeToNews(user, signUpDto.newsIds(), signUpDto.keywords());
 
         log.info("[OAuth 회원가입 완료] userId: {}, signedUp: {}", userId, user.isSignedUp());

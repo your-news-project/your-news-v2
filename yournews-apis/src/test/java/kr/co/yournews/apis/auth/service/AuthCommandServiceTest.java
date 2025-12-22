@@ -94,8 +94,11 @@ public class AuthCommandServiceTest {
         void signUpSuccess() {
             // given
             SignUpDto.Auth signUpDto =
-                    new SignUpDto.Auth(username, password, nickname, email,
-                            List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
+                    new SignUpDto.Auth(
+                            username, password, nickname, email,
+                            List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"),
+                            true, true, true
+                    );
 
             given(passwordEncodeService.encode(password)).willReturn(encodedPassword);
             given(jwtHelper.createToken(any(User.class), any(TokenMode.class))).willReturn(tokenDto);
@@ -117,8 +120,11 @@ public class AuthCommandServiceTest {
         void signUpFailIfCodeNotVerified() {
             // given
             SignUpDto.Auth signUpDto =
-                    new SignUpDto.Auth(username, password, nickname, email,
-                            List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"), true, true);
+                    new SignUpDto.Auth(
+                            username, password, nickname, email,
+                            List.of(1L, 2L, 3L), List.of("키워드1", "키워드2"),
+                            true, true, true
+                    );
 
             doThrow(new CustomException(UserErrorType.CODE_NOT_VERIFIED))
                     .when(authCodeService).ensureVerifiedAndConsume(email);
