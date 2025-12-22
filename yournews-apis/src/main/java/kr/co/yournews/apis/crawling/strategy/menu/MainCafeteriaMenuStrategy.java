@@ -29,7 +29,7 @@ public class MainCafeteriaMenuStrategy implements MenuFileStrategy {
 
     @Override
     public String getScheduledTime() {
-        return "0 30 10 * * SAT,SUN,MON";
+        return "0 30 10 ? * SAT,SUN,MON";
     }
 
     @Override
