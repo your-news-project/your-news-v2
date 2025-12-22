@@ -2,6 +2,7 @@ package kr.co.yournews.apis.crawling.processing;
 
 import kr.co.yournews.apis.crawling.service.NoticeDetailCrawlingExecutor;
 import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
+import kr.co.yournews.apis.notification.constant.FcmTarget;
 import kr.co.yournews.apis.notification.constant.NotificationConstant;
 import kr.co.yournews.apis.notification.dto.FcmMessageDto;
 import kr.co.yournews.common.util.HashUtil;
@@ -81,7 +82,10 @@ public abstract class PostProcessor {
             boolean isFirst = (idx == 0); // 첫번째 토큰 여부 판단
             boolean isLast = (idx == tokens.size() - 1); // 마지막 토큰 여부 판단
             rabbitMessagePublisher.send(
-                    FcmMessageDto.of(token.getToken(), title, publicId, isFirst, isLast)
+                    FcmMessageDto.of(
+                            token.getToken(), title, NotificationConstant.NEWS_CONTENT,
+                            FcmTarget.NOTIFICATION, publicId, isFirst, isLast
+                    )
             );
         }
 
