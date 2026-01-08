@@ -52,6 +52,26 @@ public class NotificationDto {
         }
     }
 
+    public record SearchResult(
+            Long id,
+            String newsName,
+            List<String> postTitle,
+            boolean isBookmarked,
+            NotificationType type,
+            LocalDateTime createdAt
+    ) {
+        public static SearchResult from(Notification notification) {
+            return new SearchResult(
+                    notification.getId(),
+                    notification.getNewsName(),
+                    notification.getPostTitle(),
+                    notification.isBookmarked(),
+                    notification.getType(),
+                    notification.getCreatedAt()
+            );
+        }
+    }
+
     public record DeleteRequest(
             List<Long> notificationIds
     ) { }

@@ -101,6 +101,18 @@ public class NotificationController {
         );
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> getNotificationByUserIdAndKeyword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam String keyword
+    ) {
+        return ResponseEntity.ok(
+                SuccessResponse.from(
+                        notificationQueryService.getNotificationByUserIdAndKeyword(userDetails.getUserId(), keyword)
+                )
+        );
+    }
+
     @PatchMapping("/read-all")
     public ResponseEntity<?> markAllNotificationsAsRead(@AuthenticationPrincipal CustomUserDetails userDetails) {
         notificationCommandService.markAllNotificationsAsRead(userDetails.getUserId());
