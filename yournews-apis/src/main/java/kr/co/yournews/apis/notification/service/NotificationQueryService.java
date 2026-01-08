@@ -150,4 +150,20 @@ public class NotificationQueryService {
     public Long getUnreadCount(Long userId) {
         return notificationService.readUnreadCountByUserId(userId);
     }
+
+    /**
+     * 검색어를 통한 알림 조회 메서드
+     *
+     * @param userId  : 사용자 ID
+     * @param keyword : 검색어
+     * @return : 검색어에 해당하는 알림 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<NotificationDto.SearchResult> getNotificationByUserIdAndKeyword(Long userId, String keyword) {
+        return notificationService.readByUserIdAndKeyword(userId, keyword)
+                .stream()
+                .map(NotificationDto.SearchResult::from)
+                .toList();
+    }
+
 }

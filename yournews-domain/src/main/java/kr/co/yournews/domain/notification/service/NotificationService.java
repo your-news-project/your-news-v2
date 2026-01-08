@@ -20,6 +20,10 @@ public class NotificationService {
         notificationRepository.saveAllInBatch(notifications);
     }
 
+    public List<Notification> readByUserIdAndKeyword(Long userId, String keyword) {
+        return notificationRepository.findByUserIdAndPostTitleContaining(userId, keyword);
+    }
+
     public Optional<Notification> readById(Long id) {
         return notificationRepository.findById(id);
     }
