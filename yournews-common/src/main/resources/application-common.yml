@@ -1,0 +1,7 @@
+sentry:
+  dsn: ${SENTRY_DSN:}
+  send-default-pii: true
+  max-request-body-size: always
+  exception-resolver-order: -2147483647
+  traces-sample-rate: 0.0
+  environment: ${SPRING_PROFILES_ACTIVE:local}

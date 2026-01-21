@@ -8,11 +8,14 @@ import com.apple.itunes.storekit.model.TransactionInfoResponse;
 import com.apple.itunes.storekit.verification.SignedDataVerifier;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.co.yournews.common.sentry.SentryCapture;
 import kr.co.yournews.infra.iap.dto.AppleServerNotificationDto;
 import kr.co.yournews.infra.iap.dto.AppleTransactionDecoded;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -56,6 +59,15 @@ public class AppleAppStoreClient {
                 TransactionInfoResponse response = sandboxClient.getTransactionInfo(transactionId);
                 return response.getSignedTransactionInfo();
             } catch (Exception e) {
+                SentryCapture.warn(
+                        "subscription",
+                        Map.of(
+                                "platform", "apple",
+                                "stage", "iap.getTransactionInfo",
+                                "reason", "get_tx_failed"
+                        ),
+                        "[IAP][APPLE] getTransactionInfo failed"
+                );
                 throw new RuntimeException(
                         "Failed to get transaction info from Apple. transactionId= " + transactionId,
                         e
@@ -81,6 +93,15 @@ public class AppleAppStoreClient {
             try {
                 return decodeTransactionInternal(sandboxVerifier, signedTransactionInfo);
             } catch (Exception e) {
+                SentryCapture.warn(
+                        "subscription",
+                        Map.of(
+                                "platform", "apple",
+                                "stage", "iap.decodeTransaction",
+                                "reason", "decode_failed"
+                        ),
+                        "[IAP][APPLE] verify/decode failed"
+                );
                 throw new RuntimeException(
                         "Failed to verify or decode Apple signed transaction",
                         e
@@ -134,6 +155,15 @@ public class AppleAppStoreClient {
 
                     return toDto(decodedPayload);
                 } catch (Exception e) {
+                    SentryCapture.warn(
+                            "subscription",
+                            Map.of(
+                                    "platform", "apple",
+                                    "stage", "webhook.decode",
+                                    "reason", "decode_failed"
+                            ),
+                            "[IAP][APPLE] webhook verify/decode failed"
+                    );
                     throw new RuntimeException(
                             "Failed to decode Apple server notification payload",
                             e

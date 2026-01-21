@@ -13,11 +13,13 @@ import kr.co.yournews.common.exception.AuthErrorType;
 import kr.co.yournews.common.response.error.ErrorResponse;
 import kr.co.yournews.common.response.error.type.BaseErrorType;
 import kr.co.yournews.common.response.exception.BlackListException;
+import kr.co.yournews.common.sentry.SentryCapture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,12 +35,16 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e) {
             handleExceptionToken(response, AuthErrorType.ACCESS_TOKEN_EXPIRED);
         } catch (MalformedJwtException e) {
+            captureJwtException(e, "malformed");
             handleExceptionToken(response, AuthErrorType.INVALID_ACCESS_TOKEN);
         } catch (SignatureException e) {
+            captureJwtException(e, "invalid_signature");
             handleExceptionToken(response, AuthErrorType.INVALID_TOKEN_SIGNATURE);
         } catch (JwtException e) {
+            captureJwtException(e, "jwt_unknown");
             handleExceptionToken(response, AuthErrorType.UNKNOWN_TOKEN_ERROR);
         } catch (BlackListException e) {
+            captureJwtException(e, "blacklist");
             handleExceptionToken(response, AuthErrorType.BLACKLIST_ACCESS_TOKEN);
         }
     }
@@ -57,6 +63,19 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write(messageBody);
     }
+
+    private void captureJwtException(Exception e, String jwtType) {
+        SentryCapture.warn(
+                "jwt",
+                Map.of(
+                        "stage", "filter",
+                        "jwtType", jwtType,
+                        "reason", "exception"
+                ),
+                Map.of(
+                        "exceptionClass", e.getClass().getName()
+                ),
+                "[JWT] validation failed"
+        );
+    }
 }
-
-

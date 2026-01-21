@@ -23,4 +23,7 @@ dependencies {
 
     /* test */
     testImplementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+
+    /* Sentry */
+    implementation 'io.sentry:sentry:8.21.0'
 }

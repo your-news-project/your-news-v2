@@ -2,10 +2,13 @@ package kr.co.yournews.infra.iap.google;
 
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
+import kr.co.yournews.common.sentry.SentryCapture;
 import kr.co.yournews.infra.iap.dto.GooglePlaySubscriptionInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -40,6 +43,16 @@ public class GooglePlayClient {
                     purchase.getPaymentState()
             );
         } catch (Exception e) {
+            SentryCapture.warn(
+                    "subscription",
+                    Map.of(
+                            "platform", "google",
+                            "stage", "iap.getSubscription",
+                            "reason", "lookup_failed"
+                    ),
+                    "[IAP][GOOGLE] subscription lookup failed"
+            );
+
             throw new RuntimeException(
                     "Google Play subscription lookup failed productId= " + productId,
                     e

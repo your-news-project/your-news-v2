@@ -1,6 +1,7 @@
 package kr.co.yournews.apis.subscription.webhook.google;
 
 import kr.co.yournews.apis.subscription.dto.GoogleRtdnPayload;
+import kr.co.yournews.common.sentry.SentryCapture;
 import kr.co.yournews.common.util.DateTimeConvertUtil;
 import kr.co.yournews.domain.user.entity.Subscription;
 import kr.co.yournews.domain.user.service.SubscriptionService;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -44,6 +46,18 @@ public class GoogleSubscriptionWebhookService {
 
         GoogleRtdnPayload.SubscriptionNotification notification = payload.subscriptionNotification();
         if (notification == null) {
+            SentryCapture.warn(
+                    "subscription",
+                    Map.of(
+                            "platform", "google",
+                            "stage", "webhook",
+                            "reason", "subscriptionNotification_null"
+                    ),
+                    Map.of(
+                            "bodyLength", body == null ? -1 : body.length()
+                    ),
+                    "[GOOGLE][WEBHOOK] subscriptionNotification is null"
+            );
             log.warn("[Google Webhook] subscriptionNotification is null. body={}", body);
             return;
         }
@@ -65,6 +79,18 @@ public class GoogleSubscriptionWebhookService {
                 .orElse(null);
 
         if (subscription == null) {
+            SentryCapture.warn(
+                    "subscription",
+                    Map.of(
+                            "platform", "google",
+                            "stage", "webhook",
+                            "reason", "subscription_not_found"
+                    ),
+                    Map.of(
+                            "notificationType", String.valueOf(notificationType)
+                    ),
+                    "[GOOGLE][WEBHOOK] subscription not found"
+            );
             log.warn("[Google Webhook] No subscription found for purchaseToken={}", purchaseToken);
             return;
         }
@@ -110,7 +136,21 @@ public class GoogleSubscriptionWebhookService {
             // 만료
             case 13 -> handleExpired(subscription);
 
-            default -> log.info("[Google Webhook] another type={}", type);
+            default -> {
+                SentryCapture.warn(
+                        "subscription",
+                        Map.of(
+                                "platform", "google",
+                                "stage", "webhook",
+                                "reason", "unhandled_notification_type"
+                        ),
+                        Map.of(
+                                "notificationType", type
+                        ),
+                        "[Google Webhook] unhandled notification type=" + type
+                );
+                log.info("[Google Webhook] another type={}", type);
+            }
         }
     }
 

@@ -1,17 +1,20 @@
 package kr.co.yournews.apis.subscription.webhook.apple;
 
+import kr.co.yournews.common.sentry.SentryCapture;
 import kr.co.yournews.common.util.DateTimeConvertUtil;
 import kr.co.yournews.domain.user.entity.Subscription;
 import kr.co.yournews.domain.user.service.SubscriptionService;
 import kr.co.yournews.domain.user.type.SubscriptionStatus;
 import kr.co.yournews.infra.iap.apple.AppleAppStoreClient;
-import kr.co.yournews.infra.iap.dto.AppleTransactionDecoded;
 import kr.co.yournews.infra.iap.dto.AppleServerNotificationDto;
+import kr.co.yournews.infra.iap.dto.AppleTransactionDecoded;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -49,6 +52,19 @@ public class AppleSubscriptionWebhookService {
                         .orElse(null);
 
         if (subscription == null) {
+            SentryCapture.warn(
+                    "subscription",
+                    Map.of(
+                            "platform", "apple",
+                            "stage", "webhook",
+                            "reason", "subscription_not_found"
+                    ),
+                    Map.of(
+                            "notificationType", notificationType,
+                            "subtype", subtype == null ? "null" : subtype
+                    ),
+                    "[APPLE][WEBHOOK] subscription not found"
+            );
             log.warn("[Apple Webhook] No subscription found for originalTransactionId={}", originalTransactionId);
             return;
         }
@@ -63,7 +79,22 @@ public class AppleSubscriptionWebhookService {
             case "GRACE_PERIOD_EXPIRED" -> handleGracePeriodExpired(subscription);
             case "REFUND" -> handleRefund(subscription);
             case "REFUND_REVERSED" -> handleRefundReversed(subscription);
-            default -> log.info("[Apple Webhook] Unhandled notificationType={}", notificationType);
+            default -> {
+                SentryCapture.warn(
+                        "subscription",
+                        Map.of(
+                                "platform", "apple",
+                                "stage", "webhook",
+                                "reason", "unhandled_notification"
+                        ),
+                        Map.of(
+                                "notificationType", notificationType,
+                                "subtype", subtype == null ? "null" : subtype
+                        ),
+                        "[APPLE][WEBHOOK] unhandled notificationType"
+                );
+                log.info("[Apple Webhook] Unhandled notificationType={}", notificationType);
+            }
         }
     }
 
