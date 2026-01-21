@@ -1,9 +1,12 @@
 package kr.co.yournews.infra.crawling;
 
+import kr.co.yournews.common.sentry.SentryCapture;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -28,9 +31,21 @@ public class CrawlingProcessor {
                 log.error("Error crawling {}: retry {}/{}", url, retryCount++, MAX_RETRIES);
 
                 if (retryCount > MAX_RETRIES) {
-                    log.error("Max retries reached: {}", url);
+                    SentryCapture.warn(
+                            "crawling",
+                            Map.of(
+                                    "stage", "fetch",
+                                    "reason", "max_retries"
+                            ),
+                            Map.of(
+                                    "url", url,
+                                    "retryCount", retryCount,
+                                    "exceptionClass", e.getClass().getName()
+                            ),
+                            "[CRAWLING] max retries exceeded"
+                    );
+                    log.warn("[CRAWLING] Max retries reached: {}", url);
                 }
-
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ignored) {
