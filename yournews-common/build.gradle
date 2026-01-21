@@ -3,4 +3,7 @@ jar { enabled = true }
 
 dependencies {
     compileOnly 'org.springframework.boot:spring-boot-starter-web'
+
+    /* Sentry */
+    implementation 'io.sentry:sentry:8.21.0'
 }

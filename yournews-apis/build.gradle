@@ -28,4 +28,7 @@ dependencies {
 	/* jwt */
 	implementation 'com.auth0:java-jwt:4.4.0'
 	implementation 'com.auth0:jwks-rsa:0.22.1'
+
+	/* Sentry */
+	implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.21.0'
 }
