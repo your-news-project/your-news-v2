@@ -1,7 +1,7 @@
 package kr.co.yournews.apis.calendar.service;
 
 import kr.co.yournews.apis.notification.constant.FcmTarget;
-import kr.co.yournews.apis.notification.dto.FcmMessageDto;
+import kr.co.yournews.infra.rabbitmq.dto.FcmMessageDto;
 import kr.co.yournews.domain.calendar.entity.Calendar;
 import kr.co.yournews.domain.calendar.service.CalendarService;
 import kr.co.yournews.domain.user.entity.FcmToken;

@@ -1,4 +1,4 @@
-package kr.co.yournews.apis.notification.dto;
+package kr.co.yournews.infra.rabbitmq.dto;
 
 public record FcmMessageDto(
         String token,
