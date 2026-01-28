@@ -22,6 +22,7 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:root}
     password: ${RABBITMQ_PASSWORD:}
+    publisher-confirm-type: correlated
 
 rabbitmq:
   exchange-name: ${RABBITMQ_EXCHANGE_NAME:exchange}
