@@ -4,7 +4,7 @@ import kr.co.yournews.apis.crawling.service.NoticeDetailCrawlingExecutor;
 import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.notification.constant.FcmTarget;
 import kr.co.yournews.apis.notification.constant.NotificationConstant;
-import kr.co.yournews.apis.notification.dto.FcmMessageDto;
+import kr.co.yournews.infra.rabbitmq.dto.FcmMessageDto;
 import kr.co.yournews.common.util.HashUtil;
 import kr.co.yournews.domain.notification.entity.NoticeSummary;
 import kr.co.yournews.domain.notification.entity.Notification;
