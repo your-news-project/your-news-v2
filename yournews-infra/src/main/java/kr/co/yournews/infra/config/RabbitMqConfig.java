@@ -40,4 +40,16 @@ public class RabbitMqConfig {
     public MessageConverter jackson2JsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
+
+    /**
+     * 메시지 발행 실패 처리를 위한 스케줄러 스레드풀 설정
+     */
+    @Bean
+    public ThreadPoolTaskScheduler rabbitRetryScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(4);
+        scheduler.setThreadNamePrefix("rabbit-retry-");
+        scheduler.initialize();
+        return scheduler;
+    }
 }
