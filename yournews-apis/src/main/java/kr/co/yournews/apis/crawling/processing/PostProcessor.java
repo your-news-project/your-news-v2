@@ -5,6 +5,7 @@ import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.notification.constant.FcmTarget;
 import kr.co.yournews.apis.notification.constant.NotificationConstant;
 import kr.co.yournews.infra.rabbitmq.dto.FcmMessageDto;
+import kr.co.yournews.common.util.FcmMessageFormatter;
 import kr.co.yournews.common.util.HashUtil;
 import kr.co.yournews.domain.notification.entity.NoticeSummary;
 import kr.co.yournews.domain.notification.entity.Notification;
@@ -19,6 +20,7 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -72,18 +74,32 @@ public abstract class PostProcessor {
     /**
      * FCM 메시지 전송 (RabbitMQ 이용)
      */
-    protected void sendFcmMessages(List<FcmToken> tokens, String newsName, String publicId) {
+    protected void sendFcmMessages(
+            Map<Long, List<String>> userIdToTitles,
+            List<FcmToken> tokens,
+            String newsName,
+            String publicId
+    ) {
         log.info("[알림 메시지 큐 전송 시작] 소식명: {}, 토큰 수: {}, publicId: {}", newsName, tokens.size(), publicId);
 
         String title = NotificationConstant.getNewsNotificationTitle(newsName);
 
         for (int idx = 0; idx < tokens.size(); idx++) {
             FcmToken token = tokens.get(idx);
+            Long userId = token.getUser().getId();
+            List<String> titles = userIdToTitles.get(userId);
+
+            if (titles == null || titles.isEmpty()) {
+                continue;
+            }
+
+            String content = FcmMessageFormatter.formatTitles(titles);
+
             boolean isFirst = (idx == 0); // 첫번째 토큰 여부 판단
             boolean isLast = (idx == tokens.size() - 1); // 마지막 토큰 여부 판단
             rabbitMessagePublisher.send(
                     FcmMessageDto.of(
-                            token.getToken(), title, NotificationConstant.NEWS_CONTENT,
+                            token.getToken(), title, content,
                             FcmTarget.NOTIFICATION, publicId, isFirst, isLast
                     )
             );

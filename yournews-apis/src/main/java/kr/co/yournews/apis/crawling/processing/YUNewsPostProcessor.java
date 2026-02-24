@@ -95,12 +95,20 @@ public class YUNewsPostProcessor extends PostProcessor {
 
         // 모든 알림에 공통으로 사용될 public_id (알림 페이지 이동을 위해)
         String publicId = UUID.randomUUID().toString();
-        List<Long> notifiedUserIds =
+        Map<Long, List<String>> userIdToTitles =
                 saveNotifications(userIds, userToKeywords, keywordToPosts, newsName, publicId);
-        log.info("[YUNews 알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}", userIds.size(), newsName, publicId);
+
+        if (userIdToTitles.isEmpty()) {
+            log.info("[YUNews 알림 대상 없음] newsName: {}", newsName);
+            return;
+        }
+
+        List<Long> notifiedUserIds = new ArrayList<>(userIdToTitles.keySet());
+        log.info("[YUNews 알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}", notifiedUserIds.size(), newsName, publicId);
 
         List<FcmToken> tokens = fcmTokenService.readAllByUserIds(notifiedUserIds);
-        sendFcmMessages(tokens, newsName, publicId);
+
+        sendFcmMessages(userIdToTitles, tokens, newsName, publicId);
     }
 
     /**
@@ -192,7 +200,7 @@ public class YUNewsPostProcessor extends PostProcessor {
      * @param newsName       : 소식(뉴스) 이름
      * @param publicId       : 모든 알림에 공통으로 사용할 Public ID (묶음 식별용)
      */
-    private List<Long> saveNotifications(
+    private Map<Long, List<String>> saveNotifications(
             List<Long> userIds,
             Map<Long, List<KeywordType>> userToKeywords,
             Map<KeywordType, CrawlingPostInfo> keywordToPosts,
@@ -201,7 +209,7 @@ public class YUNewsPostProcessor extends PostProcessor {
     ) {
 
         List<Notification> notifications = new ArrayList<>();
-        List<Long> notifiedUserIds = new ArrayList<>();
+        Map<Long, List<String>> userIdToTitles = new HashMap<>();
 
         for (Long userId : userIds) {
             List<KeywordType> keywords = userToKeywords.getOrDefault(userId, List.of());
@@ -220,7 +228,7 @@ public class YUNewsPostProcessor extends PostProcessor {
 
             if (!titles.isEmpty()) {
                 notifications.add(buildNotification(newsName, titles, urls, publicId, userId));
-                notifiedUserIds.add(userId);
+                userIdToTitles.put(userId, titles);
             }
         }
 
@@ -228,6 +236,6 @@ public class YUNewsPostProcessor extends PostProcessor {
             notificationCommandService.createNotifications(notifications);
         }
 
-        return notifiedUserIds;
+        return userIdToTitles;
     }
 }
