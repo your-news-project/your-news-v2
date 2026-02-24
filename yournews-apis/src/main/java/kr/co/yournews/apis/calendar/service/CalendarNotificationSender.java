@@ -91,7 +91,7 @@ public class CalendarNotificationSender {
     }
 
     private String buildCalendarTitle(boolean isDday, List<Calendar> calendars) {
-        String prefix = isDday ? "[금일]" : "[3일 뒤]";
+        String prefix = isDday ? "[오늘]" : "[3일 뒤]";
 
         String titles = calendars.stream()
                 .map(Calendar::getTitle)
