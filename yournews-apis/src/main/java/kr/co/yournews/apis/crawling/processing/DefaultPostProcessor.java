@@ -18,7 +18,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -88,11 +90,18 @@ public class DefaultPostProcessor extends PostProcessor {
 
         // 모든 알림에 공통으로 사용될 public_id (알림 페이지 이동을 위해)
         String publicId = UUID.randomUUID().toString();
+
+        Map<Long, List<String>> userIdToTitles = userIds.stream()
+                .collect(Collectors.toMap(
+                        userId -> userId,
+                        userId -> List.copyOf(postInfo.titles())
+                ));
+
         saveNotifications(userIds, newsName, postInfo.titles(), postInfo.urls(), publicId);
         log.info("[알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}", userIds.size(), newsName, publicId);
 
         List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
-        sendFcmMessages(tokens, newsName, publicId);
+        sendFcmMessages(userIdToTitles, tokens, newsName, publicId);
     }
 
     /**

@@ -1,8 +1,9 @@
 package kr.co.yournews.apis.notification.service;
 
 import kr.co.yournews.apis.notification.constant.FcmTarget;
-import kr.co.yournews.infra.rabbitmq.dto.FcmMessageDto;
+import kr.co.yournews.apis.notification.constant.NotificationConstant;
 import kr.co.yournews.apis.notification.dto.DailyNewsDto;
+import kr.co.yournews.common.util.FcmMessageFormatter;
 import kr.co.yournews.domain.news.entity.News;
 import kr.co.yournews.domain.news.service.NewsService;
 import kr.co.yournews.domain.notification.entity.Notification;
@@ -10,8 +11,8 @@ import kr.co.yournews.domain.notification.type.NotificationType;
 import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.domain.user.service.UserService;
-import kr.co.yournews.apis.notification.constant.NotificationConstant;
 import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
+import kr.co.yournews.infra.rabbitmq.dto.FcmMessageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -59,8 +60,10 @@ public class DailyNotificationProcessor {
         List<Long> userIds = userService.readAllUserIdsByNewsNameAndDailySubStatusTrue(newsName);
         List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
 
+        List<String> titles = extractTitles(newsListDtos);
+
         saveNotifications(userIds, newsName, newsListDtos, publicId);
-        sendFcmMessages(tokens, newsName, publicId);
+        sendFcmMessages(titles, tokens, newsName, publicId);
 
         log.info("[소식 처리 완료] 소식명: {}, 사용자 수: {}, 토큰 수: {}", newsName, userIds.size(), tokens.size());
     }
@@ -76,7 +79,6 @@ public class DailyNotificationProcessor {
     private void saveNotifications(List<Long> userIds, String newsName,
                                    List<DailyNewsDto> newsListDtos,
                                    String publicId) {
-
         List<String> titles = new ArrayList<>();
         List<String> urls = new ArrayList<>();
 
@@ -93,6 +95,20 @@ public class DailyNotificationProcessor {
 
         log.info("[알림 저장 완료] 소식명: {}, 사용자 수: {}, 게시글 수: {}, publicId: {}",
                 newsName, userIds.size(), titles.size(), publicId);
+    }
+
+    /**
+     * 일간 소식 중 제목 추출 메서드
+     *
+     * @param newsListDtos : 일간 소식 목록 DTO
+     * @return : 일간 소식 제목 추출 리스트
+     */
+    private List<String> extractTitles(List<DailyNewsDto> newsListDtos) {
+        List<String> titles = new ArrayList<>();
+        for (DailyNewsDto dto : newsListDtos) {
+            titles.add(dto.title());
+        }
+        return titles;
     }
 
     /**
@@ -119,8 +135,14 @@ public class DailyNotificationProcessor {
     /**
      * FCM 메시지 전송 (RabbitMQ 이용)
      */
-    private void sendFcmMessages(List<FcmToken> tokens, String newsName, String publicId) {
+    private void sendFcmMessages(
+            List<String> titles,
+            List<FcmToken> tokens,
+            String newsName,
+            String publicId
+    ) {
         String title = NotificationConstant.getDailyNewsNotificationTitle(newsName);
+        String content = FcmMessageFormatter.formatTitles(titles);
 
         log.info("[알림 메시지 큐 전송 시작] 소식명: {}, 토큰 수: {}", newsName, tokens.size());
 
@@ -130,7 +152,7 @@ public class DailyNotificationProcessor {
             boolean isLast = (idx == tokens.size() - 1); // 마지막 토큰 여부 판단
             rabbitMessagePublisher.send(
                     FcmMessageDto.of(
-                            token.getToken(), title, NotificationConstant.NEWS_CONTENT,
+                            token.getToken(), title, content,
                             FcmTarget.NOTIFICATION, publicId, isFirst, isLast
                     )
             );
@@ -138,4 +160,5 @@ public class DailyNotificationProcessor {
 
         log.info("[알림 메시지 큐 전송 완료] 소식명: {}, publicId: {}", newsName, publicId);
     }
+
 }
