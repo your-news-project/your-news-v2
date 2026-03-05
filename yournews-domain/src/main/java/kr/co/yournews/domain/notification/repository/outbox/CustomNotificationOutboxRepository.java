@@ -1,4 +1,4 @@
-package kr.co.yournews.domain.notification.repository;
+package kr.co.yournews.domain.notification.repository.outbox;
 
 import kr.co.yournews.domain.notification.entity.NotificationOutbox;
 import kr.co.yournews.domain.notification.type.OutboxStatus;

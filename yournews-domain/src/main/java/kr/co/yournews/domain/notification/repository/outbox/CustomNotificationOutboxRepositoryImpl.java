@@ -1,4 +1,4 @@
-package kr.co.yournews.domain.notification.repository;
+package kr.co.yournews.domain.notification.repository.outbox;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.co.yournews.domain.notification.entity.NotificationOutbox;

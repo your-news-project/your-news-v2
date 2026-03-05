@@ -1,7 +1,7 @@
 package kr.co.yournews.domain.notification.service;
 
 import kr.co.yournews.domain.notification.entity.NoticeSummary;
-import kr.co.yournews.domain.notification.repository.NoticeSummaryRepository;
+import kr.co.yournews.domain.notification.repository.noticesummary.NoticeSummaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

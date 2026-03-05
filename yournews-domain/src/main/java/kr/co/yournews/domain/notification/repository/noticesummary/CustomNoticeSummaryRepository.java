@@ -1,4 +1,4 @@
-package kr.co.yournews.domain.notification.repository;
+package kr.co.yournews.domain.notification.repository.noticesummary;
 
 import kr.co.yournews.domain.notification.entity.NoticeSummary;
 

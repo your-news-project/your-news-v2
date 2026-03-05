@@ -1,7 +1,7 @@
 package kr.co.yournews.domain.notification.service;
 
 import kr.co.yournews.domain.notification.entity.NotificationOutbox;
-import kr.co.yournews.domain.notification.repository.NotificationOutboxRepository;
+import kr.co.yournews.domain.notification.repository.outbox.NotificationOutboxRepository;
 import kr.co.yournews.domain.notification.type.OutboxStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

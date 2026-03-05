@@ -1,4 +1,4 @@
-package kr.co.yournews.domain.notification.repository;
+package kr.co.yournews.domain.notification.repository.notification;
 
 import kr.co.yournews.domain.notification.entity.Notification;
 import org.springframework.data.domain.Page;
