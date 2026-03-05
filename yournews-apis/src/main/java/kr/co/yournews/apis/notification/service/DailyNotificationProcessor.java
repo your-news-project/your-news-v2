@@ -11,8 +11,6 @@ import kr.co.yournews.domain.notification.type.NotificationType;
 import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.domain.user.service.UserService;
-import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
-import kr.co.yournews.infra.rabbitmq.dto.FcmMessageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,12 +23,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DailyNotificationProcessor {
-    private final RabbitMessagePublisher rabbitMessagePublisher;
     private final DailyNotificationService dailyNotificationService;
     private final NewsService newsService;
     private final UserService userService;
     private final FcmTokenService fcmTokenService;
     private final NotificationCommandService notificationCommandService;
+    private final NotificationOutboxEnqueueService notificationOutboxService;
 
     /**
      * 일간 소식을 전송하는 메서드
@@ -143,22 +141,7 @@ public class DailyNotificationProcessor {
     ) {
         String title = NotificationConstant.getDailyNewsNotificationTitle(newsName);
         String content = FcmMessageFormatter.formatTitles(titles);
-
-        log.info("[알림 메시지 큐 전송 시작] 소식명: {}, 토큰 수: {}", newsName, tokens.size());
-
-        for (int idx = 0; idx < tokens.size(); idx++) {
-            FcmToken token = tokens.get(idx);
-            boolean isFirst = (idx == 0); // 첫번째 토큰 여부 판단
-            boolean isLast = (idx == tokens.size() - 1); // 마지막 토큰 여부 판단
-            rabbitMessagePublisher.send(
-                    FcmMessageDto.of(
-                            token.getToken(), title, content,
-                            FcmTarget.NOTIFICATION, publicId, isFirst, isLast
-                    )
-            );
-        }
-
-        log.info("[알림 메시지 큐 전송 완료] 소식명: {}, publicId: {}", newsName, publicId);
+        notificationOutboxService.enqueueMessages(tokens, title, content, FcmTarget.NOTIFICATION, publicId);
     }
 
 }

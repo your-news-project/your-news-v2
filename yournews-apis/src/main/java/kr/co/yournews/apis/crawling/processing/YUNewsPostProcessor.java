@@ -6,6 +6,7 @@ import kr.co.yournews.apis.crawling.strategy.board.YUNewsBoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.dto.CrawlingPostInfo;
 import kr.co.yournews.apis.notification.service.DailyNotificationService;
 import kr.co.yournews.apis.notification.service.NotificationCommandService;
+import kr.co.yournews.apis.notification.service.NotificationOutboxEnqueueService;
 import kr.co.yournews.domain.news.dto.UserKeywordDto;
 import kr.co.yournews.domain.news.service.SubNewsService;
 import kr.co.yournews.domain.news.type.KeywordType;
@@ -13,7 +14,6 @@ import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.service.NoticeSummaryService;
 import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.domain.user.service.FcmTokenService;
-import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -39,11 +39,11 @@ public class YUNewsPostProcessor extends PostProcessor {
             FcmTokenService fcmTokenService,
             SubNewsService subNewsService,
             DailyNotificationService dailyNotificationService,
-            RabbitMessagePublisher rabbitMessagePublisher,
+            NotificationOutboxEnqueueService notificationOutboxService,
             NoticeSummaryService noticeSummaryService,
             NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor
     ) {
-        super(rabbitMessagePublisher, noticeSummaryService, noticeDetailCrawlingExecutor);
+        super(notificationOutboxService, noticeSummaryService, noticeDetailCrawlingExecutor);
         this.notificationCommandService = notificationCommandService;
         this.fcmTokenService = fcmTokenService;
         this.subNewsService = subNewsService;
