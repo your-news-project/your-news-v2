@@ -4,8 +4,7 @@ import kr.co.yournews.apis.crawling.service.NoticeDetailCrawlingExecutor;
 import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.notification.constant.FcmTarget;
 import kr.co.yournews.apis.notification.constant.NotificationConstant;
-import kr.co.yournews.infra.rabbitmq.dto.FcmMessageDto;
-import kr.co.yournews.common.util.FcmMessageFormatter;
+import kr.co.yournews.apis.notification.service.NotificationOutboxEnqueueService;
 import kr.co.yournews.common.util.HashUtil;
 import kr.co.yournews.domain.notification.entity.NoticeSummary;
 import kr.co.yournews.domain.notification.entity.Notification;
@@ -13,7 +12,6 @@ import kr.co.yournews.domain.notification.service.NoticeSummaryService;
 import kr.co.yournews.domain.notification.type.NotificationType;
 import kr.co.yournews.domain.notification.type.SummaryStatus;
 import kr.co.yournews.domain.user.entity.FcmToken;
-import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
@@ -26,7 +24,7 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class PostProcessor {
-    private final RabbitMessagePublisher rabbitMessagePublisher;
+    private final NotificationOutboxEnqueueService notificationOutboxService;
     private final NoticeSummaryService noticeSummaryService;
     private final NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor;
 
@@ -80,32 +78,14 @@ public abstract class PostProcessor {
             String newsName,
             String publicId
     ) {
-        log.info("[알림 메시지 큐 전송 시작] 소식명: {}, 토큰 수: {}, publicId: {}", newsName, tokens.size(), publicId);
-
         String title = NotificationConstant.getNewsNotificationTitle(newsName);
-
-        for (int idx = 0; idx < tokens.size(); idx++) {
-            FcmToken token = tokens.get(idx);
-            Long userId = token.getUser().getId();
-            List<String> titles = userIdToTitles.get(userId);
-
-            if (titles == null || titles.isEmpty()) {
-                continue;
-            }
-
-            String content = FcmMessageFormatter.formatTitles(titles);
-
-            boolean isFirst = (idx == 0); // 첫번째 토큰 여부 판단
-            boolean isLast = (idx == tokens.size() - 1); // 마지막 토큰 여부 판단
-            rabbitMessagePublisher.send(
-                    FcmMessageDto.of(
-                            token.getToken(), title, content,
-                            FcmTarget.NOTIFICATION, publicId, isFirst, isLast
-                    )
-            );
-        }
-
-        log.info("[알림 메시지 큐 전송 완료] 토큰 수: {}, newsName: {}, publicId: {}", tokens.size(), newsName, publicId);
+        notificationOutboxService.enqueueMessages(
+                tokens,
+                userIdToTitles,
+                title,
+                FcmTarget.NOTIFICATION,
+                publicId
+        );
     }
 
     /**

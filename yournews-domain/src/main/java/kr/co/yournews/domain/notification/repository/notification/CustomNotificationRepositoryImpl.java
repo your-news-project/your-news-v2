@@ -1,4 +1,4 @@
-package kr.co.yournews.domain.notification.repository;
+package kr.co.yournews.domain.notification.repository.notification;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

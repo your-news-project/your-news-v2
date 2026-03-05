@@ -5,17 +5,17 @@ public record FcmMessageDto(
         String title,
         String content,
         String target,
-        String info,
-        boolean isFirst,
-        boolean isLast
+        String info
 ) {
     public static FcmMessageDto of(
-            String token, String title, String content, String target,
-            String info, boolean isFirst, boolean isLast
+            String token,
+            String title,
+            String content,
+            String target,
+            String info
     ) {
         return new FcmMessageDto(
-                token, title, content, target,
-                info, isFirst, isLast
+                token, title, content, target, info
         );
     }
 }

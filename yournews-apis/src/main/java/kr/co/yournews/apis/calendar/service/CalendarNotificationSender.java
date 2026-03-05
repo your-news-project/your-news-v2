@@ -1,19 +1,19 @@
 package kr.co.yournews.apis.calendar.service;
 
 import kr.co.yournews.apis.notification.constant.FcmTarget;
-import kr.co.yournews.infra.rabbitmq.dto.FcmMessageDto;
+import kr.co.yournews.apis.notification.service.NotificationOutboxEnqueueService;
 import kr.co.yournews.domain.calendar.entity.Calendar;
 import kr.co.yournews.domain.calendar.service.CalendarService;
 import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.domain.user.service.FcmTokenService;
 import kr.co.yournews.domain.user.service.UserService;
-import kr.co.yournews.infra.rabbitmq.RabbitMessagePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -22,7 +22,7 @@ public class CalendarNotificationSender {
     private final UserService userService;
     private final CalendarService calendarService;
     private final FcmTokenService fcmTokenService;
-    private final RabbitMessagePublisher rabbitMessagePublisher;
+    private final NotificationOutboxEnqueueService notificationOutboxService;
 
     /**
      * 오늘 기준 일정 알림 전송
@@ -74,20 +74,10 @@ public class CalendarNotificationSender {
     ) {
         log.info("[일정 메시지 큐 전송 시작] 토큰 수: {}, 날짜: {}", tokens.size(), date);
 
-        for (int idx = 0; idx < tokens.size(); idx++) {
-            FcmToken token = tokens.get(idx);
-            boolean isFirst = (idx == 0);
-            boolean isLast = (idx == tokens.size() - 1);
-            rabbitMessagePublisher.send(
-                    FcmMessageDto.of(
-                            token.getToken(), title, content, FcmTarget.CALENDAR,
-                            date.toString(), isFirst, isLast
-                    )
-            );
-        }
+        String info = UUID.randomUUID().toString();
+        notificationOutboxService.enqueueMessages(tokens, title, content, FcmTarget.CALENDAR, info);
 
-        log.info("[일정 메시지 큐 전송 완료] 날짜: {}",  date);
-
+        log.info("[일정 메시지 큐 전송 완료] 날짜: {}", date);
     }
 
     private String buildCalendarTitle(boolean isDday, List<Calendar> calendars) {
