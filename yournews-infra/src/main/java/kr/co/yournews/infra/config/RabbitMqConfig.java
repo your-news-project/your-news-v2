@@ -1,6 +1,6 @@
 package kr.co.yournews.infra.config;
 
-import kr.co.yournews.infra.rabbitmq.RabbitCallbacks;
+import kr.co.yournews.infra.rabbitmq.RabbitPublishConfirmHandler;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -8,7 +8,6 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
 public class RabbitMqConfig {
@@ -20,15 +19,38 @@ public class RabbitMqConfig {
     public RabbitTemplate rabbitTemplate(
             ConnectionFactory connectionFactory,
             MessageConverter messageConverter,
-            ObjectProvider<RabbitCallbacks> provider
+            ObjectProvider<RabbitPublishConfirmHandler> provider
     ) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter);
 
-        // 메시지 브로커 발행 ACK/NACK 콜백 등록 (순환참조 방지용 지연 조회)
-        template.setConfirmCallback((correlationData, ack, cause) ->
-                provider.getObject().handleConfirm(correlationData, ack, cause)
-        );
+        template.setMandatory(true);
+
+        // 메시지 브로커 발행 ACK/NACK 콜백 등록
+        template.setConfirmCallback((correlationData, ack, cause) -> {
+            RabbitPublishConfirmHandler handler = provider.getIfAvailable();
+            if (handler == null) {
+                return;
+            }
+
+            String correlationId = (correlationData == null ? null : correlationData.getId());
+            handler.handleConfirm(correlationId, ack, cause);
+        });
+
+        // 메시지기 queue에 매칭되지 않아 반환될 때
+        template.setReturnsCallback(returned -> {
+            RabbitPublishConfirmHandler handler = provider.getIfAvailable();
+            if (handler == null) {
+                return;
+            }
+
+            String correlationId = returned.getMessage().getMessageProperties().getMessageId();
+            String reason = "replyCode=" + returned.getReplyCode()
+                    + ", replyText=" + returned.getReplyText()
+                    + ", exchange=" + returned.getExchange()
+                    + ", routingKey=" + returned.getRoutingKey();
+            handler.handleReturned(correlationId, reason);
+        });
 
         return template;
     }
@@ -39,17 +61,5 @@ public class RabbitMqConfig {
     @Bean
     public MessageConverter jackson2JsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
-    }
-
-    /**
-     * 메시지 발행 실패 처리를 위한 스케줄러 스레드풀 설정
-     */
-    @Bean
-    public ThreadPoolTaskScheduler rabbitRetryScheduler() {
-        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(4);
-        scheduler.setThreadNamePrefix("rabbit-retry-");
-        scheduler.initialize();
-        return scheduler;
     }
 }
