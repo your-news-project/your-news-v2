@@ -52,6 +52,9 @@ public class MessageProcess extends BaseTimeEntity {
     @Column(name = "last_error_message", columnDefinition = "TEXT")
     private String lastErrorMessage;
 
+    @Column(name = "dlq_attempt_count", nullable = false)
+    private int dlqAttemptCount;
+
     @Builder
     public MessageProcess(
             String idempotencyKey,
@@ -62,7 +65,8 @@ public class MessageProcess extends BaseTimeEntity {
             LocalDateTime processingStartedAt,
             LocalDateTime completedAt,
             String lastErrorCode,
-            String lastErrorMessage
+            String lastErrorMessage,
+            int dlqAttemptCount
     ) {
         this.idempotencyKey = idempotencyKey;
         this.tokenHash = tokenHash;
@@ -73,5 +77,6 @@ public class MessageProcess extends BaseTimeEntity {
         this.completedAt = completedAt;
         this.lastErrorCode = lastErrorCode;
         this.lastErrorMessage = lastErrorMessage;
+        this.dlqAttemptCount = dlqAttemptCount;
     }
 }
