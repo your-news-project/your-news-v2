@@ -1,6 +1,7 @@
 package kr.co.yournews.domain.notification.service;
 
 import kr.co.yournews.domain.notification.entity.NotificationOutbox;
+import kr.co.yournews.domain.notification.repository.outbox.NotificationOutboxDailyAggregation;
 import kr.co.yournews.domain.notification.repository.outbox.NotificationOutboxRepository;
 import kr.co.yournews.domain.notification.type.OutboxStatus;
 import lombok.RequiredArgsConstructor;
@@ -32,4 +33,11 @@ public class NotificationOutboxService {
         return notificationOutboxRepository.findExpiredInProgressForRecovery(status, dateTime, pageable);
     }
 
+    public Optional<NotificationOutboxDailyAggregation> readDailyAggregation(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        return notificationOutboxRepository.findDailyAggregation(startDateTime, endDateTime);
+    }
+
+    public int deleteByCreatedAtBefore(LocalDateTime dateTime) {
+        return notificationOutboxRepository.deleteByCreatedAtBefore(dateTime);
+    }
 }
