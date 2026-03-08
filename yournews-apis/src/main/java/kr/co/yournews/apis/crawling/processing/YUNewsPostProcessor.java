@@ -4,9 +4,9 @@ import kr.co.yournews.apis.crawling.service.NoticeDetailCrawlingExecutor;
 import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.board.YUNewsBoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.dto.CrawlingPostInfo;
+import kr.co.yournews.apis.crawling.strategy.dto.NotificationPrepareResult;
 import kr.co.yournews.apis.notification.service.DailyNotificationService;
-import kr.co.yournews.apis.notification.service.NotificationCommandService;
-import kr.co.yournews.apis.notification.service.NotificationOutboxEnqueueService;
+import kr.co.yournews.apis.notification.service.NotificationDispatchService;
 import kr.co.yournews.domain.news.dto.UserKeywordDto;
 import kr.co.yournews.domain.news.service.SubNewsService;
 import kr.co.yournews.domain.news.type.KeywordType;
@@ -29,22 +29,19 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class YUNewsPostProcessor extends PostProcessor {
-    private final NotificationCommandService notificationCommandService;
     private final FcmTokenService fcmTokenService;
     private final SubNewsService subNewsService;
     private final DailyNotificationService dailyNotificationService;
 
     public YUNewsPostProcessor(
-            NotificationCommandService notificationCommandService,
             FcmTokenService fcmTokenService,
             SubNewsService subNewsService,
             DailyNotificationService dailyNotificationService,
-            NotificationOutboxEnqueueService notificationOutboxService,
             NoticeSummaryService noticeSummaryService,
-            NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor
+            NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor,
+            NotificationDispatchService notificationDispatchService
     ) {
-        super(notificationOutboxService, noticeSummaryService, noticeDetailCrawlingExecutor);
-        this.notificationCommandService = notificationCommandService;
+        super(noticeSummaryService, noticeDetailCrawlingExecutor, notificationDispatchService);
         this.fcmTokenService = fcmTokenService;
         this.subNewsService = subNewsService;
         this.dailyNotificationService = dailyNotificationService;
@@ -95,20 +92,21 @@ public class YUNewsPostProcessor extends PostProcessor {
 
         // 모든 알림에 공통으로 사용될 public_id (알림 페이지 이동을 위해)
         String publicId = UUID.randomUUID().toString();
-        Map<Long, List<String>> userIdToTitles =
-                saveNotifications(userIds, userToKeywords, keywordToPosts, newsName, publicId);
+        NotificationPrepareResult result =
+                prepareNotifications(userIds, userToKeywords, keywordToPosts, newsName, publicId);
 
-        if (userIdToTitles.isEmpty()) {
+        if (result.notifications().isEmpty()) {
             log.info("[YUNews 알림 대상 없음] newsName: {}", newsName);
             return;
         }
 
-        List<Long> notifiedUserIds = new ArrayList<>(userIdToTitles.keySet());
-        log.info("[YUNews 알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}", notifiedUserIds.size(), newsName, publicId);
-
+        List<Long> notifiedUserIds = new ArrayList<>(result.userIdToTitles().keySet());
         List<FcmToken> tokens = fcmTokenService.readAllByUserIds(notifiedUserIds);
 
-        sendFcmMessages(userIdToTitles, tokens, newsName, publicId);
+        dispatchNotifications(newsName, publicId, result.userIdToTitles(), result.notifications(), tokens);
+
+        log.info("[YUNews 알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}",
+                notifiedUserIds.size(), newsName, publicId);
     }
 
     /**
@@ -192,7 +190,7 @@ public class YUNewsPostProcessor extends PostProcessor {
     }
 
     /**
-     * 사용자별로 키워드 매칭된 게시글을 기반으로 Notification 생성 및 저장
+     * 사용자별 Notification 및 제목 매핑 생성
      *
      * @param userIds        : 알림을 보낼 사용자 ID 리스트
      * @param userToKeywords : 사용자별 구독 키워드 매핑
@@ -200,14 +198,13 @@ public class YUNewsPostProcessor extends PostProcessor {
      * @param newsName       : 소식(뉴스) 이름
      * @param publicId       : 모든 알림에 공통으로 사용할 Public ID (묶음 식별용)
      */
-    private Map<Long, List<String>> saveNotifications(
+    private NotificationPrepareResult prepareNotifications(
             List<Long> userIds,
             Map<Long, List<KeywordType>> userToKeywords,
             Map<KeywordType, CrawlingPostInfo> keywordToPosts,
             String newsName,
             String publicId
     ) {
-
         List<Notification> notifications = new ArrayList<>();
         Map<Long, List<String>> userIdToTitles = new HashMap<>();
 
@@ -226,16 +223,14 @@ public class YUNewsPostProcessor extends PostProcessor {
                 }
             }
 
-            if (!titles.isEmpty()) {
-                notifications.add(buildNotification(newsName, titles, urls, publicId, userId));
-                userIdToTitles.put(userId, titles);
+            if (titles.isEmpty()) {
+                continue;
             }
+
+            notifications.add(buildNotification(newsName, titles, urls, publicId, userId));
+            userIdToTitles.put(userId, titles);
         }
 
-        if (!notifications.isEmpty()) {
-            notificationCommandService.createNotifications(notifications);
-        }
-
-        return userIdToTitles;
+        return new NotificationPrepareResult(notifications, userIdToTitles);
     }
 }

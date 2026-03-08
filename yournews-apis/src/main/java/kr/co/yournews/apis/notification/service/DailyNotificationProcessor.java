@@ -1,6 +1,5 @@
 package kr.co.yournews.apis.notification.service;
 
-import kr.co.yournews.apis.notification.constant.FcmTarget;
 import kr.co.yournews.apis.notification.constant.NotificationConstant;
 import kr.co.yournews.apis.notification.dto.DailyNewsDto;
 import kr.co.yournews.common.util.FcmMessageFormatter;
@@ -27,8 +26,7 @@ public class DailyNotificationProcessor {
     private final NewsService newsService;
     private final UserService userService;
     private final FcmTokenService fcmTokenService;
-    private final NotificationCommandService notificationCommandService;
-    private final NotificationOutboxEnqueueService notificationOutboxService;
+    private final NotificationDispatchService notificationDispatchService;
 
     /**
      * 일간 소식을 전송하는 메서드
@@ -50,49 +48,39 @@ public class DailyNotificationProcessor {
      */
     private void processNews(String newsName) {
         List<DailyNewsDto> newsListDtos = dailyNotificationService.getAllNewsInfo(newsName);
-        if (newsListDtos.isEmpty()) return;
+        if (newsListDtos.isEmpty()) {
+            return;
+        }
 
         log.info("[소식 처리 시작] 소식명: {}", newsName);
 
         String publicId = UUID.randomUUID().toString();
         List<Long> userIds = userService.readAllUserIdsByNewsNameAndDailySubStatusTrue(newsName);
-        List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
-
-        List<String> titles = extractTitles(newsListDtos);
-
-        saveNotifications(userIds, newsName, newsListDtos, publicId);
-        sendFcmMessages(titles, tokens, newsName, publicId);
-
-        log.info("[소식 처리 완료] 소식명: {}, 사용자 수: {}, 토큰 수: {}", newsName, userIds.size(), tokens.size());
-    }
-
-    /**
-     * 사용자별 Notification 생성 및 저장
-     *
-     * @param userIds      : 알림을 보낼 사용자 ID 리스트
-     * @param newsName     : 소식(뉴스) 이름
-     * @param newsListDtos : 게시글 제목, url 리스트
-     * @param publicId     : 모든 알림에 공통으로 사용할 Public ID (묶음 식별용)
-     */
-    private void saveNotifications(List<Long> userIds, String newsName,
-                                   List<DailyNewsDto> newsListDtos,
-                                   String publicId) {
-        List<String> titles = new ArrayList<>();
-        List<String> urls = new ArrayList<>();
-
-        for (DailyNewsDto dto : newsListDtos) {
-            titles.add(dto.title());
-            urls.add(dto.url());
+        if (userIds.isEmpty()) {
+            return;
         }
+
+        List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
+        List<String> titles = extractTitles(newsListDtos);
+        List<String> urls = extractUrls(newsListDtos);
 
         List<Notification> notifications = userIds.stream()
                 .map(userId -> buildNotification(newsName, titles, urls, publicId, userId))
                 .toList();
 
-        notificationCommandService.createNotifications(notifications);
+        String title = NotificationConstant.getDailyNewsNotificationTitle(newsName);
+        String content = FcmMessageFormatter.formatTitles(titles);
 
-        log.info("[알림 저장 완료] 소식명: {}, 사용자 수: {}, 게시글 수: {}, publicId: {}",
-                newsName, userIds.size(), titles.size(), publicId);
+        notificationDispatchService.saveNotificationsAndEnqueueOutbox(
+                notifications,
+                tokens,
+                title,
+                content,
+                publicId
+        );
+
+        log.info("[일간 알림 저장 + 아웃박스 적재 완료] 소식명: {}, 사용자 수: {}, 토큰 수: {}",
+                newsName, userIds.size(), tokens.size());
     }
 
     /**
@@ -110,14 +98,29 @@ public class DailyNotificationProcessor {
     }
 
     /**
+     * 일간 소식 중 url 추출 메서드
+     *
+     * @param newsListDtos : 일간 소식 목록 DTO
+     * @return : 일간 소식 url 추출 리스트
+     */
+    private List<String> extractUrls(List<DailyNewsDto> newsListDtos) {
+        List<String> urls = new ArrayList<>();
+        for (DailyNewsDto dto : newsListDtos) {
+            urls.add(dto.url());
+        }
+        return urls;
+    }
+
+    /**
      * Notification 엔티티 생성
      */
-    private Notification buildNotification(String newsName,
-                                           List<String> titles,
-                                           List<String> urls,
-                                           String publicId,
-                                           Long userId) {
-
+    private Notification buildNotification(
+            String newsName,
+            List<String> titles,
+            List<String> urls,
+            String publicId,
+            Long userId
+    ) {
         return Notification.builder()
                 .newsName(newsName)
                 .postTitle(titles)
@@ -128,20 +131,6 @@ public class DailyNotificationProcessor {
                 .isBookmarked(false)
                 .userId(userId)
                 .build();
-    }
-
-    /**
-     * FCM 메시지 전송 (RabbitMQ 이용)
-     */
-    private void sendFcmMessages(
-            List<String> titles,
-            List<FcmToken> tokens,
-            String newsName,
-            String publicId
-    ) {
-        String title = NotificationConstant.getDailyNewsNotificationTitle(newsName);
-        String content = FcmMessageFormatter.formatTitles(titles);
-        notificationOutboxService.enqueueMessages(tokens, title, content, FcmTarget.NOTIFICATION, publicId);
     }
 
 }
