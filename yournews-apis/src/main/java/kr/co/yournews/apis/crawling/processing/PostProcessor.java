@@ -2,9 +2,8 @@ package kr.co.yournews.apis.crawling.processing;
 
 import kr.co.yournews.apis.crawling.service.NoticeDetailCrawlingExecutor;
 import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
-import kr.co.yournews.apis.notification.constant.FcmTarget;
 import kr.co.yournews.apis.notification.constant.NotificationConstant;
-import kr.co.yournews.apis.notification.service.NotificationOutboxEnqueueService;
+import kr.co.yournews.apis.notification.service.NotificationDispatchService;
 import kr.co.yournews.common.util.HashUtil;
 import kr.co.yournews.domain.notification.entity.NoticeSummary;
 import kr.co.yournews.domain.notification.entity.Notification;
@@ -24,9 +23,9 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class PostProcessor {
-    private final NotificationOutboxEnqueueService notificationOutboxService;
     private final NoticeSummaryService noticeSummaryService;
     private final NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor;
+    private final NotificationDispatchService notificationDispatchService;
 
     private static final Set<String> SKIP = Set.of("YuTopia(비교과)", "취업처");
 
@@ -70,20 +69,22 @@ public abstract class PostProcessor {
     }
 
     /**
-     * FCM 메시지 전송 (RabbitMQ 이용)
+     * 알림 저장 + Outbox 적재
      */
-    protected void sendFcmMessages(
-            Map<Long, List<String>> userIdToTitles,
-            List<FcmToken> tokens,
+    protected void dispatchNotifications(
             String newsName,
-            String publicId
+            String publicId,
+            Map<Long, List<String>> userIdToTitles,
+            List<Notification> notifications,
+            List<FcmToken> tokens
     ) {
         String title = NotificationConstant.getNewsNotificationTitle(newsName);
-        notificationOutboxService.enqueueMessages(
+
+        notificationDispatchService.saveNotificationsAndEnqueueOutbox(
+                notifications,
                 tokens,
                 userIdToTitles,
                 title,
-                FcmTarget.NOTIFICATION,
                 publicId
         );
     }

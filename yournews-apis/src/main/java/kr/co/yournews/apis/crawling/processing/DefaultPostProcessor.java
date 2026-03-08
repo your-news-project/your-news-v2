@@ -5,8 +5,7 @@ import kr.co.yournews.apis.crawling.strategy.board.BoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.board.YUNewsBoardStrategy;
 import kr.co.yournews.apis.crawling.strategy.dto.CrawlingPostInfo;
 import kr.co.yournews.apis.notification.service.DailyNotificationService;
-import kr.co.yournews.apis.notification.service.NotificationCommandService;
-import kr.co.yournews.apis.notification.service.NotificationOutboxEnqueueService;
+import kr.co.yournews.apis.notification.service.NotificationDispatchService;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.notification.service.NoticeSummaryService;
 import kr.co.yournews.domain.user.entity.FcmToken;
@@ -25,20 +24,17 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class DefaultPostProcessor extends PostProcessor {
-    private final NotificationCommandService notificationCommandService;
     private final FcmTokenService fcmTokenService;
     private final DailyNotificationService dailyNotificationService;
 
     public DefaultPostProcessor(
-            NotificationCommandService notificationCommandService,
             FcmTokenService fcmTokenService,
             DailyNotificationService dailyNotificationService,
-            NotificationOutboxEnqueueService notificationOutboxService,
             NoticeSummaryService noticeSummaryService,
-            NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor
+            NoticeDetailCrawlingExecutor noticeDetailCrawlingExecutor,
+            NotificationDispatchService notificationDispatchService
     ) {
-        super(notificationOutboxService, noticeSummaryService, noticeDetailCrawlingExecutor);
-        this.notificationCommandService = notificationCommandService;
+        super(noticeSummaryService, noticeDetailCrawlingExecutor, notificationDispatchService);
         this.fcmTokenService = fcmTokenService;
         this.dailyNotificationService = dailyNotificationService;
     }
@@ -91,17 +87,13 @@ public class DefaultPostProcessor extends PostProcessor {
         // 모든 알림에 공통으로 사용될 public_id (알림 페이지 이동을 위해)
         String publicId = UUID.randomUUID().toString();
 
-        Map<Long, List<String>> userIdToTitles = userIds.stream()
-                .collect(Collectors.toMap(
-                        userId -> userId,
-                        userId -> List.copyOf(postInfo.titles())
-                ));
-
-        saveNotifications(userIds, newsName, postInfo.titles(), postInfo.urls(), publicId);
-        log.info("[알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}", userIds.size(), newsName, publicId);
-
+        Map<Long, List<String>> userIdToTitles = buildUserIdToTitles(userIds, postInfo.titles());
+        List<Notification> notifications = buildNotifications(userIds, newsName, postInfo, publicId);
         List<FcmToken> tokens = fcmTokenService.readAllByUserIds(userIds);
-        sendFcmMessages(userIdToTitles, tokens, newsName, publicId);
+
+        dispatchNotifications(newsName, publicId, userIdToTitles, notifications, tokens);
+
+        log.info("[알림 저장 완료] 사용자 수: {}, newsName: {}, publicId: {}", userIds.size(), newsName, publicId);
     }
 
     /**
@@ -137,24 +129,39 @@ public class DefaultPostProcessor extends PostProcessor {
     }
 
     /**
+     * 사용자별 제목 매핑 생성
+     */
+    private Map<Long, List<String>> buildUserIdToTitles(List<Long> userIds, List<String> titles) {
+        return userIds.stream()
+                .collect(Collectors.toMap(
+                        userId -> userId,
+                        userId -> List.copyOf(titles)
+                ));
+    }
+
+    /**
      * 사용자별 Notification 생성 및 저장
      *
      * @param userIds  : 알림을 보낼 사용자 ID 리스트
      * @param newsName : 소식(뉴스) 이름
-     * @param titles   : 게시글 제목 리스트
-     * @param urls     : 게시글 URL 리스트
+     * @param postInfo : 게시글 정보
      * @param publicId : 모든 알림에 공통으로 사용할 Public ID (묶음 식별용)
      */
-    private void saveNotifications(
-            List<Long> userIds, String newsName,
-            List<String> titles,
-            List<String> urls,
+    private List<Notification> buildNotifications(
+            List<Long> userIds,
+            String newsName,
+            CrawlingPostInfo postInfo,
             String publicId
     ) {
-        List<Notification> notifications = userIds.stream()
-                .map(userId -> buildNotification(newsName, titles, urls, publicId, userId))
+        return userIds.stream()
+                .map(userId -> buildNotification(
+                        newsName,
+                        postInfo.titles(),
+                        postInfo.urls(),
+                        publicId,
+                        userId
+                ))
                 .toList();
-
-        notificationCommandService.createNotifications(notifications);
     }
+
 }
