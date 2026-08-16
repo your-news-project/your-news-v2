@@ -30,7 +30,8 @@ public class SecurityConfig {
     private static final String[] PUBLIC_GET_ENDPOINTS = {
             "/api/v1/posts/**",
             "/api/v1/notifies/rank",
-            "/api/v1/calendars/**"
+            "/api/v1/calendars/**",
+            "/api/v1/student-services/**"
     };
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/auth/**", "/api/v1/admin/auth/sign-in",
@@ -56,6 +57,8 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/v1/student-services/me")
+                        .hasAnyRole(Role.USER.name(), Role.ADMIN.name())
                         .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole(Role.ADMIN.name())

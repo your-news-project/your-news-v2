@@ -5,6 +5,13 @@ dependencies {
     implementation project(':yournews-domain')
     implementation project(':yournews-common')
 
+    /* AWS S3 */
+    implementation platform('software.amazon.awssdk:bom:2.53.1')
+    implementation('software.amazon.awssdk:s3') {
+        exclude group: 'software.amazon.awssdk', module: 'apache5-client'
+    }
+    implementation 'software.amazon.awssdk:url-connection-client'
+
     /* Redis */
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 

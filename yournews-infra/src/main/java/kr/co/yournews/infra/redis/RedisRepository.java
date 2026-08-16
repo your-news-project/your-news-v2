@@ -25,6 +25,11 @@ public class RedisRepository {
         redisTemplate.opsForValue().set(key, value, duration);
     }
 
+    /* Redis 값이 없을 때만 저장 */
+    public boolean setIfAbsent(String key, Object value, Duration duration) {
+        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, duration));
+    }
+
     /* Redis List 저장 */
     public <T> void setListAll(String key, Collection<T> values) {
         redisTemplate.opsForList().rightPushAll(key, new ArrayList<>(values));

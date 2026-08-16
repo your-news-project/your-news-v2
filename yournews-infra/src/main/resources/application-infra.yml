@@ -1,4 +1,9 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 6MB
+      max-request-size: 20MB
+
   data:
     redis:
       host: ${REDIS_HOST:localhost}

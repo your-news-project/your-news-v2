@@ -68,4 +68,15 @@ public class AdminController {
     public String newsCreatePage() {
         return "admin/news-create";
     }
+
+    @GetMapping("/student-services")
+    public String studentServicesPage() {
+        return "admin/student-services";
+    }
+
+    @GetMapping("/student-services/{id}")
+    public String studentServiceDetailsPage(@PathVariable Long id, Model model) {
+        model.addAttribute("studentServiceId", id);
+        return "admin/student-service-detail";
+    }
 }

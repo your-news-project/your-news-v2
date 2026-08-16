@@ -10,13 +10,14 @@ public class MailStrategyFactory {
     private final CodeMailStrategy codeMailStrategy;
     private final PassMailStrategy passMailStrategy;
     private final InquiryMailStrategy inquiryMailStrategy;
+    private final StudentServiceRegistrationMailStrategy studentServiceRegistrationMailStrategy;
 
     public MailStrategy getStrategy(MailType mailType) {
         return switch (mailType) {
             case CODE -> codeMailStrategy;
             case PASS -> passMailStrategy;
             case INQUIRY -> inquiryMailStrategy;
+            case STUDENT_SERVICE_REGISTRATION -> studentServiceRegistrationMailStrategy;
         };
     }
 }
-
