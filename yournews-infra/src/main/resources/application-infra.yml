@@ -39,6 +39,18 @@ mail:
   admin:
     email: ${ADMIN_EMAIL}
 
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ${AWS_REGION:ap-northeast-2}
+    stack:
+      auto: false
+    s3:
+      bucket-name: ${S3_BUCKET_NAME}
+
 oauth2:
   naver:
     tokenUri: https://nid.naver.com/oauth2.0/token
