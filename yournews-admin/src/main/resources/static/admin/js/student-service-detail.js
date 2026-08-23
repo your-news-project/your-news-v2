@@ -6,8 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadStudentServiceDetail();
-    document.getElementById('approve-button').addEventListener('click', () => changeStatus('approve'));
-    document.getElementById('reject-button').addEventListener('click', () => changeStatus('reject'));
+    document.getElementById('approve-button').addEventListener('click', approveStudentService);
+    document.getElementById('reject-button').addEventListener('click', openRejectDialog);
+    document.getElementById('cancel-reject-button').addEventListener('click', closeRejectDialog);
+    document.getElementById('confirm-reject-button').addEventListener('click', rejectStudentService);
     document.getElementById('back-button').addEventListener('click', () => {
         window.location.href = '/admin/student-services';
     });
@@ -31,6 +33,10 @@ function renderStudentServiceDetail(studentService) {
     setText('detail-description', studentService.description);
     setText('detail-content-type', contentTypeLabel(studentService.contentType));
     setText('detail-status', statusLabel(studentService.status));
+    const rejectionReasonGroup = document.getElementById('rejection-reason-group');
+    const hasRejectionReason = Boolean(studentService.rejectionReason?.trim());
+    rejectionReasonGroup.hidden = !hasRejectionReason;
+    if (hasRejectionReason) setText('detail-rejection-reason', studentService.rejectionReason);
     setText('detail-report-count', studentService.reportCount);
     setText('detail-created-at', formatDateTime(studentService.createdAt));
     setText('detail-updated-at', formatDateTime(studentService.updatedAt));
@@ -98,14 +104,44 @@ function renderImageUrls(imageUrls) {
     });
 }
 
-async function changeStatus(action) {
-    const actionLabel = action === 'approve' ? '승인' : '거절';
-    if (!confirm(`이 홍보 게시물을 ${actionLabel}하시겠습니까?`)) return;
+function approveStudentService() {
+    if (!confirm('이 홍보 게시물을 승인하시겠습니까?')) return;
+    changeStatus('approve');
+}
+
+function openRejectDialog() {
+    const dialog = document.getElementById('reject-dialog');
+    const input = document.getElementById('rejection-reason');
+    input.value = '';
+    dialog.showModal();
+    input.focus();
+}
+
+function closeRejectDialog() {
+    document.getElementById('reject-dialog').close();
+}
+
+function rejectStudentService() {
+    const rejectionReason = document.getElementById('rejection-reason').value.trim();
+    if (!rejectionReason) {
+        alert('반려 사유를 입력해주세요.');
+        return;
+    }
+    changeStatus('reject', rejectionReason);
+}
+
+async function changeStatus(action, rejectionReason = null) {
+    const actionLabel = action === 'approve' ? '승인' : '반려';
+    const options = { method: 'PATCH' };
+    if (action === 'reject') {
+        options.headers = { 'Content-Type': 'application/json' };
+        options.body = JSON.stringify({ rejectionReason });
+    }
 
     try {
         const response = await fetchWithAuth(
                 `/api/v1/admin/student-services/${studentServiceId}/${action}`,
-                { method: 'PATCH' }
+                options
         );
         const result = await response.json();
         if (!response.ok || result.code !== 200) throw new Error(result.message);
@@ -125,7 +161,7 @@ function statusLabel(status) {
     return {
         PENDING: '승인 대기',
         APPROVED: '승인',
-        REJECTED: '거절',
+        REJECTED: '반려',
         HIDDEN: '숨김'
     }[status] ?? status;
 }

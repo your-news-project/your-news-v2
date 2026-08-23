@@ -179,10 +179,10 @@ public class StudentServiceCommandService {
         User user = userService.readById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorType.NOT_FOUND));
 
-        StudentService studentService = readApprovedStudentService(studentServiceId);
+        readApprovedStudentService(studentServiceId);
         StudentServiceLike studentServiceLike = StudentServiceLike.builder()
                 .user(user)
-                .studentService(studentService)
+                .studentServiceId(studentServiceId)
                 .build();
 
         try {

@@ -15,7 +15,7 @@ public class StudentServiceLikeService {
     }
 
     public boolean existsByUserIdAndStudentServiceId(Long userId, Long studentServiceId) {
-        return studentServiceLikeRepository.existsByUser_IdAndStudentService_Id(userId, studentServiceId);
+        return studentServiceLikeRepository.existsByUser_IdAndStudentServiceId(userId, studentServiceId);
     }
 
     public boolean deleteByUserIdAndStudentServiceId(Long userId, Long studentServiceId) {

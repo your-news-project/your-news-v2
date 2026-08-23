@@ -8,6 +8,7 @@ import kr.co.yournews.domain.notification.type.OutboxStatus;
 import kr.co.yournews.domain.user.entity.FcmToken;
 import kr.co.yournews.domain.user.entity.User;
 import kr.co.yournews.infra.properties.RabbitMqProperties;
+import kr.co.yournews.infra.notification.NotificationOutboxEnqueueService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,5 +1,7 @@
 package kr.co.yournews.admin.studentservice.controller;
 
+import jakarta.validation.Valid;
+import kr.co.yournews.admin.studentservice.dto.StudentServiceManagementDto;
 import kr.co.yournews.admin.studentservice.service.StudentServiceManagementCommandService;
 import kr.co.yournews.admin.studentservice.service.StudentServiceManagementQueryService;
 import kr.co.yournews.common.response.success.SuccessResponse;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,8 +54,14 @@ public class StudentServiceManagementController {
     }
 
     @PatchMapping("/{studentServiceId}/reject")
-    public ResponseEntity<?> rejectStudentService(@PathVariable Long studentServiceId) {
-        studentServiceManagementCommandService.rejectStudentService(studentServiceId);
+    public ResponseEntity<?> rejectStudentService(
+            @PathVariable Long studentServiceId,
+            @RequestBody @Valid StudentServiceManagementDto.RejectRequest request
+    ) {
+        studentServiceManagementCommandService.rejectStudentService(
+                studentServiceId,
+                request.rejectionReason()
+        );
         return ResponseEntity.ok(SuccessResponse.ok());
     }
 

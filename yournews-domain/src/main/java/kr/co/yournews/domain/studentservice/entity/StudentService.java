@@ -63,6 +63,9 @@ public class StudentService extends BaseTimeEntity {
     @Column(nullable = false)
     private StudentServiceStatus status;
 
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
     @Column(name = "report_count", nullable = false)
     private int reportCount;
 
@@ -106,6 +109,7 @@ public class StudentService extends BaseTimeEntity {
 
     public void approve() {
         this.status = StudentServiceStatus.APPROVED;
+        this.rejectionReason = null;
         this.approvedAt = LocalDateTime.now();
     }
 
@@ -139,8 +143,12 @@ public class StudentService extends BaseTimeEntity {
         return List.of();
     }
 
-    public void reject() {
+    public void reject(String rejectionReason) {
+        if (rejectionReason == null || rejectionReason.isBlank()) {
+            throw new IllegalArgumentException("반려 사유는 필수입니다.");
+        }
         this.status = StudentServiceStatus.REJECTED;
+        this.rejectionReason = rejectionReason.strip();
     }
 
     public void hide() {

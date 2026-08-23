@@ -1,8 +1,9 @@
 package kr.co.yournews.apis.notification.service;
 
-import kr.co.yournews.apis.notification.constant.FcmTarget;
+import kr.co.yournews.common.constant.FcmTarget;
 import kr.co.yournews.domain.notification.entity.Notification;
 import kr.co.yournews.domain.user.entity.FcmToken;
+import kr.co.yournews.infra.notification.NotificationOutboxEnqueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

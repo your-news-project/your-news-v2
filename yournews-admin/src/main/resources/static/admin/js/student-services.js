@@ -98,7 +98,7 @@ function statusLabel(status) {
     return {
         PENDING: '승인 대기',
         APPROVED: '승인',
-        REJECTED: '거절',
+        REJECTED: '반려',
         HIDDEN: '숨김'
     }[status] ?? status;
 }

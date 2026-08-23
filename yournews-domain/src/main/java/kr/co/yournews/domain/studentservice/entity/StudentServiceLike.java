@@ -1,5 +1,6 @@
 package kr.co.yournews.domain.studentservice.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -30,13 +31,12 @@ public class StudentServiceLike {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_service_id")
-    private StudentService studentService;
+    @Column(name = "student_service_id", nullable = false)
+    private Long studentServiceId;
 
     @Builder
-    public StudentServiceLike(User user, StudentService studentService) {
+    public StudentServiceLike(User user, Long studentServiceId) {
         this.user = user;
-        this.studentService = studentService;
+        this.studentServiceId = studentServiceId;
     }
 }

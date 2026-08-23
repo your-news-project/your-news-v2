@@ -14,19 +14,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StudentServiceManagementCommandService {
     private final StudentServiceService studentServiceService;
+    private final StudentServiceStatusNotificationService statusNotificationService;
 
     @Transactional
     public void approveStudentService(Long studentServiceId) {
         StudentService studentService = getStudentService(studentServiceId);
         studentService.approve();
+        statusNotificationService.enqueueApproved(studentService);
         log.info("[ADMIN 학생 서비스 승인 완료] studentServiceId: {}", studentServiceId);
     }
 
     @Transactional
-    public void rejectStudentService(Long studentServiceId) {
+    public void rejectStudentService(Long studentServiceId, String rejectionReason) {
         StudentService studentService = getStudentService(studentServiceId);
-        studentService.reject();
-        log.info("[ADMIN 학생 서비스 거절 완료] studentServiceId: {}", studentServiceId);
+        studentService.reject(rejectionReason);
+        statusNotificationService.enqueueRejected(studentService);
+        log.info("[ADMIN 학생 서비스 반려 완료] studentServiceId: {}", studentServiceId);
     }
 
     @Transactional

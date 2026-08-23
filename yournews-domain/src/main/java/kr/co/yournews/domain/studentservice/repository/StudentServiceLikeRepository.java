@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface StudentServiceLikeRepository extends JpaRepository<StudentServiceLike, Long> {
-    boolean existsByUser_IdAndStudentService_Id(Long userId, Long studentServiceId);
+    boolean existsByUser_IdAndStudentServiceId(Long userId, Long studentServiceId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "DELETE FROM student_service_like "
